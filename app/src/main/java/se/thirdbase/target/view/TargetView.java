@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -18,6 +19,14 @@ import android.view.View;
 public class TargetView extends View {
 
     private static final String TAG = TargetView.class.getSimpleName();
+
+    private static int clamp(int val, int min, int max) {
+        return Math.max(min, Math.min(max, val));
+    }
+
+    private static float clamp(float val, float min, float max) {
+        return Math.max(min, Math.min(max, val));
+    }
 
     enum State {
         INIT("INIT"),
@@ -54,20 +63,22 @@ public class TargetView extends View {
     private Rect mSrcRect;
     private Rect mDstRect;
     private Rect mScaledRect;
-    private Bitmap mOverViewBitmap;
     private Bitmap mBigBitmap;
+    private Bitmap mBulletHoleBitmap;
     private Paint mBitmapPaint;
     private State mState = State.INIT;
     private ScaleGestureDetector mScaleGestureDetector;
+    private GestureDetector mGestureDetector;
 
 
     public TargetView(Context context) {
         super(context);
 
         mScaleGestureDetector = new ScaleGestureDetector(context, mOnScaleGestureListener);
+        mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
 
         mBitmapPaint = new Paint();
-        mBitmapPaint.setAntiAlias(true);
+        mBitmapPaint.setAntiAlias(false);
         //setOnClickListener(mOnClickListener);
         setOnTouchListener(mOnTouchListener);
     }
@@ -98,18 +109,11 @@ public class TargetView extends View {
         }
     }
 
-    private void drawOverview(Canvas canvas) {
-        if (mOverViewBitmap != null) {
-            //Log.d(TAG, "drawOverview()");
-            canvas.drawBitmap(mOverViewBitmap, 0, 0, mBitmapPaint);
-        }
-    }
-
     private void drawZoomview(Canvas canvas) {
         if (mBigBitmap != null) {
             if (mBigBitmap != null) {
-                Log.d(TAG, "SCL: " + mScaledRect.toShortString());
-                Log.d(TAG, "DST: " + mDstRect.toShortString());
+                //Log.d(TAG, "SCL: " + mScaledRect.toShortString());
+                //Log.d(TAG, "DST: " + mDstRect.toShortString());
                 canvas.drawBitmap(mBigBitmap, mScaledRect, mDstRect, null);
             }
         }
@@ -125,14 +129,15 @@ public class TargetView extends View {
         mHeight = h;
 
         if (mBigBitmap == null) {
-            int zoomWidth = (int) (w * MAX_ZOOM_FACTOR);
-            int zoomHeight = (int) (h * MAX_ZOOM_FACTOR);
+            int dim = Math.min(w, h);
+            int zoomWidth = (int) (dim * MAX_ZOOM_FACTOR);
+            int zoomHeight = (int) (dim * MAX_ZOOM_FACTOR);
 
             mSrcRect = new Rect(0, 0, zoomWidth, zoomHeight);
             mScaledRect = new Rect(0, 0, zoomWidth, zoomHeight);
-            mDstRect = new Rect(0, 0, w, h);
+            mDstRect = new Rect(0, 0, dim, dim);
 
-            mBigBitmap = Bitmap.createBitmap(zoomWidth, zoomHeight, Bitmap.Config.ARGB_8888);
+            mBigBitmap = Bitmap.createBitmap(zoomWidth, zoomHeight, Bitmap.Config.RGB_565);
         }
 
         new CreateTarget().execute(mBigBitmap);
@@ -154,13 +159,17 @@ public class TargetView extends View {
             float cx = minDim / 2;
             float cy = minDim / 2;
 
+            Canvas canvas = new Canvas(params[0]);
+
             Paint paint = new Paint();
+            paint.setColor(Color.WHITE);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            canvas.drawRect(0, 0, minDim, minDim, paint);
+
             paint.setAntiAlias(true);
             paint.setStrokeWidth(2);
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.BLACK);
-
-            Canvas canvas = new Canvas(params[0]);
 
             int ring;
             for (ring = 10; ring > 4; ring--) {
@@ -232,7 +241,6 @@ public class TargetView extends View {
                 }
             }
 
-            mOverViewBitmap = Bitmap.createScaledBitmap(mBigBitmap, mWidth, mHeight, true);
             return null;
         }
 
@@ -256,7 +264,8 @@ public class TargetView extends View {
                 case INIT:
                 case OVERVIEW:
                 case ZOOM:
-                    mScaleGestureDetector.onTouchEvent(event);
+                    //mScaleGestureDetector.onTouchEvent(event);
+                    mGestureDetector.onTouchEvent(event);
                     break;
             }
 
@@ -265,23 +274,121 @@ public class TargetView extends View {
         }
     };
 
+    private GestureDetector.SimpleOnGestureListener mSimpleGestureDetector= new GestureDetector.SimpleOnGestureListener() {
+
+        private float mCenterX;
+        private float mCenterY;
+
+        @Override
+        public boolean onDoubleTap(MotionEvent event) {
+            Log.d(TAG, "onDoubleTap");
+
+            switch (mState) {
+                case INIT:
+                case OVERVIEW:
+                    zoomIn(event);
+                    transition(State.ZOOM);
+                    break;
+                case ZOOM:
+                    zoomOut(event);
+                    transition(State.OVERVIEW);
+                    break;
+            }
+
+            invalidate();
+
+            return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent event) {
+            Log.d(TAG, "onLongPress");
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            if (mState == State.ZOOM) {
+                Log.d(TAG, String.format("%.2f %.2f", distanceX, distanceY));
+
+                int width = (int) ((mSrcRect.right - mSrcRect.left) / MAX_ZOOM_FACTOR);
+                int height = (int) ((mSrcRect.bottom - mSrcRect.top) / MAX_ZOOM_FACTOR);
+                //mScaledRect.left = (int)Math.max(0, mScaledRect.left + distanceX);
+                //mScaledRect.top = (int)Math.max(0, mScaledRect.top + distanceY);
+                mScaledRect.left = (int)Math.max(0, Math.min(mSrcRect.right - width, mScaledRect.left + distanceX));
+                mScaledRect.top = (int)Math.max(0, Math.min(mSrcRect.bottom - height, mScaledRect.top + distanceY));
+                mScaledRect.right = mScaledRect.left + width;
+                mScaledRect.bottom = mScaledRect.top + height;
+            }
+
+            return true;
+        }
+
+        private void zoomIn(MotionEvent event) {
+            mCenterX = event.getX();
+            mCenterY = event.getY();
+
+            Log.d(TAG, String.format("%.2f %.2f", (mCenterX / mDstRect.right), (mCenterY / mDstRect.bottom)));
+
+            int centerX = (int)((mCenterX / mDstRect.right) * mSrcRect.right);
+            int centerY = (int)((mCenterY / mDstRect.bottom) * mSrcRect.bottom);
+
+            int width = (int) ((mSrcRect.right - mSrcRect.left) / MAX_ZOOM_FACTOR);
+            int height = (int) ((mSrcRect.bottom - mSrcRect.top) / MAX_ZOOM_FACTOR);
+
+            mScaledRect.left = centerX - width / 2;
+            mScaledRect.top = centerY - height / 2;
+            mScaledRect.right = mScaledRect.left + width;
+            mScaledRect.bottom = mScaledRect.top + height;
+        }
+
+        private void zoomOut(MotionEvent event) {
+            mScaledRect.top = mSrcRect.top;
+            mScaledRect.left = mSrcRect.left;
+            mScaledRect.bottom = mSrcRect.bottom;
+            mScaledRect.right = mSrcRect.right;
+        }
+    };
+
+
     private ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+        private int centerX;
+        private int centerY;
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            float x = detector.getFocusX();
+            float y = detector.getFocusY();
+
+            //centerX = (int)((x / mDstRect.right) * mSrcRect.right);
+            //centerY = (int)((y / mDstRect.bottom) * mSrcRect.bottom);
+
+            centerX = (int)((x / mDstRect.right) * mScaledRect.right);
+            centerY = (int)((y / mDstRect.bottom) * mScaledRect.bottom);
+
+            return true;
+        }
+
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             mScaleFactor *= detector.getScaleFactor();
 
             mScaleFactor = Math.max(MIN_ZOOM_FACTOR, Math.min(mScaleFactor, MAX_ZOOM_FACTOR));
-            Log.d(TAG, "mScaleFactor: " + mScaleFactor);
+            //Log.d(TAG, String.format("mScaleFactor: %.1f, (X/Y): %.1f %.1f", mScaleFactor, x, y));
 
+            int width = (int) ((mSrcRect.right - mSrcRect.left) / mScaleFactor);
+            int height = (int) ((mSrcRect.bottom - mSrcRect.top) / mScaleFactor);
 
-            int width = (int)((mSrcRect.right - mSrcRect.left) / mScaleFactor);
-            int height = (int)((mSrcRect.bottom - mSrcRect.top) / mScaleFactor);
-            mScaledRect.left = (mSrcRect.right - width) / 2;
-            mScaledRect.top = (mSrcRect.bottom - height) / 2;
+            mScaledRect.left = centerX - width / 2;
+            mScaledRect.top = centerY - height / 2;
             mScaledRect.right = mScaledRect.left + width;
             mScaledRect.bottom = mScaledRect.top + height;
 
+            Log.d(TAG, String.format("Aspect: %.2f, factor: %.2f", ((float) width) / height, mScaleFactor));
+            Log.d(TAG, String.format("%4d %4d %4d %4d", mScaledRect.left, mScaledRect.top, width, height));
+
             invalidate();
+
             return true;
         }
     };
