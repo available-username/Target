@@ -68,7 +68,7 @@ public class TargetView extends View {
     }
 
     private static final float MIN_ZOOM_FACTOR = 1.0f;
-    private static final float MAX_ZOOM_FACTOR = 1.3f;
+    private static final float MAX_ZOOM_FACTOR = 2.0f;
 
     private static final float VIRTUAL_WIDTH = 60.0f; //cm
 
@@ -107,8 +107,10 @@ public class TargetView extends View {
         switch (mState) {
             case INIT:
             case OVERVIEW:
+                drawZoomview(canvas, 1);
+                break;
             case ZOOM:
-                drawZoomview(canvas);
+                drawZoomview(canvas, MAX_ZOOM_FACTOR);
                 break;
         }
     }
@@ -128,7 +130,7 @@ public class TargetView extends View {
         }
     }
 
-    private void drawZoomview(Canvas canvas) {
+    private void _drawZoomview(Canvas canvas) {
         if (mTargetBitmap != null) {
             //Log.d(TAG, "SCL: " + mScaledRect.toShortString());
             //Log.d(TAG, "DST: " + mDstRect.toShortString());
@@ -137,33 +139,110 @@ public class TargetView extends View {
             canvas.drawBitmap(mTargetBitmap, mScaledRect, mDstRect, null);
         }
 
-        if (true) {
-            for (BulletHole hole : mBulletHoles) {
-                //float x = hole.x * mPixelsPerCm - mBulletHoleBitmap.getWidth() / 2;
-                //float y = hole.y * mPixelsPerCm- mBulletHoleBitmap.getHeight() / 2;
-                float x = getPixelCoordinateX(hole.x) - mBulletHoleBitmap.getWidth() / 2;
-                float y = getPixelCoordinateY(hole.y) - mBulletHoleBitmap.getHeight() / 2;
+        for (BulletHole hole : mBulletHoles) {
+            float x = getPixelCoordinateX(hole.x) - mBulletHoleBitmap.getWidth() / 2;
+            float y = getPixelCoordinateY(hole.y) - mBulletHoleBitmap.getHeight() / 2;
 
-                Log.d(TAG, String.format("X/Y: %.2f %.2f", hole.x, hole.y));
-                Log.d(TAG, String.format("Draw at %.2f %.2f", x, y));
-                canvas.drawBitmap(mBulletHoleBitmap, x, y, null);
-            }
-        } else{
-            if (mBulletHoleBitmap != null) {
-                float x = 30f * mZoomedPixelsPerCm / MAX_ZOOM_FACTOR - mBulletHoleBitmap.getWidth() / 2;
-                float y = 30f * mZoomedPixelsPerCm / MAX_ZOOM_FACTOR - mBulletHoleBitmap.getHeight() / 2;
+            canvas.drawBitmap(mBulletHoleBitmap, x, y, null);
+        }
+    }
 
-                Log.d(TAG, String.format("X/Y: %.2f %.2f",x, y));
-                canvas.drawBitmap(mBulletHoleBitmap, x, y, null);
+    private void drawZoomview(Canvas canvas, float zoomLevel) {
+        float zoomedPixelsPerCm = zoomLevel * mPixelsPerCm;
 
-                x = 60f * mZoomedPixelsPerCm / MAX_ZOOM_FACTOR - mBulletHoleBitmap.getWidth() / 2;
-                y = 30f * mZoomedPixelsPerCm / MAX_ZOOM_FACTOR - mBulletHoleBitmap.getHeight() / 2;
+        float radiusIncrement = 2.5f; // cm
+        float textSize = zoomedPixelsPerCm * radiusIncrement * 0.75f;
+        float textHeightOffset = textSize / 2;
+        float textWidthOffset = (zoomedPixelsPerCm * radiusIncrement) / 2;
 
-                Log.d(TAG, String.format("X/Y: %.2f %.2f",x, y));
-                canvas.drawBitmap(mBulletHoleBitmap, x, y, null);
+        //float cx = mDstRect.width() / 2 - mScaledRect.left * mDstRect.width() / mScaledRect.width();
+        //float cy = mDstRect.height() / 2 - mScaledRect.top * mDstRect.height() / mScaledRect.height();
 
-            } else {
-                Log.d(TAG, "No bullet hole");
+        float cx = mScaledRect.width() * zoomLevel / 2 - mScaledRect.left;
+        float cy = mScaledRect.height() * zoomLevel / 2 - mScaledRect.top;
+
+        Log.d(TAG, "Scaled: " + mScaledRect.toShortString());
+        Log.d(TAG, String.format("center %.2f %.2f", cx, cy));
+
+        Paint paint = new Paint();
+        paint.setColor(Color.GREEN);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        //canvas.drawRect(0, 0, dim, dim, paint);
+        //canvas.drawRect(0, 0, width, height, paint);
+        canvas.drawColor(Color.WHITE);
+
+        paint.setAntiAlias(true);
+        paint.setStrokeWidth(2);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.BLACK);
+
+        int ring;
+        for (ring = 10; ring > 4; ring--) {
+            canvas.drawCircle(cx, cy, ring * radiusIncrement * zoomedPixelsPerCm, paint);
+        }
+
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        canvas.drawCircle(cx, cy, ring * radiusIncrement * zoomedPixelsPerCm, paint);
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.WHITE);
+
+        for (; ring > 0; ring--) {
+            canvas.drawCircle(cx, cy, ring * radiusIncrement * zoomedPixelsPerCm, paint);
+        }
+
+        // finally, the inner ring
+        canvas.drawCircle(cx, cy, 1.25f * zoomedPixelsPerCm, paint);
+
+
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setStrokeWidth(1);
+        paint.setFakeBoldText(true);
+        paint.setTextSize(textSize);
+        paint.setTextAlign(Paint.Align.CENTER);
+
+        for (int i = 0; i < 4; i++) {
+            double angle = i * Math.PI / 2;
+
+
+            int num;
+            for (num = 1; num < 10; num++) {
+                int color;
+
+                if (num < 4) {
+                    color = Color.WHITE;
+                } else {
+                    color = Color.BLACK;
+                }
+
+                paint.setColor(color);
+
+                float r = zoomedPixelsPerCm * radiusIncrement * num;
+                float x = cx + (float) (r * Math.cos(angle));
+                float y = cy + (float) (r * Math.sin(angle));
+
+                switch (i) {
+                    case 0:
+                        paint.setTextAlign(Paint.Align.CENTER);
+                        x += textWidthOffset;
+                        y += textHeightOffset / 2;
+                        break;
+                    case 1:
+                        paint.setTextAlign(Paint.Align.CENTER);
+                        y += textHeightOffset * 2;
+                        break;
+                    case 2:
+                        paint.setTextAlign(Paint.Align.CENTER);
+                        x -= textWidthOffset;
+                        y += textHeightOffset / 2;
+                        break;
+                    case 3:
+                        paint.setTextAlign(Paint.Align.CENTER);
+                        y -= textHeightOffset;
+                        break;
+                }
+
+                canvas.drawText("" + (10 - num), x, y, paint);
             }
         }
     }
@@ -193,8 +272,8 @@ public class TargetView extends View {
             int zoomHeight = (int) (h * MAX_ZOOM_FACTOR);
 
             mSrcRect = new Rect(0, 0, zoomWidth, zoomHeight);
-            mScaledRect = new Rect(0, 0, zoomWidth, zoomHeight);
-            //mDstRect = new Rect(0, 0, dim, dim);
+            //mScaledRect = new Rect(0, 0, zoomWidth, zoomHeight);
+            mScaledRect = new Rect(0, 0, w, h);
             mDstRect = new Rect(0, 0, w, h);
 
             //mPixelsPerCm = dim / VIRTUAL_WIDTH;
@@ -206,8 +285,6 @@ public class TargetView extends View {
 
             Log.d(TAG, String.format("DIM: %d, pc/cm: %.2f & %.2f", dim, mZoomedPixelsPerCm, mPixelsPerCm));
         }
-
-        new BitmapCreator().execute();
     }
 
     private OnTouchListener mOnTouchListener = new OnTouchListener() {
@@ -292,12 +369,16 @@ public class TargetView extends View {
             if (mState == State.ZOOM) {
                 Log.d(TAG, String.format("%.2f %.2f", distanceX, distanceY));
 
-                int width = (int) ((mSrcRect.right - mSrcRect.left) / MAX_ZOOM_FACTOR);
-                int height = (int) ((mSrcRect.bottom - mSrcRect.top) / MAX_ZOOM_FACTOR);
+                //int width = (int) ((mSrcRect.right - mSrcRect.left) / MAX_ZOOM_FACTOR);
+                //int height = (int) ((mSrcRect.bottom - mSrcRect.top) / MAX_ZOOM_FACTOR);
+                int width = mDstRect.width();
+                int height = mDstRect.height();
                 //mScaledRect.left = (int)Math.max(0, mScaledRect.left + distanceX);
                 //mScaledRect.top = (int)Math.max(0, mScaledRect.top + distanceY);
-                mScaledRect.left = (int)Math.max(0, Math.min(mSrcRect.right - width, mScaledRect.left + distanceX));
-                mScaledRect.top = (int)Math.max(0, Math.min(mSrcRect.bottom - height, mScaledRect.top + distanceY));
+                mScaledRect.left = (int) clamp(mScaledRect.left + distanceX, 0, mSrcRect.right - width);
+                //mScaledRect.left = (int)Math.max(0, Math.min(mSrcRect.right - width, mScaledRect.left + distanceX));
+                mScaledRect.top = (int) clamp(mScaledRect.top + distanceY, 0, mSrcRect.bottom - height);
+                //mScaledRect.top = (int)Math.max(0, Math.min(mSrcRect.bottom - height, mScaledRect.top + distanceY));
                 mScaledRect.right = mScaledRect.left + width;
                 mScaledRect.bottom = mScaledRect.top + height;
             }
@@ -319,22 +400,22 @@ public class TargetView extends View {
 
             mScaledRect.left = clamp(centerX - width / 2, 0, mSrcRect.right - width);
             mScaledRect.top = clamp(centerY - height / 2, 0, mSrcRect.bottom - height);
-            mScaledRect.right = mScaledRect.left + width;
-            mScaledRect.bottom = mScaledRect.top + height;
+            //mScaledRect.right = mScaledRect.left + width;
+            //mScaledRect.bottom = mScaledRect.top + height;
+            mScaledRect.right = mScaledRect.left + mDstRect.width();
+            mScaledRect.bottom = mScaledRect.top + mDstRect.height();
 
             mZoomedIn = true;
         }
 
         private void zoomOut(MotionEvent event) {
-            mScaledRect.top = mSrcRect.top;
-            mScaledRect.left = mSrcRect.left;
-            mScaledRect.bottom = mSrcRect.bottom;
-            mScaledRect.right = mSrcRect.right;
+            mScaledRect.top = mDstRect.top;
+            mScaledRect.left = mDstRect.left;
+            mScaledRect.bottom = mDstRect.bottom;
+            mScaledRect.right = mDstRect.right;
 
             mZoomedIn = false;
         }
-
-
     };
 
 
@@ -383,118 +464,8 @@ public class TargetView extends View {
 
     class BitmapCreator extends AsyncTask<Void, Void, Void> {
 
-        private int dim;
-        private int width;
-        private int height;
-
         @Override
         protected Void doInBackground(Void... params) {
-            dim = Math.min(mSrcRect.width(), mSrcRect.height());
-            width = mSrcRect.width();
-            height = mSrcRect.height();
-            createTarget();
-            createBulletHole();
-
-            return null;
-        }
-
-        private void createTarget() {
-            float radiusIncrement = 2.5f; // cm
-            float textSize = mZoomedPixelsPerCm * radiusIncrement * 0.75f;
-            float textHeightOffset = textSize / 2;
-            float textWidthOffset = (mZoomedPixelsPerCm * radiusIncrement) / 2;
-            //float cx = dim / 2;
-            //float cy = dim / 2;
-            float cx = width / 2;
-            float cy = height / 2;
-
-            //mTargetBitmap = Bitmap.createBitmap(dim, dim, Bitmap.Config.RGB_565);
-            mTargetBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-            Canvas canvas = new Canvas(mTargetBitmap);
-
-            Paint paint = new Paint();
-            paint.setColor(Color.WHITE);
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            //canvas.drawRect(0, 0, dim, dim, paint);
-            canvas.drawRect(0, 0, width, height, paint);
-
-            paint.setAntiAlias(true);
-            paint.setStrokeWidth(2);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.BLACK);
-
-            int ring;
-            for (ring = 10; ring > 4; ring--) {
-                canvas.drawCircle(cx, cy, ring * radiusIncrement * mZoomedPixelsPerCm, paint);
-            }
-
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            canvas.drawCircle(cx, cy, ring * radiusIncrement * mZoomedPixelsPerCm, paint);
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.WHITE);
-
-            for (; ring > 0; ring--) {
-                canvas.drawCircle(cx, cy, ring * radiusIncrement * mZoomedPixelsPerCm, paint);
-            }
-
-            // finally, the inner ring
-            canvas.drawCircle(cx, cy, 1.25f * mZoomedPixelsPerCm, paint);
-
-
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setStrokeWidth(1);
-            paint.setFakeBoldText(true);
-            paint.setTextSize(textSize);
-            paint.setTextAlign(Paint.Align.CENTER);
-
-            for (int i = 0; i < 4; i++) {
-                double angle = i * Math.PI / 2;
-
-
-                int num;
-                for (num = 1; num < 10; num++) {
-                    int color;
-
-                    if (num < 4) {
-                        color = Color.WHITE;
-                    } else {
-                        color = Color.BLACK;
-                    }
-
-                    paint.setColor(color);
-
-                    float r = mZoomedPixelsPerCm * radiusIncrement * num;
-                    float x = cx + (float) (r * Math.cos(angle));
-                    float y = cy + (float) (r * Math.sin(angle));
-
-                    switch (i) {
-                        case 0:
-                            paint.setTextAlign(Paint.Align.CENTER);
-                            x += textWidthOffset;
-                            y += textHeightOffset / 2;
-                            break;
-                        case 1:
-                            paint.setTextAlign(Paint.Align.CENTER);
-                            y += textHeightOffset * 2;
-                            break;
-                        case 2:
-                            paint.setTextAlign(Paint.Align.CENTER);
-                            x -= textWidthOffset;
-                            y += textHeightOffset / 2;
-                            break;
-                        case 3:
-                            paint.setTextAlign(Paint.Align.CENTER);
-                            y -= textHeightOffset;
-                            break;
-                    }
-
-                    canvas.drawText("" + (10 - num), x, y, paint);
-                }
-            }
-        }
-
-        private void createBulletHole() {
             float bulletDiameter = CM_PER_INCH * 0.22f * mZoomedPixelsPerCm;
             int bmDim = (int)Math.ceil(bulletDiameter);
             float cx = ((float)bmDim) / 2;
@@ -510,6 +481,8 @@ public class TargetView extends View {
 
             float radius = bulletDiameter / 2;
             canvas.drawCircle(cx, cy, radius, paint);
+
+            return null;
         }
 
         @Override
