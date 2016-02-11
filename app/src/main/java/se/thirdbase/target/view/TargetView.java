@@ -1,12 +1,10 @@
 package se.thirdbase.target.view;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -34,7 +32,6 @@ public class TargetView extends View {
     }
 
     enum State {
-        INIT("INIT"),
         OVERVIEW("OVERVIEW"),
         ZOOM("ZOOM");
 
@@ -68,23 +65,17 @@ public class TargetView extends View {
     }
 
     private static final float MIN_ZOOM_FACTOR = 1.0f;
-    private static final float MAX_ZOOM_FACTOR = 2.0f;
+    private static final float MAX_ZOOM_FACTOR = 5.0f;
 
     private static final float VIRTUAL_WIDTH = 60.0f; //cm
 
     private float mPixelsPerCm;
-    private float mCmPerPixel;
-    private float mZoomedPixelsPerCm;
-    private float mZoomedCmPerPixel;
     private float mScaleFactor = 1.0f;
-    private boolean mZoomedIn;
+    private float mZoomLevel = MIN_ZOOM_FACTOR;
     private Rect mSrcRect;
     private Rect mDstRect;
     private Rect mScaledRect;
-    private Bitmap mTargetBitmap;
-    private Bitmap mBulletHoleBitmap;
-    private Paint mBitmapPaint;
-    private State mState = State.INIT;
+    private State mState = State.OVERVIEW;
     private ScaleGestureDetector mScaleGestureDetector;
     private GestureDetector mGestureDetector;
 
@@ -95,80 +86,91 @@ public class TargetView extends View {
 
         mScaleGestureDetector = new ScaleGestureDetector(context, mOnScaleGestureListener);
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
-
-        mBitmapPaint = new Paint();
-        mBitmapPaint.setAntiAlias(false);
-        //setOnClickListener(mOnClickListener);
         setOnTouchListener(mOnTouchListener);
     }
 
     @Override
     public void onDraw(Canvas canvas) {
         switch (mState) {
-            case INIT:
             case OVERVIEW:
-                drawZoomview(canvas, 1);
                 break;
             case ZOOM:
-                drawZoomview(canvas, MAX_ZOOM_FACTOR);
+            default:
                 break;
         }
+
+        drawTarget(canvas);
+        drawBullets(canvas);
     }
 
     private void transition(State nextState) {
 
-        //Log.d(TAG, String.format("transition() %s -> %s", mState, nextState));
+        Log.d(TAG, String.format("transition() %s -> %s", mState, nextState));
 
         switch (mState) {
-            case INIT:
             case OVERVIEW:
+                mZoomLevel = MAX_ZOOM_FACTOR;
                 mState = nextState;
                 break;
             case ZOOM:
+                mZoomLevel = MIN_ZOOM_FACTOR;
                 mState = nextState;
                 break;
         }
     }
 
-    private void _drawZoomview(Canvas canvas) {
-        if (mTargetBitmap != null) {
-            //Log.d(TAG, "SCL: " + mScaledRect.toShortString());
-            //Log.d(TAG, "DST: " + mDstRect.toShortString());
-            Log.d(TAG, String.format("WIDTH/HEIGHT: %d/%d", mSrcRect.width(), mSrcRect.height()));
+    private void onEnterOverview() {
+        mZoomLevel = MIN_ZOOM_FACTOR;
+    }
 
-            canvas.drawBitmap(mTargetBitmap, mScaledRect, mDstRect, null);
-        }
+    private void onEnterZoom() {
+        mZoomLevel = MAX_ZOOM_FACTOR;
+    }
+
+    private void drawBullets(Canvas canvas) {
+        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
+        float bulletDiameter = CM_PER_INCH * 0.22f * zoomedPixelsPerCm;
+        float radius = bulletDiameter / 2;
+        int dim = (int)Math.ceil(bulletDiameter);
+
+        Paint paint = new Paint();
+        paint.setColor(Color.GRAY);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         for (BulletHole hole : mBulletHoles) {
-            float x = getPixelCoordinateX(hole.x) - mBulletHoleBitmap.getWidth() / 2;
-            float y = getPixelCoordinateY(hole.y) - mBulletHoleBitmap.getHeight() / 2;
+            float x = getPixelCoordinateX(hole.x) - dim / 2;
+            float y = getPixelCoordinateY(hole.y) - dim / 2;
 
-            canvas.drawBitmap(mBulletHoleBitmap, x, y, null);
+            canvas.drawCircle(x, y, radius, paint);
         }
     }
 
-    private void drawZoomview(Canvas canvas, float zoomLevel) {
-        float zoomedPixelsPerCm = zoomLevel * mPixelsPerCm;
+    private float getPixelCoordinateX(float val) {
+        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
+        return (val * zoomedPixelsPerCm - mScaledRect.left) * mDstRect.width() / mScaledRect.width();
+    }
+
+    private float getPixelCoordinateY(float val) {
+        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
+        return (val * zoomedPixelsPerCm - mScaledRect.top) * mDstRect.height() / mScaledRect.height();
+    }
+
+
+    private void drawTarget(Canvas canvas) {
+        float pixelsPerCm = mZoomLevel * mPixelsPerCm;
+        Log.d(TAG, "ZoomLevel: " + mZoomLevel);
 
         float radiusIncrement = 2.5f; // cm
-        float textSize = zoomedPixelsPerCm * radiusIncrement * 0.75f;
+        float textSize = pixelsPerCm * radiusIncrement * 0.75f;
         float textHeightOffset = textSize / 2;
-        float textWidthOffset = (zoomedPixelsPerCm * radiusIncrement) / 2;
+        float textWidthOffset = (pixelsPerCm * radiusIncrement) / 2;
 
-        //float cx = mDstRect.width() / 2 - mScaledRect.left * mDstRect.width() / mScaledRect.width();
-        //float cy = mDstRect.height() / 2 - mScaledRect.top * mDstRect.height() / mScaledRect.height();
-
-        float cx = mScaledRect.width() * zoomLevel / 2 - mScaledRect.left;
-        float cy = mScaledRect.height() * zoomLevel / 2 - mScaledRect.top;
-
-        Log.d(TAG, "Scaled: " + mScaledRect.toShortString());
-        Log.d(TAG, String.format("center %.2f %.2f", cx, cy));
+        float cx = mScaledRect.width() * mZoomLevel / 2 - mScaledRect.left;
+        float cy = mScaledRect.height() * mZoomLevel  / 2 - mScaledRect.top;
 
         Paint paint = new Paint();
         paint.setColor(Color.GREEN);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        //canvas.drawRect(0, 0, dim, dim, paint);
-        //canvas.drawRect(0, 0, width, height, paint);
         canvas.drawColor(Color.WHITE);
 
         paint.setAntiAlias(true);
@@ -178,21 +180,21 @@ public class TargetView extends View {
 
         int ring;
         for (ring = 10; ring > 4; ring--) {
-            canvas.drawCircle(cx, cy, ring * radiusIncrement * zoomedPixelsPerCm, paint);
+            canvas.drawCircle(cx, cy, ring * radiusIncrement * pixelsPerCm, paint);
         }
 
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        canvas.drawCircle(cx, cy, ring * radiusIncrement * zoomedPixelsPerCm, paint);
+        canvas.drawCircle(cx, cy, ring * radiusIncrement * pixelsPerCm, paint);
 
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.WHITE);
 
         for (; ring > 0; ring--) {
-            canvas.drawCircle(cx, cy, ring * radiusIncrement * zoomedPixelsPerCm, paint);
+            canvas.drawCircle(cx, cy, ring * radiusIncrement * pixelsPerCm, paint);
         }
 
         // finally, the inner ring
-        canvas.drawCircle(cx, cy, 1.25f * zoomedPixelsPerCm, paint);
+        canvas.drawCircle(cx, cy, 1.25f * pixelsPerCm, paint);
 
 
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -217,7 +219,7 @@ public class TargetView extends View {
 
                 paint.setColor(color);
 
-                float r = zoomedPixelsPerCm * radiusIncrement * num;
+                float r = pixelsPerCm * radiusIncrement * num;
                 float x = cx + (float) (r * Math.cos(angle));
                 float y = cy + (float) (r * Math.sin(angle));
 
@@ -247,58 +249,26 @@ public class TargetView extends View {
         }
     }
 
-    private float getPixelCoordinateX(float val) {
-        return (val * mZoomedPixelsPerCm - mScaledRect.left) * mDstRect.width() / mScaledRect.width();
-    }
-
-    private float getPixelCoordinateY(float val) {
-        return (val * mZoomedPixelsPerCm - mScaledRect.top) * mDstRect.height() / mScaledRect.height();
-    }
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        //Log.d(TAG, String.format("onSizeChanged(%d, %d, %d, %d)", w, h, oldw, oldh));
+        int zoomWidth = (int) (w * MAX_ZOOM_FACTOR);
+        int zoomHeight = (int) (h * MAX_ZOOM_FACTOR);
 
-        //mWidth = w;
-        //mHeight = h;
+        mSrcRect = new Rect(0, 0, zoomWidth, zoomHeight);
+        mScaledRect = new Rect(0, 0, w, h);
+        mDstRect = new Rect(0, 0, w, h);
 
-        if (mTargetBitmap == null) {
-            int dim = Math.min(w, h);
-            //int zoomWidth = (int) (dim * MAX_ZOOM_FACTOR);
-            //int zoomHeight = (int) (dim * MAX_ZOOM_FACTOR);
-            int zoomWidth = (int) (w * MAX_ZOOM_FACTOR);
-            int zoomHeight = (int) (h * MAX_ZOOM_FACTOR);
-
-            mSrcRect = new Rect(0, 0, zoomWidth, zoomHeight);
-            //mScaledRect = new Rect(0, 0, zoomWidth, zoomHeight);
-            mScaledRect = new Rect(0, 0, w, h);
-            mDstRect = new Rect(0, 0, w, h);
-
-            //mPixelsPerCm = dim / VIRTUAL_WIDTH;
-            mPixelsPerCm = w / VIRTUAL_WIDTH;
-            mCmPerPixel = 1 / mZoomedPixelsPerCm;
-            //mZoomedPixelsPerCm = Math.min(zoomWidth, zoomHeight) / VIRTUAL_WIDTH;
-            mZoomedPixelsPerCm = zoomWidth / VIRTUAL_WIDTH;
-            mZoomedCmPerPixel = 1 / mZoomedPixelsPerCm;
-
-            Log.d(TAG, String.format("DIM: %d, pc/cm: %.2f & %.2f", dim, mZoomedPixelsPerCm, mPixelsPerCm));
-        }
+        mPixelsPerCm = w / VIRTUAL_WIDTH;
     }
 
     private OnTouchListener mOnTouchListener = new OnTouchListener() {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            //Log.d(TAG, "onTouch()");
-
-            int action = event.getAction();
-            final float x = event.getX();
-            final float y = event.getY();
 
             switch (mState) {
-                case INIT:
                 case OVERVIEW:
                 case ZOOM:
                     //mScaleGestureDetector.onTouchEvent(event);
@@ -306,7 +276,6 @@ public class TargetView extends View {
                     break;
             }
 
-            invalidate();
             return true;
         }
     };
@@ -318,21 +287,18 @@ public class TargetView extends View {
 
         @Override
         public boolean onDoubleTap(MotionEvent event) {
-            Log.d(TAG, "onDoubleTap");
-
             switch (mState) {
-                case INIT:
                 case OVERVIEW:
                     zoomIn(event);
                     transition(State.ZOOM);
+                    invalidate();
                     break;
                 case ZOOM:
                     zoomOut(event);
                     transition(State.OVERVIEW);
+                    invalidate();
                     break;
             }
-
-            invalidate();
 
             return true;
         }
@@ -341,25 +307,28 @@ public class TargetView extends View {
         public void onLongPress(MotionEvent event) {
             Log.d(TAG, "onLongPress");
 
-            if (mBulletHoles.size() < 5) {
-                float x = event.getX();
-                float y = event.getY();
+            if (mState == State.ZOOM) {
+                if (mBulletHoles.size() < 5) {
+                    float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
+                    float x = event.getX();
+                    float y = event.getY();
 
-                // Find out where we are in the source rectangle
-                x = mScaledRect.left + mScaledRect.width() * x / mDstRect.width();
-                y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
+                    // Find out where we are in the source rectangle
+                    x = mScaledRect.left + mScaledRect.width() * x / mDstRect.width();
+                    y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
 
-                BulletHole hole = new BulletHole(x / mZoomedPixelsPerCm, y / mZoomedPixelsPerCm);
-                Log.d(TAG, String.format("Hole: %.2f %.2f", hole.x, hole.y));
-                mBulletHoles.add(hole);
+                    BulletHole hole = new BulletHole(x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
+                    Log.d(TAG, String.format("Hole: %.2f %.2f", hole.x, hole.y));
+                    mBulletHoles.add(hole);
+
+                    invalidate();
+                }
             }
         }
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent event) {
             Log.d(TAG, "onSingleTapConfirmed");
-            float x = event.getX();
-            float y = event.getY();
 
             return true;
         }
@@ -367,30 +336,22 @@ public class TargetView extends View {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (mState == State.ZOOM) {
-                Log.d(TAG, String.format("%.2f %.2f", distanceX, distanceY));
 
-                //int width = (int) ((mSrcRect.right - mSrcRect.left) / MAX_ZOOM_FACTOR);
-                //int height = (int) ((mSrcRect.bottom - mSrcRect.top) / MAX_ZOOM_FACTOR);
                 int width = mDstRect.width();
                 int height = mDstRect.height();
-                //mScaledRect.left = (int)Math.max(0, mScaledRect.left + distanceX);
-                //mScaledRect.top = (int)Math.max(0, mScaledRect.top + distanceY);
                 mScaledRect.left = (int) clamp(mScaledRect.left + distanceX, 0, mSrcRect.right - width);
-                //mScaledRect.left = (int)Math.max(0, Math.min(mSrcRect.right - width, mScaledRect.left + distanceX));
                 mScaledRect.top = (int) clamp(mScaledRect.top + distanceY, 0, mSrcRect.bottom - height);
-                //mScaledRect.top = (int)Math.max(0, Math.min(mSrcRect.bottom - height, mScaledRect.top + distanceY));
                 mScaledRect.right = mScaledRect.left + width;
                 mScaledRect.bottom = mScaledRect.top + height;
             }
 
+            invalidate();
             return true;
         }
 
         private void zoomIn(MotionEvent event) {
             mCenterX = event.getX();
             mCenterY = event.getY();
-
-            //Log.d(TAG, String.format("%.2f %.2f", (mCenterX / mDstRect.right), (mCenterY / mDstRect.bottom)));
 
             int centerX = (int)((mCenterX / mDstRect.right) * mSrcRect.right);
             int centerY = (int)((mCenterY / mDstRect.bottom) * mSrcRect.bottom);
@@ -400,12 +361,8 @@ public class TargetView extends View {
 
             mScaledRect.left = clamp(centerX - width / 2, 0, mSrcRect.right - width);
             mScaledRect.top = clamp(centerY - height / 2, 0, mSrcRect.bottom - height);
-            //mScaledRect.right = mScaledRect.left + width;
-            //mScaledRect.bottom = mScaledRect.top + height;
             mScaledRect.right = mScaledRect.left + mDstRect.width();
             mScaledRect.bottom = mScaledRect.top + mDstRect.height();
-
-            mZoomedIn = true;
         }
 
         private void zoomOut(MotionEvent event) {
@@ -413,8 +370,6 @@ public class TargetView extends View {
             mScaledRect.left = mDstRect.left;
             mScaledRect.bottom = mDstRect.bottom;
             mScaledRect.right = mDstRect.right;
-
-            mZoomedIn = false;
         }
     };
 
@@ -461,33 +416,4 @@ public class TargetView extends View {
             return true;
         }
     };
-
-    class BitmapCreator extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            float bulletDiameter = CM_PER_INCH * 0.22f * mZoomedPixelsPerCm;
-            int bmDim = (int)Math.ceil(bulletDiameter);
-            float cx = ((float)bmDim) / 2;
-            float cy = ((float)bmDim) / 2;
-
-            mBulletHoleBitmap = Bitmap.createBitmap(bmDim, bmDim, Bitmap.Config.ARGB_8888);
-
-            Canvas canvas = new Canvas(mBulletHoleBitmap);
-
-            Paint paint = new Paint();
-            paint.setColor(Color.GRAY);
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-
-            float radius = bulletDiameter / 2;
-            canvas.drawCircle(cx, cy, radius, paint);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            invalidate();
-        }
-    }
 }
