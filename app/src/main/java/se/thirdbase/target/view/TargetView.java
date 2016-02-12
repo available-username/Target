@@ -4,9 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -15,6 +15,8 @@ import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import se.thirdbase.target.model.BulletHole;
 
 /**
  * Created by alexp on 2/8/16.
@@ -36,7 +38,7 @@ public class TargetView extends View {
     enum State {
         OVERVIEW("OVERVIEW"),
         ZOOM("ZOOM"),
-        PLACE_BULLET("PLACE_BULLET");
+        ADD_BULLET("ADD_BULLET");
 
         private String mName;
 
@@ -47,34 +49,6 @@ public class TargetView extends View {
         public String toString() {
             return mName;
         }
-    }
-
-    enum Caliber {
-        CAL_22,
-        CAL_9MM,
-        CAL_10MM,
-        CAL_45ACP,
-        CAL_50
-    }
-
-    class BulletHole {
-        float cmX;
-        float cmY;
-
-        public BulletHole(float cmX, float cmY) {
-            this.cmX = cmX;
-            this.cmY = cmY;
-        }
-
-        public BulletHole(int pixelX, int pixelY, int viewWidth, int viewHeight, float targetWidth, float targetHeight) {
-            cmX = targetWidth * pixelX / viewWidth;
-            cmY = targetHeight * pixelY / viewHeight;
-        }
-
-        public PointF toPixelLocation(float pixelsPerCm) {
-            return new PointF(cmX * pixelsPerCm, cmY * pixelsPerCm);
-        }
-
     }
 
     private static final float MIN_ZOOM_FACTOR = 1.0f;
@@ -97,6 +71,14 @@ public class TargetView extends View {
 
     private List<BulletHole> mBulletHoles = new ArrayList<>(5);
 
+    public TargetView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+
+        mScaleGestureDetector = new ScaleGestureDetector(context, mOnScaleGestureListener);
+        mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
+        setOnTouchListener(mOnTouchListener);
+    }
+
     public TargetView(Context context) {
         super(context);
 
@@ -115,7 +97,7 @@ public class TargetView extends View {
                 break;
             case ZOOM:
                 break;
-            case PLACE_BULLET:
+            case ADD_BULLET:
                 drawBulletPlacer(canvas);
                 postInvalidateDelayed(1000 / 25);
                 break;
@@ -132,7 +114,7 @@ public class TargetView extends View {
             case OVERVIEW:
 
                 switch (nextState) {
-                    case PLACE_BULLET:
+                    case ADD_BULLET:
                     case OVERVIEW: throw new IllegalStateException("Illegal transition: " + transition);
                     case ZOOM: onEnterZoom(); break;
                 }
@@ -143,13 +125,13 @@ public class TargetView extends View {
                 switch (nextState) {
                     case OVERVIEW: onEnterOverview(); break;
                     case ZOOM: throw new IllegalStateException("Illegal transition: " + transition);
-                    case PLACE_BULLET: onPlaceBullet(); break;
+                    case ADD_BULLET: onPlaceBullet(); break;
                 }
                 break;
 
-            case PLACE_BULLET:
+            case ADD_BULLET:
                 switch (nextState) {
-                    case PLACE_BULLET:
+                    case ADD_BULLET:
                     case OVERVIEW: throw new IllegalStateException("Illegal transition: " + transition);
                     case ZOOM: onEnterZoom(); break;
                 }
@@ -157,6 +139,14 @@ public class TargetView extends View {
         }
 
         Log.d(TAG, "Transition: " + transition);
+    }
+
+    public void overview() {
+        transition(State.OVERVIEW);
+    }
+
+    public void zoom() {
+        transition(State.ZOOM);
     }
 
     private void onEnterOverview() {
@@ -170,7 +160,7 @@ public class TargetView extends View {
     }
 
     private void onPlaceBullet() {
-        mState = State.PLACE_BULLET;
+        mState = State.ADD_BULLET;
     }
 
     private void drawBulletPlacer(Canvas canvas) {
@@ -321,6 +311,8 @@ public class TargetView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
+        Log.d(TAG, String.format("onSizeChanged(%d, %d, %d, %d)", w, h, oldw, oldh));
+
         int zoomWidth = (int) (w * MAX_ZOOM_FACTOR);
         int zoomHeight = (int) (h * MAX_ZOOM_FACTOR);
 
@@ -329,6 +321,39 @@ public class TargetView extends View {
         mDstRect = new Rect(0, 0, w, h);
 
         mPixelsPerCm = w / VIRTUAL_WIDTH;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int wMode = MeasureSpec.getMode(widthMeasureSpec);
+        int wSize = MeasureSpec.getSize(widthMeasureSpec);
+        int hMode = MeasureSpec.getMode(heightMeasureSpec);
+        int hSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int width;
+        int height;
+
+        View parent = (View)getParent();
+
+        int parentWidth = parent.getWidth();
+        int parentHeight = parent.getHeight();
+
+        switch (wMode) {
+            case MeasureSpec.EXACTLY: width = wSize; break;
+            case MeasureSpec.AT_MOST: width = Math.min(wSize, parentWidth); break;
+            default: width = parentWidth;
+        }
+
+        switch (hMode) {
+            case MeasureSpec.EXACTLY: height = hSize; break;
+            case MeasureSpec.AT_MOST: height = Math.min(hSize, parentHeight); break;
+            default: height = parentHeight;
+        }
+
+        width = height = Math.min(width, height);
+
+        Log.d(TAG, String.format("setMeasuredDimension(%d, %d)", width, height));
+        super.setMeasuredDimension(width, height);
     }
 
     private OnTouchListener mOnTouchListener = new OnTouchListener() {
@@ -347,7 +372,7 @@ public class TargetView extends View {
                 case ZOOM:
                     mGestureDetector.onTouchEvent(event);
                     break;
-                case PLACE_BULLET:
+                case ADD_BULLET:
                     //mScaleGestureDetector.onTouchEvent(event);
                     invalidate();
                     //mGestureDetector.onTouchEvent(event);
@@ -410,7 +435,7 @@ public class TargetView extends View {
             }
             /*
             if (mState == State.ZOOM) {
-                transition(State.PLACE_BULLET);
+                transition(State.ADD_BULLET);
             }
             */
         }
@@ -433,7 +458,7 @@ public class TargetView extends View {
                 mScaledRect.top = (int) clamp(mScaledRect.top + distanceY, 0, mSrcRect.bottom - height);
                 mScaledRect.right = mScaledRect.left + width;
                 mScaledRect.bottom = mScaledRect.top + height;
-            } else if(mState == State.PLACE_BULLET) {
+            } else if(mState == State.ADD_BULLET) {
 
             }
 
