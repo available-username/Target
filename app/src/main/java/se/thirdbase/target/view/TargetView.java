@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -33,7 +35,8 @@ public class TargetView extends View {
 
     enum State {
         OVERVIEW("OVERVIEW"),
-        ZOOM("ZOOM");
+        ZOOM("ZOOM"),
+        PLACE_BULLET("PLACE_BULLET");
 
         private String mName;
 
@@ -55,13 +58,23 @@ public class TargetView extends View {
     }
 
     class BulletHole {
-        float x;
-        float y;
+        float cmX;
+        float cmY;
 
-        public BulletHole(float x, float y) {
-            this.x = x;
-            this.y = y;
+        public BulletHole(float cmX, float cmY) {
+            this.cmX = cmX;
+            this.cmY = cmY;
         }
+
+        public BulletHole(int pixelX, int pixelY, int viewWidth, int viewHeight, float targetWidth, float targetHeight) {
+            cmX = targetWidth * pixelX / viewWidth;
+            cmY = targetHeight * pixelY / viewHeight;
+        }
+
+        public PointF toPixelLocation(float pixelsPerCm) {
+            return new PointF(cmX * pixelsPerCm, cmY * pixelsPerCm);
+        }
+
     }
 
     private static final float MIN_ZOOM_FACTOR = 1.0f;
@@ -79,6 +92,9 @@ public class TargetView extends View {
     private ScaleGestureDetector mScaleGestureDetector;
     private GestureDetector mGestureDetector;
 
+    private float mCurrentX;
+    private float mCurrentY;
+
     private List<BulletHole> mBulletHoles = new ArrayList<>(5);
 
     public TargetView(Context context) {
@@ -91,45 +107,93 @@ public class TargetView extends View {
 
     @Override
     public void onDraw(Canvas canvas) {
+        drawTarget(canvas);
+        drawBullets(canvas);
+
         switch (mState) {
             case OVERVIEW:
                 break;
             case ZOOM:
+                break;
+            case PLACE_BULLET:
+                drawBulletPlacer(canvas);
+                postInvalidateDelayed(1000 / 25);
+                break;
             default:
                 break;
         }
-
-        drawTarget(canvas);
-        drawBullets(canvas);
     }
 
     private void transition(State nextState) {
 
-        Log.d(TAG, String.format("transition() %s -> %s", mState, nextState));
+        String transition = String.format("%s -> %s", mState, nextState);
 
         switch (mState) {
             case OVERVIEW:
-                mZoomLevel = MAX_ZOOM_FACTOR;
-                mState = nextState;
+
+                switch (nextState) {
+                    case PLACE_BULLET:
+                    case OVERVIEW: throw new IllegalStateException("Illegal transition: " + transition);
+                    case ZOOM: onEnterZoom(); break;
+                }
+
                 break;
             case ZOOM:
-                mZoomLevel = MIN_ZOOM_FACTOR;
-                mState = nextState;
+
+                switch (nextState) {
+                    case OVERVIEW: onEnterOverview(); break;
+                    case ZOOM: throw new IllegalStateException("Illegal transition: " + transition);
+                    case PLACE_BULLET: onPlaceBullet(); break;
+                }
+                break;
+
+            case PLACE_BULLET:
+                switch (nextState) {
+                    case PLACE_BULLET:
+                    case OVERVIEW: throw new IllegalStateException("Illegal transition: " + transition);
+                    case ZOOM: onEnterZoom(); break;
+                }
                 break;
         }
+
+        Log.d(TAG, "Transition: " + transition);
     }
 
     private void onEnterOverview() {
         mZoomLevel = MIN_ZOOM_FACTOR;
+        mState = State.OVERVIEW;
     }
 
     private void onEnterZoom() {
         mZoomLevel = MAX_ZOOM_FACTOR;
+        mState = State.ZOOM;
+    }
+
+    private void onPlaceBullet() {
+        mState = State.PLACE_BULLET;
+    }
+
+    private void drawBulletPlacer(Canvas canvas) {
+        Paint paint = new Paint();
+        paint.setStrokeWidth(2.0f);
+
+        paint.setColor(Color.GRAY);
+
+        int width = canvas.getWidth();
+        int height = canvas.getHeight();
+        int offset = Math.max(width, height) / 5;
+        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
+        float bulletDiameter = CM_PER_INCH * 0.22f * zoomedPixelsPerCm;
+        float radius = bulletDiameter / 2;
+
+        Log.d(TAG, "drawBulletPlacer");
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        canvas.drawCircle(mCurrentX - offset, mCurrentY - offset, radius, paint);
     }
 
     private void drawBullets(Canvas canvas) {
-        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-        float bulletDiameter = CM_PER_INCH * 0.22f * zoomedPixelsPerCm;
+        float pixelsPerCm = mZoomLevel * mPixelsPerCm;
+        float bulletDiameter = CM_PER_INCH * 0.22f * pixelsPerCm;
         float radius = bulletDiameter / 2;
         int dim = (int)Math.ceil(bulletDiameter);
 
@@ -138,21 +202,25 @@ public class TargetView extends View {
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         for (BulletHole hole : mBulletHoles) {
-            float x = getPixelCoordinateX(hole.x) - dim / 2;
-            float y = getPixelCoordinateY(hole.y) - dim / 2;
+            //float x = getPixelCoordinateX(hole.x) - dim / 2;
+            //float y = getPixelCoordinateY(hole.y) - dim / 2;
 
-            canvas.drawCircle(x, y, radius, paint);
+            PointF p = hole.toPixelLocation(pixelsPerCm);
+
+            canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
         }
     }
 
     private float getPixelCoordinateX(float val) {
         float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-        return (val * zoomedPixelsPerCm - mScaledRect.left) * mDstRect.width() / mScaledRect.width();
+        //return (val * zoomedPixelsPerCm - mScaledRect.left) * mDstRect.width() / mScaledRect.width();
+        return (val * zoomedPixelsPerCm - mScaledRect.left);
     }
 
     private float getPixelCoordinateY(float val) {
         float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-        return (val * zoomedPixelsPerCm - mScaledRect.top) * mDstRect.height() / mScaledRect.height();
+        //return (val * zoomedPixelsPerCm - mScaledRect.top) * mDstRect.height() / mScaledRect.height();
+        return (val * zoomedPixelsPerCm - mScaledRect.top);
     }
 
 
@@ -268,11 +336,26 @@ public class TargetView extends View {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
 
+            int action = event.getAction();
+            mCurrentX = event.getX();
+            mCurrentY = event.getY();
+
+            Log.d(TAG, String.format("%.2f, %.2f", mCurrentX, mCurrentY));
+
             switch (mState) {
                 case OVERVIEW:
                 case ZOOM:
-                    //mScaleGestureDetector.onTouchEvent(event);
                     mGestureDetector.onTouchEvent(event);
+                    break;
+                case PLACE_BULLET:
+                    //mScaleGestureDetector.onTouchEvent(event);
+                    invalidate();
+                    //mGestureDetector.onTouchEvent(event);
+
+                    if (action == MotionEvent.ACTION_UP) {
+                        // Commit bullet
+                        transition(State.ZOOM);
+                    }
                     break;
             }
 
@@ -307,6 +390,7 @@ public class TargetView extends View {
         public void onLongPress(MotionEvent event) {
             Log.d(TAG, "onLongPress");
 
+
             if (mState == State.ZOOM) {
                 if (mBulletHoles.size() < 5) {
                     float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
@@ -318,12 +402,17 @@ public class TargetView extends View {
                     y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
 
                     BulletHole hole = new BulletHole(x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
-                    Log.d(TAG, String.format("Hole: %.2f %.2f", hole.x, hole.y));
+                    //Log.d(TAG, String.format("Hole: %.2f %.2f", hole.x, hole.y));
                     mBulletHoles.add(hole);
 
                     invalidate();
                 }
             }
+            /*
+            if (mState == State.ZOOM) {
+                transition(State.PLACE_BULLET);
+            }
+            */
         }
 
         @Override
@@ -335,6 +424,7 @@ public class TargetView extends View {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            Log.d(TAG, "onScroll()");
             if (mState == State.ZOOM) {
 
                 int width = mDstRect.width();
@@ -343,6 +433,8 @@ public class TargetView extends View {
                 mScaledRect.top = (int) clamp(mScaledRect.top + distanceY, 0, mSrcRect.bottom - height);
                 mScaledRect.right = mScaledRect.left + width;
                 mScaledRect.bottom = mScaledRect.top + height;
+            } else if(mState == State.PLACE_BULLET) {
+
             }
 
             invalidate();
