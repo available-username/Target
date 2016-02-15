@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -16,6 +15,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
+import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
 
 /**
@@ -75,11 +75,13 @@ public class TargetView extends View {
     private ViewState mViewState = ViewState.OVERVIEW;
     private GestureDetector mGestureDetector;
 
-    private List<BulletHole> mBulletHoles = new ArrayList<>(MAX_NBR_BULLETS);
+    private List<BulletHole> mBulletHoles = new ArrayList<>();
     private BulletHole mActiveBulletHole;
 
     private ZoomChangeListener mZoomChangeListener;
     private ActionListener mActionListener;
+
+    private int mMaxNbrBullets = MAX_NBR_BULLETS;
 
     public TargetView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -165,6 +167,12 @@ public class TargetView extends View {
     }
 
     public void addBulletHole(float x, float y) {
+        testTransition(ActionState.ADD);
+
+        if (mBulletHoles.size() == mMaxNbrBullets) {
+            throw new IllegalStateException("The maximum number of bullets has already been added");
+        }
+
         float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
 
         // Find out where we are in the source rectangle
@@ -175,7 +183,7 @@ public class TargetView extends View {
         //Log.d(TAG, String.format("Hole: %.2f %.2f", hole.x, hole.y));
         //mBulletHoles.add(hole);
 
-        mActiveBulletHole =  new BulletHole(x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
+        mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
 
         invalidate();
     }
@@ -227,6 +235,32 @@ public class TargetView extends View {
     private void onZoomOut() {
         if (mZoomChangeListener != null) {
             mZoomChangeListener.onZoomOut();
+        }
+    }
+
+    public void relocateBullet(int bullet) {
+        testTransition(ActionState.RELOCATE);
+
+        if (bullet < 0 || bullet >= mBulletHoles.size()) {
+            throw new IllegalStateException("Illegal bullet index");
+        }
+
+        mActiveBulletHole = mBulletHoles.get(bullet);
+        mBulletHoles.set(bullet, null);
+    }
+
+    public void cancelRelocation() {
+        testTransition(ActionState.IDLE);
+
+        mActiveBulletHole = null;
+    }
+
+    public void commitBullet() {
+        testTransition(ActionState.IDLE);
+
+        if (mActiveBulletHole != null && mBulletHoles.size() < mMaxNbrBullets) {
+            mBulletHoles.add(mActiveBulletHole);
+            mActiveBulletHole = null;
         }
     }
 
@@ -284,7 +318,8 @@ public class TargetView extends View {
 
         int ring;
         for (ring = 10; ring > 4; ring--) {
-            canvas.drawCircle(cx, cy, ring * radiusIncrement * pixelsPerCm, paint);
+            float radius = ring * radiusIncrement;
+            canvas.drawCircle(cx, cy, radius * pixelsPerCm, paint);
         }
 
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -294,12 +329,12 @@ public class TargetView extends View {
         paint.setColor(Color.WHITE);
 
         for (; ring > 0; ring--) {
-            canvas.drawCircle(cx, cy, ring * radiusIncrement * pixelsPerCm, paint);
+            float radius = ring * radiusIncrement;
+            canvas.drawCircle(cx, cy, radius * pixelsPerCm, paint);
         }
 
         // finally, the inner ring
         canvas.drawCircle(cx, cy, 1.25f * pixelsPerCm, paint);
-
 
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeWidth(1);
@@ -371,18 +406,12 @@ public class TargetView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int wMode = MeasureSpec.getMode(widthMeasureSpec);
-        int wSize = MeasureSpec.getSize(widthMeasureSpec);
-        int hMode = MeasureSpec.getMode(heightMeasureSpec);
-        int hSize = MeasureSpec.getSize(heightMeasureSpec);
-
-        int width;
-        int height;
-
         View parent = (View)getParent();
 
+        int wMode = MeasureSpec.getMode(widthMeasureSpec);
+        int wSize = MeasureSpec.getSize(widthMeasureSpec);
         int parentWidth = parent.getWidth();
-        int parentHeight = parent.getHeight();
+        int width;
 
         switch (wMode) {
             case MeasureSpec.EXACTLY: width = wSize; break;
@@ -390,13 +419,16 @@ public class TargetView extends View {
             default: width = parentWidth;
         }
 
+        int hMode = MeasureSpec.getMode(heightMeasureSpec);
+        int hSize = MeasureSpec.getSize(heightMeasureSpec);
+        int parentHeight = parent.getHeight();
+        int height;
+
         switch (hMode) {
             case MeasureSpec.EXACTLY: height = hSize; break;
             case MeasureSpec.AT_MOST: height = Math.min(hSize, parentHeight); break;
             default: height = parentHeight;
         }
-
-        width = height = Math.min(width, height);
 
         Log.d(TAG, String.format("setMeasuredDimension(%d, %d)", width, height));
         super.setMeasuredDimension(width, height);
@@ -431,12 +463,23 @@ public class TargetView extends View {
         public void onLongPress(MotionEvent event) {
             Log.d(TAG, "onLongPress");
 
-            addBulletHole(event.getX(), event.getY());
+            switch (mActionState) {
+                case IDLE:
+                    addBulletHole(event.getX(), event.getY());
+                    break;
+                case ADD:
+                    break;
+                case RELOCATE:
+                    break;
+            }
         }
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent event) {
             Log.d(TAG, "onSingleTapConfirmed");
+
+            commitBullet();
+            invalidate();
 
             return true;
         }
@@ -449,12 +492,20 @@ public class TargetView extends View {
             return true;
         }
 
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            Log.d(TAG, "onFling");
+            cancelRelocation();
+
+            return true;
+        }
+
         private void updateTarget(float pointerX, float pointerY, float distanceX, float distanceY) {
 
             if (mActiveBulletHole != null) {
                 float pixelsPercm = mZoomLevel * mPixelsPerCm;
                 mActiveBulletHole.move(-distanceX / pixelsPercm, -distanceY / pixelsPercm);
-            } else {
+            } else if (mViewState == ViewState.ZOOM){
                 int width = mDstRect.width();
                 int height = mDstRect.height();
                 mScaledRect.left = (int) clamp(mScaledRect.left + distanceX, 0, mSrcRect.right - width);
