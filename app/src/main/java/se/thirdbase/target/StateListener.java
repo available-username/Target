@@ -5,7 +5,9 @@ package se.thirdbase.target;
  */
 public interface StateListener {
 
-    void onTarget();
+    void onStartup();
 
-    void onStatisticsOverview();
+    void onPrecision();
+
+    void onStatistics();
 }

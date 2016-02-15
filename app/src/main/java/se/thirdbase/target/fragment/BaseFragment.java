@@ -1,7 +1,6 @@
 package se.thirdbase.target.fragment;
 
 import android.content.Context;
-import android.net.NetworkInfo;
 import android.support.v4.app.Fragment;
 
 import se.thirdbase.target.StateListener;
@@ -22,13 +21,21 @@ abstract class BaseFragment extends Fragment {
         }
     }
 
-    public void onTarget() {
+    public void onStartup() {
         if (mListener != null) {
-            mListener.onTarget();
+            mListener.onStartup();
         }
     }
 
-    public void onStatisticsOverview() {
+    public void onPrecision() {
+        if (mListener != null) {
+            mListener.onPrecision();
+        }
+    }
 
+    public void onStatistics() {
+        if (mListener != null) {
+            mListener.onStatistics();
+        }
     }
 }

@@ -6,11 +6,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -22,6 +22,20 @@ import se.thirdbase.target.model.BulletHole;
  * Created by alexp on 2/8/16.
  */
 public class TargetView extends View {
+
+    public interface ZoomChangeListener {
+        void onZoomIn();
+
+        void onZoomOut();
+    }
+
+    public interface ActionListener {
+        void onIdle();
+
+        void onAdd();
+
+        void onRelocate();
+    }
 
     private static final String TAG = TargetView.class.getSimpleName();
 
@@ -35,188 +49,220 @@ public class TargetView extends View {
         return Math.max(min, Math.min(max, val));
     }
 
-    enum State {
-        OVERVIEW("OVERVIEW"),
-        ZOOM("ZOOM"),
-        ADD_BULLET("ADD_BULLET");
+    enum ActionState {
+        IDLE,
+        ADD,
+        RELOCATE
+    }
 
-        private String mName;
-
-        State(String name) {
-            mName = name;
-        }
-
-        public String toString() {
-            return mName;
-        }
+    enum ViewState {
+        OVERVIEW,
+        ZOOM
     }
 
     private static final float MIN_ZOOM_FACTOR = 1.0f;
     private static final float MAX_ZOOM_FACTOR = 5.0f;
-
     private static final float VIRTUAL_WIDTH = 60.0f; //cm
+    private static final int MAX_NBR_BULLETS = 5;
 
     private float mPixelsPerCm;
-    private float mScaleFactor = 1.0f;
     private float mZoomLevel = MIN_ZOOM_FACTOR;
     private Rect mSrcRect;
     private Rect mDstRect;
     private Rect mScaledRect;
-    private State mState = State.OVERVIEW;
-    private ScaleGestureDetector mScaleGestureDetector;
+
+    private ActionState mActionState = ActionState.IDLE;
+    private ViewState mViewState = ViewState.OVERVIEW;
     private GestureDetector mGestureDetector;
 
-    private float mCurrentX;
-    private float mCurrentY;
+    private List<BulletHole> mBulletHoles = new ArrayList<>(MAX_NBR_BULLETS);
+    private BulletHole mActiveBulletHole;
 
-    private List<BulletHole> mBulletHoles = new ArrayList<>(5);
+    private ZoomChangeListener mZoomChangeListener;
+    private ActionListener mActionListener;
 
     public TargetView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mScaleGestureDetector = new ScaleGestureDetector(context, mOnScaleGestureListener);
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
     }
 
     public TargetView(Context context) {
         super(context);
-
-        mScaleGestureDetector = new ScaleGestureDetector(context, mOnScaleGestureListener);
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
+    }
+
+    public void setZoomChangedListener(ZoomChangeListener listener) {
+        mZoomChangeListener = listener;
+    }
+
+    public void setActionListener(ActionListener listener) {
+        mActionListener = listener;
     }
 
     @Override
     public void onDraw(Canvas canvas) {
         drawTarget(canvas);
         drawBullets(canvas);
+        drawActiveBullet(canvas);
+        switch (mActionState) {
+            case IDLE:
+                break;
+            case ADD:
+            case RELOCATE:
+                drawActiveBullet(canvas);
+                break;
+        }
+    }
 
-        switch (mState) {
-            case OVERVIEW:
+    private void testTransition(ActionState nextState) {
+        boolean legal;
+
+        switch (mActionState) {
+            case IDLE:
+                legal = nextState == ActionState.IDLE || nextState == ActionState.ADD || nextState == ActionState.RELOCATE;
                 break;
-            case ZOOM:
+            case ADD:
+                legal = nextState == ActionState.IDLE;
                 break;
-            case ADD_BULLET:
-                drawBulletPlacer(canvas);
-                postInvalidateDelayed(1000 / 25);
-                break;
+            case RELOCATE:
             default:
+                legal = nextState == ActionState.IDLE;
                 break;
         }
+
+        if (!legal) {
+            throw new IllegalStateException(String.format("Illegal transition: %s -> %s", mActionState, nextState));
+        }
+
+        mActionState = nextState;
     }
 
-    private void transition(State nextState) {
+    private void testTransition(ViewState nextState) {
+        boolean legal;
 
-        String transition = String.format("%s -> %s", mState, nextState);
-
-        switch (mState) {
+        switch (mViewState) {
             case OVERVIEW:
-
-                switch (nextState) {
-                    case ADD_BULLET:
-                    case OVERVIEW: throw new IllegalStateException("Illegal transition: " + transition);
-                    case ZOOM: onEnterZoom(); break;
-                }
-
+                legal = nextState == ViewState.ZOOM;
                 break;
             case ZOOM:
-
-                switch (nextState) {
-                    case OVERVIEW: onEnterOverview(); break;
-                    case ZOOM: throw new IllegalStateException("Illegal transition: " + transition);
-                    case ADD_BULLET: onPlaceBullet(); break;
-                }
-                break;
-
-            case ADD_BULLET:
-                switch (nextState) {
-                    case ADD_BULLET:
-                    case OVERVIEW: throw new IllegalStateException("Illegal transition: " + transition);
-                    case ZOOM: onEnterZoom(); break;
-                }
+            default:
+                legal = nextState == ViewState.OVERVIEW;
                 break;
         }
 
-        Log.d(TAG, "Transition: " + transition);
+        if (!legal) {
+            throw new IllegalStateException(String.format("Illegal transition: %s -> %s", mViewState, nextState));
+        }
+
+        mViewState = nextState;
     }
 
-    public void overview() {
-        transition(State.OVERVIEW);
+    public void addBulletHole() {
+        addBulletHole(mScaledRect.right / 2, mScaledRect.bottom / 2);
     }
 
-    public void zoom() {
-        transition(State.ZOOM);
-    }
-
-    private void onEnterOverview() {
-        mZoomLevel = MIN_ZOOM_FACTOR;
-        mState = State.OVERVIEW;
-    }
-
-    private void onEnterZoom() {
-        mZoomLevel = MAX_ZOOM_FACTOR;
-        mState = State.ZOOM;
-    }
-
-    private void onPlaceBullet() {
-        mState = State.ADD_BULLET;
-    }
-
-    private void drawBulletPlacer(Canvas canvas) {
-        Paint paint = new Paint();
-        paint.setStrokeWidth(2.0f);
-
-        paint.setColor(Color.GRAY);
-
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
-        int offset = Math.max(width, height) / 5;
+    public void addBulletHole(float x, float y) {
         float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-        float bulletDiameter = CM_PER_INCH * 0.22f * zoomedPixelsPerCm;
-        float radius = bulletDiameter / 2;
 
-        Log.d(TAG, "drawBulletPlacer");
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        canvas.drawCircle(mCurrentX - offset, mCurrentY - offset, radius, paint);
+        // Find out where we are in the source rectangle
+        x = mScaledRect.left + mScaledRect.width() * x / mDstRect.width();
+        y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
+
+        //BulletHole hole = new BulletHole(x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
+        //Log.d(TAG, String.format("Hole: %.2f %.2f", hole.x, hole.y));
+        //mBulletHoles.add(hole);
+
+        mActiveBulletHole =  new BulletHole(x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
+
+        invalidate();
+    }
+
+    public void zoomIn() {
+        zoomIn(mDstRect.width() / 2, mDstRect.height() / 2);
+    }
+
+    public void zoomIn(float x, float y) {
+        testTransition(ViewState.ZOOM);
+
+        int centerX = (int)((x / mDstRect.right) * mSrcRect.right);
+        int centerY = (int)((y / mDstRect.bottom) * mSrcRect.bottom);
+
+        int width = (int) ((mSrcRect.right - mSrcRect.left) / MAX_ZOOM_FACTOR);
+        int height = (int) ((mSrcRect.bottom - mSrcRect.top) / MAX_ZOOM_FACTOR);
+
+        mScaledRect.left = clamp(centerX - width / 2, 0, mSrcRect.right - width);
+        mScaledRect.top = clamp(centerY - height / 2, 0, mSrcRect.bottom - height);
+        mScaledRect.right = mScaledRect.left + mDstRect.width();
+        mScaledRect.bottom = mScaledRect.top + mDstRect.height();
+
+        mZoomLevel = MAX_ZOOM_FACTOR;
+
+        invalidate();
+        onZoomIn();
+    }
+
+    public void zoomOut() {
+        testTransition(ViewState.OVERVIEW);
+
+        mScaledRect.top = mDstRect.top;
+        mScaledRect.left = mDstRect.left;
+        mScaledRect.bottom = mDstRect.bottom;
+        mScaledRect.right = mDstRect.right;
+
+        mZoomLevel = MIN_ZOOM_FACTOR;
+
+        invalidate();
+        onZoomOut();
+    }
+
+    private void onZoomIn() {
+        if (mZoomChangeListener != null) {
+            mZoomChangeListener.onZoomIn();
+        }
+    }
+
+    private void onZoomOut() {
+        if (mZoomChangeListener != null) {
+            mZoomChangeListener.onZoomOut();
+        }
+    }
+
+    private void drawActiveBullet(Canvas canvas) {
+        if (mActiveBulletHole != null) {
+            float pixelsPerCm = mZoomLevel * mPixelsPerCm;
+            float bulletDiameter = CM_PER_INCH * 0.22f * pixelsPerCm;
+            float radius = bulletDiameter / 2;
+
+            Paint paint = new Paint();
+            paint.setColor(Color.RED);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+            PointF p = mActiveBulletHole.toPixelLocation(pixelsPerCm);
+
+            canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
+        }
     }
 
     private void drawBullets(Canvas canvas) {
         float pixelsPerCm = mZoomLevel * mPixelsPerCm;
         float bulletDiameter = CM_PER_INCH * 0.22f * pixelsPerCm;
         float radius = bulletDiameter / 2;
-        int dim = (int)Math.ceil(bulletDiameter);
 
         Paint paint = new Paint();
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         for (BulletHole hole : mBulletHoles) {
-            //float x = getPixelCoordinateX(hole.x) - dim / 2;
-            //float y = getPixelCoordinateY(hole.y) - dim / 2;
-
             PointF p = hole.toPixelLocation(pixelsPerCm);
-
             canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
         }
     }
 
-    private float getPixelCoordinateX(float val) {
-        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-        //return (val * zoomedPixelsPerCm - mScaledRect.left) * mDstRect.width() / mScaledRect.width();
-        return (val * zoomedPixelsPerCm - mScaledRect.left);
-    }
-
-    private float getPixelCoordinateY(float val) {
-        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-        //return (val * zoomedPixelsPerCm - mScaledRect.top) * mDstRect.height() / mScaledRect.height();
-        return (val * zoomedPixelsPerCm - mScaledRect.top);
-    }
-
-
     private void drawTarget(Canvas canvas) {
         float pixelsPerCm = mZoomLevel * mPixelsPerCm;
-        Log.d(TAG, "ZoomLevel: " + mZoomLevel);
 
         float radiusIncrement = 2.5f; // cm
         float textSize = pixelsPerCm * radiusIncrement * 0.75f;
@@ -360,51 +406,21 @@ public class TargetView extends View {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-
-            int action = event.getAction();
-            mCurrentX = event.getX();
-            mCurrentY = event.getY();
-
-            Log.d(TAG, String.format("%.2f, %.2f", mCurrentX, mCurrentY));
-
-            switch (mState) {
-                case OVERVIEW:
-                case ZOOM:
-                    mGestureDetector.onTouchEvent(event);
-                    break;
-                case ADD_BULLET:
-                    //mScaleGestureDetector.onTouchEvent(event);
-                    invalidate();
-                    //mGestureDetector.onTouchEvent(event);
-
-                    if (action == MotionEvent.ACTION_UP) {
-                        // Commit bullet
-                        transition(State.ZOOM);
-                    }
-                    break;
-            }
-
+            mGestureDetector.onTouchEvent(event);
             return true;
         }
     };
 
     private GestureDetector.SimpleOnGestureListener mSimpleGestureDetector= new GestureDetector.SimpleOnGestureListener() {
 
-        private float mCenterX;
-        private float mCenterY;
-
         @Override
         public boolean onDoubleTap(MotionEvent event) {
-            switch (mState) {
+            switch (mViewState) {
                 case OVERVIEW:
-                    zoomIn(event);
-                    transition(State.ZOOM);
-                    invalidate();
+                    zoomIn(event.getX(), event.getY());
                     break;
                 case ZOOM:
-                    zoomOut(event);
-                    transition(State.OVERVIEW);
-                    invalidate();
+                    zoomOut();
                     break;
             }
 
@@ -415,29 +431,7 @@ public class TargetView extends View {
         public void onLongPress(MotionEvent event) {
             Log.d(TAG, "onLongPress");
 
-
-            if (mState == State.ZOOM) {
-                if (mBulletHoles.size() < 5) {
-                    float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-                    float x = event.getX();
-                    float y = event.getY();
-
-                    // Find out where we are in the source rectangle
-                    x = mScaledRect.left + mScaledRect.width() * x / mDstRect.width();
-                    y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
-
-                    BulletHole hole = new BulletHole(x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
-                    //Log.d(TAG, String.format("Hole: %.2f %.2f", hole.x, hole.y));
-                    mBulletHoles.add(hole);
-
-                    invalidate();
-                }
-            }
-            /*
-            if (mState == State.ZOOM) {
-                transition(State.ADD_BULLET);
-            }
-            */
+            addBulletHole(event.getX(), event.getY());
         }
 
         @Override
@@ -449,88 +443,25 @@ public class TargetView extends View {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            Log.d(TAG, "onScroll()");
-            if (mState == State.ZOOM) {
+            updateTarget(e2.getX(), e2.getY(), distanceX, distanceY);
 
+            invalidate();
+            return true;
+        }
+
+        private void updateTarget(float pointerX, float pointerY, float distanceX, float distanceY) {
+
+            if (mActiveBulletHole != null) {
+                float pixelsPercm = mZoomLevel * mPixelsPerCm;
+                mActiveBulletHole.move(-distanceX / pixelsPercm, -distanceY / pixelsPercm);
+            } else {
                 int width = mDstRect.width();
                 int height = mDstRect.height();
                 mScaledRect.left = (int) clamp(mScaledRect.left + distanceX, 0, mSrcRect.right - width);
                 mScaledRect.top = (int) clamp(mScaledRect.top + distanceY, 0, mSrcRect.bottom - height);
                 mScaledRect.right = mScaledRect.left + width;
                 mScaledRect.bottom = mScaledRect.top + height;
-            } else if(mState == State.ADD_BULLET) {
-
             }
-
-            invalidate();
-            return true;
-        }
-
-        private void zoomIn(MotionEvent event) {
-            mCenterX = event.getX();
-            mCenterY = event.getY();
-
-            int centerX = (int)((mCenterX / mDstRect.right) * mSrcRect.right);
-            int centerY = (int)((mCenterY / mDstRect.bottom) * mSrcRect.bottom);
-
-            int width = (int) ((mSrcRect.right - mSrcRect.left) / MAX_ZOOM_FACTOR);
-            int height = (int) ((mSrcRect.bottom - mSrcRect.top) / MAX_ZOOM_FACTOR);
-
-            mScaledRect.left = clamp(centerX - width / 2, 0, mSrcRect.right - width);
-            mScaledRect.top = clamp(centerY - height / 2, 0, mSrcRect.bottom - height);
-            mScaledRect.right = mScaledRect.left + mDstRect.width();
-            mScaledRect.bottom = mScaledRect.top + mDstRect.height();
-        }
-
-        private void zoomOut(MotionEvent event) {
-            mScaledRect.top = mDstRect.top;
-            mScaledRect.left = mDstRect.left;
-            mScaledRect.bottom = mDstRect.bottom;
-            mScaledRect.right = mDstRect.right;
-        }
-    };
-
-
-    private ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-
-        private int centerX;
-        private int centerY;
-
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            float x = detector.getFocusX();
-            float y = detector.getFocusY();
-
-            //centerX = (int)((x / mDstRect.right) * mSrcRect.right);
-            //centerY = (int)((y / mDstRect.bottom) * mSrcRect.bottom);
-
-            centerX = (int)((x / mDstRect.right) * mScaledRect.right);
-            centerY = (int)((y / mDstRect.bottom) * mScaledRect.bottom);
-
-            return true;
-        }
-
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            mScaleFactor *= detector.getScaleFactor();
-
-            mScaleFactor = Math.max(MIN_ZOOM_FACTOR, Math.min(mScaleFactor, MAX_ZOOM_FACTOR));
-            //Log.d(TAG, String.format("mScaleFactor: %.1f, (X/Y): %.1f %.1f", mScaleFactor, x, y));
-
-            int width = (int) ((mSrcRect.right - mSrcRect.left) / mScaleFactor);
-            int height = (int) ((mSrcRect.bottom - mSrcRect.top) / mScaleFactor);
-
-            mScaledRect.left = clamp(centerX - width / 2, 0, mSrcRect.right - width);
-            mScaledRect.top = clamp(centerY - height / 2, 0, mSrcRect.bottom - height);
-            mScaledRect.right = mScaledRect.left + width;
-            mScaledRect.bottom = mScaledRect.top + height;
-
-            Log.d(TAG, String.format("Aspect: %.2f, factor: %.2f", ((float) width) / height, mScaleFactor));
-            Log.d(TAG, String.format("%4d %4d %4d %4d", mScaledRect.left, mScaledRect.top, width, height));
-
-            invalidate();
-
-            return true;
         }
     };
 }

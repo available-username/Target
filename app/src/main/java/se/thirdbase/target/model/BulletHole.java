@@ -16,6 +16,12 @@ public class BulletHole {
         cmY = targetHeight * pixelY / viewHeight;
     }
 
+
+    public void move(float deltaX, float deltaY) {
+        cmX += deltaX;
+        cmY += deltaY;
+    }
+
     public PointF toPixelLocation(float pixelsPerCm) {
         return new PointF(cmX * pixelsPerCm, cmY * pixelsPerCm);
     }

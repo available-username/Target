@@ -31,7 +31,7 @@ public class TargetFragment extends BaseFragment {
     private static final int BUTTON_EDIT_IDX = 0;
     private static final int BUTTON_CANCEL_IDX = 0;
     private static final int BUTTON_ADD_IDX = 1;
-    private static final int BUTTON_COMMIT_IDX = 1;
+    private static final int BUTTON_COMMIT_IDX = 2;
     private static final int BUTTON_DELETE_IDX = 1;
     private static final int BUTTON_RELOCATE_IDX = 2;
     private static final int BUTTON_EDIT_BULLET0 = 1;
@@ -193,6 +193,7 @@ public class TargetFragment extends BaseFragment {
         testTransition(State.RELOCATE_BULLET);
         clearButtons();
         toggleButton(mCancelButton, R.drawable.cancel);
+        toggleButton(mDeleteButton, R.drawable.delete);
         toggleButton(mCommitButton, R.drawable.commit);
     }
 
