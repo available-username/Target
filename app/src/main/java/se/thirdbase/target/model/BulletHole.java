@@ -8,11 +8,11 @@ public class BulletHole {
     float cmY;
     float distanceFromBullseye;
 
+
     public BulletHole(BulletCaliber caliber, float cmX, float cmY) {
         this.caliber = caliber;
         this.cmX = cmX;
         this.cmY = cmY;
-        distanceFromBullseye = (float) Math.sqrt(cmX * cmX + cmY * cmY);
     }
 
     public BulletHole(BulletCaliber caliber, int pixelX, int pixelY, int viewWidth, int viewHeight, float targetWidth, float targetHeight) {
@@ -40,8 +40,18 @@ public class BulletHole {
         return cmY;
     }
 
-    public float getDistanceFromBullseye() {
-        return distanceFromBullseye;
+    public float getRadius(float width, float height) {
+        float x = (width / 2 - cmX);
+        float y = (height / 2 - cmY);
+
+        return (float) Math.sqrt(x * x + y * y);
+    }
+
+    public float getAngle(float width, float height) {
+        float x = (width / 2 - cmX);
+        float y = (height / 2 - cmY);
+
+        return (float) (Math.PI - Math.atan2(y, x));
     }
 
     public BulletCaliber getCaliber() {

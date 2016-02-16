@@ -181,7 +181,7 @@ public class TargetFragment extends BaseFragment {
         toggleButton(mSelectBullet4, R.drawable.five);
     }
 
-    private void onEnterEditBullet(int bulletIndex) {
+    private void onEnterEditBullet() {
         testTransition(State.EDIT_BULLET);
         clearButtons();
         toggleButton(mCancelButton, R.drawable.cancel);
@@ -215,6 +215,7 @@ public class TargetFragment extends BaseFragment {
                 case OVERVIEW:
                     if (v == mAddButton) {
                         Log.d(TAG, "mAddButton clicked");
+                        mTargetView.addBulletHole();
                         onEnterAddBullet();
                     } else if (v == mEditButton) {
                         Log.d(TAG, "mEditButton clicked");
@@ -248,24 +249,30 @@ public class TargetFragment extends BaseFragment {
                         onEnterOverview();
                     } else if (v == mSelectBullet0) {
                         Log.d(TAG, "mSelectBullet0 clicked");
-                        onEnterEditBullet(0);
+                        mTargetView.relocateBullet(0);
+                        onEnterEditBullet();
                     } else if (v == mSelectBullet1) {
                         Log.d(TAG, "mSelectBullet1 clicked");
-                        onEnterEditBullet(1);
+                        mTargetView.relocateBullet(1);
+                        onEnterEditBullet();
                     } else if (v == mSelectBullet2) {
                         Log.d(TAG, "mSelectBullet2 clicked");
-                        onEnterEditBullet(2);
+                        mTargetView.relocateBullet(2);
+                        onEnterEditBullet();
                     } else if (v == mSelectBullet3) {
                         Log.d(TAG, "mSelectBullet3 clicked");
-                        onEnterEditBullet(3);
+                        mTargetView.relocateBullet(3);
+                        onEnterEditBullet();
                     } else if (v == mSelectBullet4) {
                         Log.d(TAG, "mSelectBullet4 clicked");
-                        onEnterEditBullet(4);
+                        mTargetView.relocateBullet(4);
+                        onEnterEditBullet();
                     }
                     break;
                 case RELOCATE_BULLET:
                     if (v == mCommitButton) {
                         Log.d(TAG, "mCommitButton clicked");
+                        onCommitBullet();
                         onEnterOverview();
                     } else if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");

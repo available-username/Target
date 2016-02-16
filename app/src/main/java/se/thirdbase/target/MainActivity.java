@@ -22,8 +22,8 @@ public class MainActivity extends AppCompatActivity implements StateListener {
 
         mFragmentManager = getSupportFragmentManager();
 
-        Fragment fragment = TargetFragment.newInstance();
-        //Fragment fragment = StartupFragment.newInstance();
+        //Fragment fragment = TargetFragment.newInstance();
+        Fragment fragment = StartupFragment.newInstance();
         displayFragment(fragment, false);
     }
 

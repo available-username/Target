@@ -62,8 +62,9 @@ public class TargetView extends View {
 
     private static final float MIN_ZOOM_FACTOR = 1.0f;
     private static final float MAX_ZOOM_FACTOR = 5.0f;
-    private static final float VIRTUAL_WIDTH = 60.0f; //cm
     private static final int MAX_NBR_BULLETS = 5;
+    private static final float VIRTUAL_WIDTH = 60.0f; //cm
+    private static float VIRTUAL_HEIGHT;
 
     private float mPixelsPerCm;
     private float mZoomLevel = MIN_ZOOM_FACTOR;
@@ -295,6 +296,13 @@ public class TargetView extends View {
         }
     }
 
+    private boolean touches(float bulletRadius, float bulletDiameter, float radius) {
+        float upperBound = bulletRadius + bulletDiameter / 2;
+        float lowerBound = bulletRadius - bulletDiameter / 2;
+
+        return lowerBound <= radius && radius <= upperBound;
+    }
+
     private void drawTarget(Canvas canvas) {
         float pixelsPerCm = mZoomLevel * mPixelsPerCm;
 
@@ -316,11 +324,28 @@ public class TargetView extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.BLACK);
 
+        float bulletRadius = Float.MAX_VALUE;
+        float bulletDiameter = 0f;
         int ring;
+
+        if (mActiveBulletHole != null) {
+            bulletRadius = mActiveBulletHole.getRadius(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+            bulletDiameter = mActiveBulletHole.getCaliber().getDiameter();
+        }
+
         for (ring = 10; ring > 4; ring--) {
             float radius = ring * radiusIncrement;
+
+            if (touches(bulletRadius, bulletDiameter, radius)) {
+                paint.setColor(Color.RED);
+            } else {
+                paint.setColor(Color.BLACK);
+            }
+
             canvas.drawCircle(cx, cy, radius * pixelsPerCm, paint);
         }
+
+        paint.setColor(Color.BLACK);
 
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         canvas.drawCircle(cx, cy, ring * radiusIncrement * pixelsPerCm, paint);
@@ -328,10 +353,20 @@ public class TargetView extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.WHITE);
 
+
         for (; ring > 0; ring--) {
             float radius = ring * radiusIncrement;
+
+            if (touches(bulletRadius, bulletDiameter, radius)) {
+                paint.setColor(Color.RED);
+            } else {
+                paint.setColor(Color.WHITE);
+            }
+
             canvas.drawCircle(cx, cy, radius * pixelsPerCm, paint);
         }
+
+        paint.setColor(Color.WHITE);
 
         // finally, the inner ring
         canvas.drawCircle(cx, cy, 1.25f * pixelsPerCm, paint);
@@ -344,7 +379,6 @@ public class TargetView extends View {
 
         for (int i = 0; i < 4; i++) {
             double angle = i * Math.PI / 2;
-
 
             int num;
             for (num = 1; num < 10; num++) {
@@ -402,6 +436,9 @@ public class TargetView extends View {
         mDstRect = new Rect(0, 0, w, h);
 
         mPixelsPerCm = w / VIRTUAL_WIDTH;
+        VIRTUAL_HEIGHT = h / mPixelsPerCm;
+
+        Log.d(TAG, String.format("W/H %.2f %.2f", VIRTUAL_WIDTH, VIRTUAL_HEIGHT));
     }
 
     @Override
