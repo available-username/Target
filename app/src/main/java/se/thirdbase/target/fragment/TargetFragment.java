@@ -74,6 +74,7 @@ public class TargetFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.target_layout, container, false);
 
         mTargetView = (TargetView)view.findViewById(R.id.target_layout_target_view);
+        mTargetView.setActionListener(mActionListener);
 
         mButtons[0] = (ImageButton)view.findViewById(R.id.target_layout_button0);
         mButtons[1] = (ImageButton)view.findViewById(R.id.target_layout_button1);
@@ -287,6 +288,22 @@ public class TargetFragment extends BaseFragment {
                     onEnterOverview();
                     break;
             }
+        }
+    };
+
+    private TargetView.ActionListener mActionListener = new TargetView.ActionListener() {
+        @Override
+        public void onIdle() {
+            onEnterOverview();
+        }
+
+        @Override
+        public void onAdd() {
+            onEnterOverview();
+        }
+
+        @Override
+        public void onRelocate() {
         }
     };
 }
