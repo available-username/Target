@@ -149,6 +149,8 @@ public class TargetFragment extends BaseFragment {
             throw new IllegalStateException(String.format("Illegal transition: %s -> %s", mState, nextState));
         }
 
+        Log.d(TAG, String.format("%s -> %s", mState, nextState));
+
         mState = nextState;
     }
 
@@ -186,7 +188,7 @@ public class TargetFragment extends BaseFragment {
         clearButtons();
         toggleButton(mCancelButton, R.drawable.cancel);
         toggleButton(mDeleteButton, R.drawable.delete);
-        toggleButton(mRelocateButton, R.drawable.relocate);
+        toggleButton(mRelocateButton, R.drawable.commit);
     }
 
     private void onEnterRelocate() {
@@ -225,11 +227,11 @@ public class TargetFragment extends BaseFragment {
                 case ADD_BULLET:
                     if (v == mCommitButton) {
                         Log.d(TAG, "mCommitButton clicked");
-                        onEnterOverview();
+                        mTargetView.commitBullet();
                     } else if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
-                        onEnterOverview();
                     }
+                    onEnterOverview();
                     break;
                 case EDIT_BULLET:
                     if (v == mCancelButton) {
@@ -237,47 +239,52 @@ public class TargetFragment extends BaseFragment {
                         onEnterSelectBullet();
                     } else if (v == mDeleteButton) {
                         Log.d(TAG, "mDeleteButton clicked");
+                        mTargetView.removeBullet();
                         onEnterOverview();
                     } else if (v == mRelocateButton) {
                         Log.d(TAG, "mRelocateButton clicked");
-                        onEnterRelocate();
+                        mTargetView.commitBullet();
+                        onEnterOverview();
+                        //onEnterRelocate();
                     }
                     break;
                 case SELECT_BULLET:
                     if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
+                        mTargetView.cancelRelocation();
                         onEnterOverview();
-                    } else if (v == mSelectBullet0) {
-                        Log.d(TAG, "mSelectBullet0 clicked");
-                        mTargetView.relocateBullet(0);
-                        onEnterEditBullet();
-                    } else if (v == mSelectBullet1) {
-                        Log.d(TAG, "mSelectBullet1 clicked");
-                        mTargetView.relocateBullet(1);
-                        onEnterEditBullet();
-                    } else if (v == mSelectBullet2) {
-                        Log.d(TAG, "mSelectBullet2 clicked");
-                        mTargetView.relocateBullet(2);
-                        onEnterEditBullet();
-                    } else if (v == mSelectBullet3) {
-                        Log.d(TAG, "mSelectBullet3 clicked");
-                        mTargetView.relocateBullet(3);
-                        onEnterEditBullet();
-                    } else if (v == mSelectBullet4) {
-                        Log.d(TAG, "mSelectBullet4 clicked");
-                        mTargetView.relocateBullet(4);
+                    } else {
+                        if (v == mSelectBullet0) {
+                            Log.d(TAG, "mSelectBullet0 clicked");
+                            mTargetView.relocateBullet(0);
+                        } else if (v == mSelectBullet1) {
+                            Log.d(TAG, "mSelectBullet1 clicked");
+                            mTargetView.relocateBullet(1);
+                        } else if (v == mSelectBullet2) {
+                            Log.d(TAG, "mSelectBullet2 clicked");
+                            mTargetView.relocateBullet(2);
+                        } else if (v == mSelectBullet3) {
+                            Log.d(TAG, "mSelectBullet3 clicked");
+                            mTargetView.relocateBullet(3);
+                        } else if (v == mSelectBullet4) {
+                            Log.d(TAG, "mSelectBullet4 clicked");
+                            mTargetView.relocateBullet(4);
+                        }
+
                         onEnterEditBullet();
                     }
                     break;
                 case RELOCATE_BULLET:
-                    if (v == mCommitButton) {
-                        Log.d(TAG, "mCommitButton clicked");
-                        onCommitBullet();
-                        onEnterOverview();
-                    } else if (v == mCancelButton) {
+                    if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
-                        onEnterOverview();
+                    } else if (v == mDeleteButton) {
+                        Log.d(TAG, "mDeleteButton clicked");
+                        mTargetView.removeBullet();
+                    } else if (v == mCommitButton) {
+                        Log.d(TAG, "mCommitButton clicked");
+                        mTargetView.commitBullet();
                     }
+                    onEnterOverview();
                     break;
             }
         }

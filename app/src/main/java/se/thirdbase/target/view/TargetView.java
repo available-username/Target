@@ -78,6 +78,7 @@ public class TargetView extends View {
 
     private List<BulletHole> mBulletHoles = new ArrayList<>();
     private BulletHole mActiveBulletHole;
+    private int mActiveBulletIdx = Integer.MIN_VALUE;
 
     private ZoomChangeListener mZoomChangeListener;
     private ActionListener mActionListener;
@@ -163,32 +164,6 @@ public class TargetView extends View {
         mViewState = nextState;
     }
 
-    public void addBulletHole() {
-        addBulletHole(mScaledRect.right / 2, mScaledRect.bottom / 2);
-    }
-
-    public void addBulletHole(float x, float y) {
-        testTransition(ActionState.ADD);
-
-        if (mBulletHoles.size() == mMaxNbrBullets) {
-            throw new IllegalStateException("The maximum number of bullets has already been added");
-        }
-
-        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-
-        // Find out where we are in the source rectangle
-        x = mScaledRect.left + mScaledRect.width() * x / mDstRect.width();
-        y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
-
-        //BulletHole hole = new BulletHole(x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
-        //Log.d(TAG, String.format("Hole: %.2f %.2f", hole.x, hole.y));
-        //mBulletHoles.add(hole);
-
-        mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
-
-        invalidate();
-    }
-
     public void zoomIn() {
         zoomIn(mDstRect.width() / 2, mDstRect.height() / 2);
     }
@@ -239,6 +214,29 @@ public class TargetView extends View {
         }
     }
 
+    public void addBulletHole() {
+        addBulletHole(mScaledRect.width() / 2, mScaledRect.height() / 2);
+    }
+
+    public void addBulletHole(float x, float y) {
+        testTransition(ActionState.ADD);
+
+        if (mBulletHoles.size() == mMaxNbrBullets) {
+            throw new IllegalStateException("The maximum number of bullets has already been added");
+        }
+
+        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
+
+        // Find out where we are in the source rectangle
+        x = mScaledRect.left + mScaledRect.width() * x / mDstRect.width();
+        y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
+
+        mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
+
+        invalidate();
+        onAdd();
+    }
+
     public void relocateBullet(int bullet) {
         testTransition(ActionState.RELOCATE);
 
@@ -246,22 +244,70 @@ public class TargetView extends View {
             throw new IllegalStateException("Illegal bullet index");
         }
 
-        mActiveBulletHole = mBulletHoles.get(bullet);
-        mBulletHoles.set(bullet, null);
+        mActiveBulletIdx = bullet;
+        mActiveBulletHole = mBulletHoles.get(bullet).copy();
+        invalidate();
+        onRelocate();
     }
 
     public void cancelRelocation() {
         testTransition(ActionState.IDLE);
 
         mActiveBulletHole = null;
+        mActiveBulletIdx = Integer.MIN_VALUE;
+
+        invalidate();
+        onIdle();
+    }
+
+    public void removeBullet() {
+        testTransition(ActionState.IDLE);
+
+        if (mActiveBulletHole != null) {
+            mBulletHoles.remove(mActiveBulletIdx);
+
+            mActiveBulletIdx = Integer.MIN_VALUE;
+            mActiveBulletHole = null;
+        }
+
+        invalidate();
+        onIdle();
     }
 
     public void commitBullet() {
-        testTransition(ActionState.IDLE);
 
-        if (mActiveBulletHole != null && mBulletHoles.size() < mMaxNbrBullets) {
-            mBulletHoles.add(mActiveBulletHole);
-            mActiveBulletHole = null;
+        if (mActionState == ActionState.ADD) {
+            if (mActiveBulletHole != null && mBulletHoles.size() < mMaxNbrBullets) {
+                mBulletHoles.add(mActiveBulletHole);
+            }
+        } else if (mActionState == ActionState.RELOCATE) {
+            mBulletHoles.set(mActiveBulletIdx, mActiveBulletHole);
+            mActiveBulletIdx = Integer.MIN_VALUE;
+        }
+
+        mActiveBulletHole = null;
+
+        testTransition(ActionState.IDLE);
+        invalidate();
+
+        onIdle();
+    }
+
+    private void onIdle() {
+        if (mActionListener != null) {
+            mActionListener.onIdle();
+        }
+    }
+
+    private void onAdd() {
+        if (mActionListener != null) {
+            mActionListener.onAdd();
+        }
+    }
+
+    private void onRelocate() {
+        if (mActionListener != null) {
+            mActionListener.onRelocate();
         }
     }
 
@@ -290,9 +336,12 @@ public class TargetView extends View {
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-        for (BulletHole hole : mBulletHoles) {
-            PointF p = hole.toPixelLocation(pixelsPerCm);
-            canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
+        int size = mBulletHoles.size();
+        for (int i = 0; i < size; i++) {
+            if (i != mActiveBulletIdx) {
+                PointF p = mBulletHoles.get(i).toPixelLocation(pixelsPerCm);
+                canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
+            }
         }
     }
 
@@ -516,7 +565,6 @@ public class TargetView extends View {
             Log.d(TAG, "onSingleTapConfirmed");
 
             commitBullet();
-            invalidate();
 
             return true;
         }

@@ -6,7 +6,6 @@ public class BulletHole {
     final BulletCaliber caliber;
     float cmX;
     float cmY;
-    float distanceFromBullseye;
 
 
     public BulletHole(BulletCaliber caliber, float cmX, float cmY) {
@@ -15,17 +14,13 @@ public class BulletHole {
         this.cmY = cmY;
     }
 
-    public BulletHole(BulletCaliber caliber, int pixelX, int pixelY, int viewWidth, int viewHeight, float targetWidth, float targetHeight) {
-        this.caliber = caliber;
-        cmX = targetWidth * pixelX / viewWidth;
-        cmY = targetHeight * pixelY / viewHeight;
+    public BulletHole copy() {
+        return new BulletHole(caliber, cmX, cmY);
     }
-
 
     public void move(float deltaX, float deltaY) {
         cmX += deltaX;
         cmY += deltaY;
-        distanceFromBullseye = (float) Math.sqrt(cmX * cmX + cmY * cmY);
     }
 
     public PointF toPixelLocation(float pixelsPerCm) {
