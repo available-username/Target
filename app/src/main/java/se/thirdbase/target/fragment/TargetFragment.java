@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.view.TargetView;
@@ -177,11 +178,19 @@ public class TargetFragment extends BaseFragment {
         testTransition(State.SELECT_BULLET);
         clearButtons();
         toggleButton(mCancelButton, R.drawable.cancel);
-        toggleButton(mSelectBullet0, R.drawable.one);
-        toggleButton(mSelectBullet1, R.drawable.two);
-        toggleButton(mSelectBullet2, R.drawable.three);
-        toggleButton(mSelectBullet3, R.drawable.four);
-        toggleButton(mSelectBullet4, R.drawable.five);
+
+        switch (mTargetView.getNbrOfBullets()) {
+            case 5:
+                toggleButton(mSelectBullet4, R.drawable.five);
+            case 4:
+                toggleButton(mSelectBullet3, R.drawable.four);
+            case 3:
+                toggleButton(mSelectBullet2, R.drawable.three);
+            case 2:
+                toggleButton(mSelectBullet1, R.drawable.two);
+            case 1:
+                toggleButton(mSelectBullet0, R.drawable.one);
+        }
     }
 
     private void onEnterEditBullet() {
@@ -194,6 +203,7 @@ public class TargetFragment extends BaseFragment {
 
     private void onEnterRelocate() {
         testTransition(State.RELOCATE_BULLET);
+        //testTransition(State.EDIT_BULLET);
         clearButtons();
         toggleButton(mCancelButton, R.drawable.cancel);
         toggleButton(mDeleteButton, R.drawable.delete);
@@ -218,8 +228,15 @@ public class TargetFragment extends BaseFragment {
                 case OVERVIEW:
                     if (v == mAddButton) {
                         Log.d(TAG, "mAddButton clicked");
-                        mTargetView.addBulletHole();
-                        onEnterAddBullet();
+
+                        if (mTargetView.getNbrOfBullets() < 5) {
+                            mTargetView.addBulletHole();
+
+                            //Transition to ADD_BULLET will be performed when the callback is
+                            //received from the TargetView
+                        } else {
+                            Toast.makeText(getContext(), R.string.max_bullets_reached, Toast.LENGTH_SHORT).show();
+                        }
                     } else if (v == mEditButton) {
                         Log.d(TAG, "mEditButton clicked");
                         onEnterSelectBullet();
@@ -231,6 +248,7 @@ public class TargetFragment extends BaseFragment {
                         mTargetView.commitBullet();
                     } else if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
+                        mTargetView.cancelMove();
                     }
                     onEnterOverview();
                     break;
@@ -246,13 +264,12 @@ public class TargetFragment extends BaseFragment {
                         Log.d(TAG, "mRelocateButton clicked");
                         mTargetView.commitBullet();
                         onEnterOverview();
-                        //onEnterRelocate();
                     }
                     break;
                 case SELECT_BULLET:
                     if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
-                        mTargetView.cancelRelocation();
+                        mTargetView.cancelMove();
                         onEnterOverview();
                     } else {
                         if (v == mSelectBullet0) {
@@ -272,12 +289,14 @@ public class TargetFragment extends BaseFragment {
                             mTargetView.relocateBullet(4);
                         }
 
-                        onEnterEditBullet();
+                        //Transition to EDIT_BULLET will occur when
+                        //a callback from the TargetView is received
                     }
                     break;
                 case RELOCATE_BULLET:
                     if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
+                        mTargetView.cancelMove();
                     } else if (v == mDeleteButton) {
                         Log.d(TAG, "mDeleteButton clicked");
                         mTargetView.removeBullet();
@@ -299,11 +318,12 @@ public class TargetFragment extends BaseFragment {
 
         @Override
         public void onAdd() {
-            onEnterOverview();
+            onEnterAddBullet();
         }
 
         @Override
         public void onRelocate() {
+            onEnterEditBullet();
         }
     };
 }

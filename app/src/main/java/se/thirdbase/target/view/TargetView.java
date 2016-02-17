@@ -250,7 +250,7 @@ public class TargetView extends View {
         onRelocate();
     }
 
-    public void cancelRelocation() {
+    public void cancelMove() {
         testTransition(ActionState.IDLE);
 
         mActiveBulletHole = null;
@@ -291,6 +291,10 @@ public class TargetView extends View {
         invalidate();
 
         onIdle();
+    }
+
+    public int getNbrOfBullets() {
+        return mBulletHoles.size();
     }
 
     private void onIdle() {
@@ -580,7 +584,7 @@ public class TargetView extends View {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             Log.d(TAG, "onFling");
-            cancelRelocation();
+            cancelMove();
 
             return true;
         }
