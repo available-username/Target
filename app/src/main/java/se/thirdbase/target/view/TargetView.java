@@ -297,6 +297,25 @@ public class TargetView extends View {
         return mBulletHoles.size();
     }
 
+    public int getBulletScore(int bulletIdx) {
+        BulletHole hole = mBulletHoles.get(bulletIdx);
+        float diameter = hole.getCaliber().getDiameter();
+        float radius = hole.getRadius(VIRTUAL_WIDTH, VIRTUAL_HEIGHT) - diameter / 2;
+
+        return (int)Math.ceil(10 - radius / 2.5f);
+    }
+
+    public int getTotalScore() {
+        int total = 0;
+        int size = mBulletHoles.size();
+
+        for (int i = 0; i < size; i++) {
+            total += getBulletScore(i);
+        }
+
+        return total;
+    }
+
     private void onIdle() {
         if (mActionListener != null) {
             mActionListener.onIdle();

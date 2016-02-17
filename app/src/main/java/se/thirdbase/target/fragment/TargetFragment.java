@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import se.thirdbase.target.R;
@@ -41,8 +42,10 @@ public class TargetFragment extends BaseFragment {
     private static final int BUTTON_EDIT_BULLET3 = 4;
     private static final int BUTTON_EDIT_BULLET4 = 5;
 
-
     private static final String BUNDLE_TAG_STATE = "BUNDLE_TAG_STATE";
+
+    private TextView mCountText;
+    private TextView mScoreText;
 
     private ImageButton[] mButtons = new ImageButton[NBR_BUTTONS];
     private ImageButton mEditButton;
@@ -73,6 +76,9 @@ public class TargetFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.target_layout, container, false);
+
+        mCountText = (TextView)view.findViewById(R.id.target_layout_nbr_bullets);
+        mScoreText = (TextView)view.findViewById(R.id.target_layout_score);
 
         mTargetView = (TargetView)view.findViewById(R.id.target_layout_target_view);
         mTargetView.setActionListener(mActionListener);
@@ -160,7 +166,17 @@ public class TargetFragment extends BaseFragment {
         testTransition(State.OVERVIEW);
         clearButtons();
         toggleButton(mEditButton, R.drawable.edit);
-        toggleButton(mAddButton, R.drawable.add);
+
+        int nbrBullets = mTargetView.getNbrOfBullets();
+
+        if (nbrBullets < 5) {
+            toggleButton(mAddButton, R.drawable.add);
+        }
+
+        int score = mTargetView.getTotalScore();
+
+        mCountText.setText("" + nbrBullets);
+        mScoreText.setText("" + score);
     }
 
     private void onEnterAddBullet() {
@@ -255,6 +271,7 @@ public class TargetFragment extends BaseFragment {
                 case EDIT_BULLET:
                     if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
+                        mTargetView.cancelMove();
                         onEnterSelectBullet();
                     } else if (v == mDeleteButton) {
                         Log.d(TAG, "mDeleteButton clicked");
