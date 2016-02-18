@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -13,7 +15,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
@@ -76,7 +77,7 @@ public class TargetView extends View {
     private ViewState mViewState = ViewState.OVERVIEW;
     private GestureDetector mGestureDetector;
 
-    private List<BulletHole> mBulletHoles = new ArrayList<>();
+    private ArrayList<BulletHole> mBulletHoles = new ArrayList<>();
     private BulletHole mActiveBulletHole;
     private int mActiveBulletIdx = Integer.MIN_VALUE;
 
@@ -90,6 +91,8 @@ public class TargetView extends View {
 
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
+
+        setSaveEnabled(true);
     }
 
     public TargetView(Context context) {
@@ -104,6 +107,59 @@ public class TargetView extends View {
 
     public void setActionListener(ActionListener listener) {
         mActionListener = listener;
+    }
+
+    private static final String BUNDLE_TAG_SUPER_PARCEL = "BUNDLE_TAG_SUPER_PARCEL";
+    private static final String BUNDLE_TAG_PIXELS_PER_CM = "BUNDLE_TAG_PIXELS_PER_CM";
+    private static final String BUNDLE_TAG_ZOOM_LEVEL = "BUNDLE_TAG_ZOOM_LEVEL";
+    private static final String BUNDLE_TAG_SRC_RECT = "BUNDLE_TAG_SRC_RECT";
+    private static final String BUNDLE_TAG_DST_RECT = "BUNDLE_TAG_DST_RECT";
+    private static final String BUNDLE_TAG_SCALED_RECT = "BUNDLE_TAG_SCALED_RECT";
+    private static final String BUNDLE_TAG_ACTION_STATE = "BUNDLE_TAG_ACTION_STATE";
+    private static final String BUNDLE_TAG_VIEW_STATE = "BUNDLE_TAG_VIEW_STATE";
+    private static final String BUNDLE_TAG_BULLET_HOLES = "BUNDLE_TAG_BULLET_HOLES";
+    private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE = "BUNDLE_TAG_ACTIVE_BULLET_HOLE";
+    private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX = "BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX";
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable parcel = super.onSaveInstanceState();
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BUNDLE_TAG_SUPER_PARCEL, parcel);
+        bundle.putFloat(BUNDLE_TAG_PIXELS_PER_CM, mPixelsPerCm);
+        bundle.putFloat(BUNDLE_TAG_ZOOM_LEVEL, mZoomLevel);
+        bundle.putParcelable(BUNDLE_TAG_SRC_RECT, mSrcRect);
+        bundle.putParcelable(BUNDLE_TAG_DST_RECT, mDstRect);
+        bundle.putParcelable(BUNDLE_TAG_SCALED_RECT, mScaledRect);
+        bundle.putSerializable(BUNDLE_TAG_ACTION_STATE, mActionState);
+        bundle.putSerializable(BUNDLE_TAG_VIEW_STATE, mViewState);
+        bundle.putParcelableArrayList(BUNDLE_TAG_BULLET_HOLES, mBulletHoles);
+        bundle.putParcelable(BUNDLE_TAG_ACTIVE_BULLET_HOLE, mActiveBulletHole);
+        bundle.putInt(BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX, mActiveBulletIdx);
+
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable parcel) {
+        Bundle bundle = (Bundle)parcel;
+        Parcelable superParcel = bundle.getBundle(BUNDLE_TAG_SUPER_PARCEL);
+
+        super.onRestoreInstanceState(superParcel);
+
+        mPixelsPerCm = bundle.getFloat(BUNDLE_TAG_PIXELS_PER_CM);
+        mZoomLevel = bundle.getFloat(BUNDLE_TAG_ZOOM_LEVEL);
+        mSrcRect = bundle.getParcelable(BUNDLE_TAG_SRC_RECT);
+        mDstRect = bundle.getParcelable(BUNDLE_TAG_DST_RECT);
+        mScaledRect = bundle.getParcelable(BUNDLE_TAG_SCALED_RECT);
+        mActionState = (ActionState)bundle.getSerializable(BUNDLE_TAG_ACTION_STATE);
+        mViewState = (ViewState) bundle.getSerializable(BUNDLE_TAG_VIEW_STATE);
+        mBulletHoles = bundle.getParcelableArrayList(BUNDLE_TAG_BULLET_HOLES);
+        mActiveBulletHole = bundle.getParcelable(BUNDLE_TAG_ACTIVE_BULLET_HOLE);
+        mActiveBulletIdx = bundle.getInt(BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX);
+
+        invalidate();
     }
 
     @Override
@@ -216,6 +272,7 @@ public class TargetView extends View {
 
     public void addBulletHole() {
         addBulletHole(mScaledRect.width() / 2, mScaledRect.height() / 2);
+        //addBulletHole(getWidth() / 2, getHeight() / 2);
     }
 
     public void addBulletHole(float x, float y) {
@@ -231,7 +288,15 @@ public class TargetView extends View {
         x = mScaledRect.left + mScaledRect.width() * x / mDstRect.width();
         y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
 
-        mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
+        float xOffset = VIRTUAL_WIDTH / 2 - x / zoomedPixelsPerCm;
+        float yOffset = VIRTUAL_HEIGHT / 2 - y / zoomedPixelsPerCm;
+        float radius = (float)Math.sqrt(xOffset * xOffset + yOffset * yOffset);
+        float angle = (float)(Math.PI - Math.atan2(yOffset, xOffset));
+
+        Log.d(TAG, String.format("Radius: %.2f Angle: %.2f", radius, angle));
+
+        //mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
+        mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, radius, angle);
 
         invalidate();
         onAdd();
@@ -300,8 +365,9 @@ public class TargetView extends View {
     public int getBulletScore(int bulletIdx) {
         BulletHole hole = mBulletHoles.get(bulletIdx);
         float diameter = hole.getCaliber().getDiameter();
-        float radius = hole.getRadius(VIRTUAL_WIDTH, VIRTUAL_HEIGHT) - diameter / 2;
+        float radius = Math.abs(hole.getRadius(VIRTUAL_WIDTH, VIRTUAL_HEIGHT) - diameter / 2);
 
+        Log.d(TAG, "Radius: " + radius);
         return (int)Math.ceil(10 - radius / 2.5f);
     }
 
@@ -344,7 +410,12 @@ public class TargetView extends View {
             paint.setColor(Color.RED);
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-            PointF p = mActiveBulletHole.toPixelLocation(pixelsPerCm);
+            PointF p = mActiveBulletHole.toCartesianCoordinates();
+
+            p.x += VIRTUAL_WIDTH / 2;
+            p.y += VIRTUAL_HEIGHT / 2;
+            p.x *= pixelsPerCm;
+            p.y *= pixelsPerCm;
 
             canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
         }
@@ -362,7 +433,12 @@ public class TargetView extends View {
         int size = mBulletHoles.size();
         for (int i = 0; i < size; i++) {
             if (i != mActiveBulletIdx) {
-                PointF p = mBulletHoles.get(i).toPixelLocation(pixelsPerCm);
+                PointF p = mBulletHoles.get(i).toCartesianCoordinates();
+                p.x += VIRTUAL_WIDTH / 2;
+                p.y += VIRTUAL_HEIGHT / 2;
+                p.x *= pixelsPerCm;
+                p.y *= pixelsPerCm;
+
                 canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
             }
         }

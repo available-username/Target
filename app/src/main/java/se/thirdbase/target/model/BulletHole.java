@@ -1,55 +1,84 @@
 package se.thirdbase.target.model;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PointF;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class BulletHole {
-    final BulletCaliber caliber;
-    float cmX;
-    float cmY;
+public class BulletHole implements Parcelable {
+    final BulletCaliber mCaliber;
+    float radius;
+    float angle;
 
+    public static BulletHole newInstance(SQLiteDatabase db, int id) {
+        return null;
+    }
 
-    public BulletHole(BulletCaliber caliber, float cmX, float cmY) {
-        this.caliber = caliber;
-        this.cmX = cmX;
-        this.cmY = cmY;
+    public BulletHole(BulletCaliber caliber, float radius, float angle) {
+        this.mCaliber = caliber;
+        this.radius = radius;
+        this.angle = angle;
+    }
+
+    protected BulletHole(Parcel in) {
+        mCaliber = (BulletCaliber) in.readSerializable();
+        radius = in.readFloat();
+        angle = in.readFloat();
     }
 
     public BulletHole copy() {
-        return new BulletHole(caliber, cmX, cmY);
+        return new BulletHole(mCaliber, radius, angle);
     }
 
     public void move(float deltaX, float deltaY) {
-        cmX += deltaX;
-        cmY += deltaY;
+        float x = (float) (radius * Math.cos(angle)) + deltaX;
+        float y = (float) (radius * Math.sin(angle)) + deltaY;
+
+        radius = (float) Math.sqrt(x * x + y * y);
+        angle = (float) Math.atan2(y, x);
     }
 
-    public PointF toPixelLocation(float pixelsPerCm) {
-        return new PointF(cmX * pixelsPerCm, cmY * pixelsPerCm);
+    public PointF toCartesianCoordinates() {
+        float x = (float) (radius * Math.cos(angle));
+        float y = (float) (radius * Math.sin(angle));
+
+        return new PointF(x, y);
     }
 
-    public float getCmX() {
-        return cmX;
-    }
-
-    public float getCmY() {
-        return cmY;
-    }
 
     public float getRadius(float width, float height) {
-        float x = (width / 2 - cmX);
-        float y = (height / 2 - cmY);
-
-        return (float) Math.sqrt(x * x + y * y);
+        return radius;
     }
 
     public float getAngle(float width, float height) {
-        float x = (width / 2 - cmX);
-        float y = (height / 2 - cmY);
-
-        return (float) (Math.PI - Math.atan2(y, x));
+        return angle;
     }
 
     public BulletCaliber getCaliber() {
-        return caliber;
+        return mCaliber;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeSerializable(mCaliber);
+        dest.writeFloat(radius);
+        dest.writeFloat(angle);
+    }
+
+    public static final Creator<BulletHole> CREATOR = new Creator<BulletHole>() {
+        @Override
+        public BulletHole createFromParcel(Parcel in) {
+            return new BulletHole(in);
+        }
+
+        @Override
+        public BulletHole[] newArray(int size) {
+            return new BulletHole[size];
+        }
+    };
 }

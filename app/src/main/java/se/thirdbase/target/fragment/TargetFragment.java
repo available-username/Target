@@ -11,7 +11,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import se.thirdbase.target.R;
+import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.view.TargetView;
 
 /**
@@ -121,9 +124,14 @@ public class TargetFragment extends BaseFragment {
         super.onResume();
     }
 
+    private static final String BUNDLE_TAG_BULLET_HOLES = "BUNDLE_TAG_BULLET_HOLES";
+    private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE = "BUNDLE_TAG_ACTIVE_BULLET_HOLE";
+    private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX = "BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX";
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
         outState.putSerializable(BUNDLE_TAG_STATE, mState);
     }
 

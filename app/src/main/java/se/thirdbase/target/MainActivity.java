@@ -5,11 +5,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.FrameLayout;
 
 import se.thirdbase.target.fragment.StartupFragment;
 import se.thirdbase.target.fragment.TargetFragment;
-import se.thirdbase.target.view.TargetView;
 
 public class MainActivity extends AppCompatActivity implements StateListener {
 
@@ -22,9 +20,10 @@ public class MainActivity extends AppCompatActivity implements StateListener {
 
         mFragmentManager = getSupportFragmentManager();
 
-        //Fragment fragment = TargetFragment.newInstance();
-        Fragment fragment = StartupFragment.newInstance();
-        displayFragment(fragment, false);
+        if (savedInstanceState == null) {
+            Fragment fragment = StartupFragment.newInstance();
+            displayFragment(fragment, false);
+        }
     }
 
     private void displayFragment(Fragment fragment, boolean addToBackStack) {
