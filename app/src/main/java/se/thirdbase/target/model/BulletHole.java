@@ -1,5 +1,6 @@
 package se.thirdbase.target.model;
 
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PointF;
 import android.os.Parcel;
@@ -9,10 +10,6 @@ public class BulletHole implements Parcelable {
     final BulletCaliber mCaliber;
     float radius;
     float angle;
-
-    public static BulletHole newInstance(SQLiteDatabase db, int id) {
-        return null;
-    }
 
     public BulletHole(BulletCaliber caliber, float radius, float angle) {
         this.mCaliber = caliber;
@@ -46,11 +43,11 @@ public class BulletHole implements Parcelable {
     }
 
 
-    public float getRadius(float width, float height) {
+    public float getRadius() {
         return radius;
     }
 
-    public float getAngle(float width, float height) {
+    public float getAngle() {
         return angle;
     }
 

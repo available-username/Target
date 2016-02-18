@@ -7,11 +7,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.BulletHole;
@@ -49,6 +50,7 @@ public class TargetFragment extends BaseFragment {
 
     private TextView mCountText;
     private TextView mScoreText;
+    private Button mSaveButton;
 
     private ImageButton[] mButtons = new ImageButton[NBR_BUTTONS];
     private ImageButton mEditButton;
@@ -85,6 +87,8 @@ public class TargetFragment extends BaseFragment {
 
         mTargetView = (TargetView)view.findViewById(R.id.target_layout_target_view);
         mTargetView.setActionListener(mActionListener);
+
+        mSaveButton = (Button)view.findViewById(R.id.target_layout_save_button);
 
         mButtons[0] = (ImageButton)view.findViewById(R.id.target_layout_button0);
         mButtons[1] = (ImageButton)view.findViewById(R.id.target_layout_button1);
@@ -349,6 +353,16 @@ public class TargetFragment extends BaseFragment {
         @Override
         public void onRelocate() {
             onEnterEditBullet();
+        }
+    };
+
+    private View.OnClickListener mOnSaveClickedListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            List<BulletHole> bulletHoleList = mTargetView.getBulletHoles();
+
+            for (BulletHole hole : bulletHoleList) {
+            }
         }
     };
 }

@@ -15,6 +15,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
@@ -258,6 +260,10 @@ public class TargetView extends View {
         onZoomOut();
     }
 
+    public List<BulletHole> getBulletHoles() {
+        return Collections.unmodifiableList(mBulletHoles);
+    }
+
     private void onZoomIn() {
         if (mZoomChangeListener != null) {
             mZoomChangeListener.onZoomIn();
@@ -365,7 +371,7 @@ public class TargetView extends View {
     public int getBulletScore(int bulletIdx) {
         BulletHole hole = mBulletHoles.get(bulletIdx);
         float diameter = hole.getCaliber().getDiameter();
-        float radius = Math.abs(hole.getRadius(VIRTUAL_WIDTH, VIRTUAL_HEIGHT) - diameter / 2);
+        float radius = Math.abs(hole.getRadius() - diameter / 2);
 
         Log.d(TAG, "Radius: " + radius);
         return (int)Math.ceil(10 - radius / 2.5f);
@@ -477,7 +483,7 @@ public class TargetView extends View {
         int ring;
 
         if (mActiveBulletHole != null) {
-            bulletRadius = mActiveBulletHole.getRadius(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+            bulletRadius = mActiveBulletHole.getRadius();
             bulletDiameter = mActiveBulletHole.getCaliber().getDiameter();
         }
 
