@@ -16,6 +16,7 @@ import java.util.List;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.BulletHole;
+import se.thirdbase.target.model.PrecisionSeries;
 import se.thirdbase.target.view.TargetView;
 
 /**
@@ -89,6 +90,7 @@ public class TargetFragment extends BaseFragment {
         mTargetView.setActionListener(mActionListener);
 
         mSaveButton = (Button)view.findViewById(R.id.target_layout_save_button);
+        mSaveButton.setOnClickListener(mOnSaveClickedListener);
 
         mButtons[0] = (ImageButton)view.findViewById(R.id.target_layout_button0);
         mButtons[1] = (ImageButton)view.findViewById(R.id.target_layout_button1);
@@ -361,8 +363,9 @@ public class TargetFragment extends BaseFragment {
         public void onClick(View v) {
             List<BulletHole> bulletHoleList = mTargetView.getBulletHoles();
 
-            for (BulletHole hole : bulletHoleList) {
-            }
+            PrecisionSeries precisionSeries = new PrecisionSeries(bulletHoleList);
+
+            onPrecisionSeriesComplete(precisionSeries);
         }
     };
 }

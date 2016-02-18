@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 
 import se.thirdbase.target.StateListener;
+import se.thirdbase.target.model.PrecisionRound;
+import se.thirdbase.target.model.PrecisionSeries;
 
 /**
  * Created by alexp on 2/12/16.
@@ -21,19 +23,31 @@ abstract class BaseFragment extends Fragment {
         }
     }
 
-    public void onStartup() {
+    protected void onStartup() {
         if (mListener != null) {
             mListener.onStartup();
         }
     }
 
-    public void onPrecision() {
+    protected void onPrecision() {
         if (mListener != null) {
             mListener.onPrecision();
         }
     }
 
-    public void onStatistics() {
+    protected void onPrecisionSeriesComplete(PrecisionSeries precisionSeries) {
+        if (mListener != null) {
+            mListener.onPrecisionSeriesComplete(precisionSeries);
+        }
+    }
+
+    protected void onPrecisionRoundComplete(PrecisionRound precisionRound) {
+        if (mListener != null) {
+            mListener.onPrecisionRoundComplete(precisionRound);
+        }
+    }
+
+    protected void onStatistics() {
         if (mListener != null) {
             mListener.onStatistics();
         }

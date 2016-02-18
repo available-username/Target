@@ -47,18 +47,17 @@ public final class PrecisionSeriesContract {
 
     public static PrecisionSeries retrievePrecisionSeries(SQLiteDatabase db, int id) {
         String[] columns = {
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_1,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_SCORE
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_1,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_5
         };
 
         Cursor cursor = db.query(
                 PrecisionSeriesContract.TABLE_NAME,
                 columns,
-                PrecisionSeriesContract.PrecisionSeriesEntry._ID + "=?",
+                PrecisionSeriesEntry._ID + "=?",
                 new String[]{"" + id},
                 null,  // groupBy
                 null,  // having
@@ -68,7 +67,7 @@ public final class PrecisionSeriesContract {
         List<BulletHole> bulletHoles = new ArrayList<>();
 
         // -1 since the last columns is the score column
-        for (int i = 0; i < columns.length - 1; i++) {
+        for (int i = 0; i < columns.length; i++) {
 
             int bulletHoleId = cursor.getInt(cursor.getColumnIndex(columns[i]));
             BulletHole bulletHole = BulletHoleContract.retrieveBulletHole(db, bulletHoleId);
@@ -89,11 +88,11 @@ public final class PrecisionSeriesContract {
 
         ContentValues values = new ContentValues();
         String[] columns = {
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_1,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
-                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_1,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_5,
         };
 
         int size = bulletHoles.size();
@@ -101,7 +100,7 @@ public final class PrecisionSeriesContract {
             values.put(columns[i], ids.get(i));
         }
 
-        values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_SCORE, precisionSeries.getScore());
+        values.put(PrecisionSeriesEntry.COLUMN_NAME_SCORE, precisionSeries.getScore());
 
         return db.insert(PrecisionSeriesContract.TABLE_NAME, null, values);
     }

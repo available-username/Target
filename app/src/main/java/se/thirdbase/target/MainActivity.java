@@ -6,8 +6,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import se.thirdbase.target.fragment.PrecisionRoundFragment;
 import se.thirdbase.target.fragment.StartupFragment;
 import se.thirdbase.target.fragment.TargetFragment;
+import se.thirdbase.target.model.PrecisionRound;
+import se.thirdbase.target.model.PrecisionSeries;
 
 public class MainActivity extends AppCompatActivity implements StateListener {
 
@@ -44,10 +47,31 @@ public class MainActivity extends AppCompatActivity implements StateListener {
         displayFragment(fragment, true);
     }
 
+    private PrecisionRound mPrecisionRound;
+
     @Override
     public void onPrecision() {
         Fragment fragment = TargetFragment.newInstance();
+
         displayFragment(fragment, true);
+    }
+
+    @Override
+    public void onPrecisionSeriesComplete(PrecisionSeries precisionSeries) {
+        if (mPrecisionRound == null) {
+            mPrecisionRound = new PrecisionRound();
+        }
+
+        mPrecisionRound.addPrecisionSeries(precisionSeries);
+
+        Fragment fragment = PrecisionRoundFragment.newInstance(mPrecisionRound);
+
+        displayFragment(fragment, true);
+    }
+
+    @Override
+    public void onPrecisionRoundComplete(PrecisionRound precisionRound) {
+        mPrecisionRound = null;
     }
 
     @Override

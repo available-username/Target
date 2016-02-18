@@ -1,7 +1,5 @@
 package se.thirdbase.target.model;
 
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PointF;
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -20,7 +20,7 @@ public class PrecisionDBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(BulletHoleContract.SQL_CREATE_BULLET_HOLE);
         db.execSQL(PrecisionSeriesContract.SQL_CREATE_SERIES);
-        db.execSQL(PrecisionContract.SQL_CREATE_PRECISION);
+        db.execSQL(PrecisionRoundContract.SQL_CREATE_PRECISION);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class PrecisionDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(PrecisionContract.SQL_DROP_PRECISION);
+        db.execSQL(PrecisionRoundContract.SQL_DROP_PRECISION);
         db.execSQL(PrecisionSeriesContract.SQL_DROP_SERIES);
         db.execSQL(BulletHoleContract.SQL_DROP_BULLET_HOLE);
     }

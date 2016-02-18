@@ -1,22 +1,15 @@
 package se.thirdbase.target.model;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-
-import se.thirdbase.target.db.BulletHoleContract;
-import se.thirdbase.target.db.PrecisionContract;
-import se.thirdbase.target.db.PrecisionDBHelper;
-import se.thirdbase.target.db.PrecisionSeriesContract;
 
 /**
  * Created by alexp on 2/17/16.
  */
-public class PrecisionSeries {
+public class PrecisionSeries implements Parcelable {
 
     private static final float RING_RADIUS_INCREMENT = 2.5f;
 
@@ -31,6 +24,23 @@ public class PrecisionSeries {
         mBulletHoles = bulletHoles;
         mScore = calculateScore(bulletHoles);
     }
+
+    protected PrecisionSeries(Parcel in) {
+        mBulletHoles = in.createTypedArrayList(BulletHole.CREATOR);
+        mScore = in.readInt();
+    }
+
+    public static final Creator<PrecisionSeries> CREATOR = new Creator<PrecisionSeries>() {
+        @Override
+        public PrecisionSeries createFromParcel(Parcel in) {
+            return new PrecisionSeries(in);
+        }
+
+        @Override
+        public PrecisionSeries[] newArray(int size) {
+            return new PrecisionSeries[size];
+        }
+    };
 
     public void addBulletHole(BulletHole bulletHole) {
         mBulletHoles.add(bulletHole);
@@ -65,6 +75,17 @@ public class PrecisionSeries {
 
     public int getScore() {
         return mScore;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(mBulletHoles);
+        dest.writeInt(mScore);
     }
 }
 
