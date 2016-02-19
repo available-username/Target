@@ -11,6 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.List;
+
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
@@ -27,6 +29,10 @@ public class PrecisionRoundFragment extends BaseFragment {
 
     private ListView mSeriesList;
     private PrecisionRound mPrecisionRound;
+
+    public static PrecisionRoundFragment newInstance() {
+        return newInstance(new PrecisionRound());
+    }
 
     public static PrecisionRoundFragment newInstance(PrecisionRound precisionRound) {
         Bundle arguments = new Bundle();
@@ -99,9 +105,10 @@ public class PrecisionRoundFragment extends BaseFragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Log.d(TAG, String.format("Position: %d", position));
 
-            if (position == mPrecisionRound.getPrecisionSeries().size()) {
-                onPrecision();
-            }
+            List<PrecisionSeries> precisionSeries = mPrecisionRound.getPrecisionSeries();
+            PrecisionSeries series = position == precisionSeries.size() ? null : precisionSeries.get(position);
+
+            onUpdatePrecisionSeries(series);
         }
     };
 }

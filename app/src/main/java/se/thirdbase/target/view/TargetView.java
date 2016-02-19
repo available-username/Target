@@ -295,7 +295,8 @@ public class TargetView extends View {
         y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
 
         float xOffset = VIRTUAL_WIDTH / 2 - x / zoomedPixelsPerCm;
-        float yOffset = VIRTUAL_HEIGHT / 2 - y / zoomedPixelsPerCm;
+        //float yOffset = VIRTUAL_HEIGHT / 2 - y / zoomedPixelsPerCm;
+        float yOffset = y / zoomedPixelsPerCm - VIRTUAL_HEIGHT / 2;
         float radius = (float)Math.sqrt(xOffset * xOffset + yOffset * yOffset);
         float angle = (float)(Math.PI - Math.atan2(yOffset, xOffset));
 
@@ -306,6 +307,12 @@ public class TargetView extends View {
 
         invalidate();
         onAdd();
+    }
+
+    public void setBulletHoles(List<BulletHole> bulletHoles) {
+        mBulletHoles = new ArrayList<>();
+        mBulletHoles.addAll(bulletHoles);
+        invalidate();
     }
 
     public void relocateBullet(int bullet) {
@@ -505,7 +512,7 @@ public class TargetView extends View {
         canvas.drawCircle(cx, cy, ring * radiusIncrement * pixelsPerCm, paint);
 
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.WHITE);
+        //paint.setColor(Color.WHITE);
 
 
         for (; ring > 0; ring--) {
@@ -514,7 +521,11 @@ public class TargetView extends View {
             if (touches(bulletRadius, bulletDiameter, radius)) {
                 paint.setColor(Color.RED);
             } else {
-                paint.setColor(Color.WHITE);
+                if (ring == 4) {
+                    paint.setColor(Color.BLACK);
+                } else {
+                    paint.setColor(Color.WHITE);
+                }
             }
 
             canvas.drawCircle(cx, cy, radius * pixelsPerCm, paint);

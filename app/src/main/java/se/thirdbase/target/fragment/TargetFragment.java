@@ -48,6 +48,7 @@ public class TargetFragment extends BaseFragment {
     private static final int BUTTON_EDIT_BULLET4 = 5;
 
     private static final String BUNDLE_TAG_STATE = "BUNDLE_TAG_STATE";
+    private static final String BUNDLE_TAG_PRECISION_SERIES = "BUNDLE_TAG_PRECISION_SERIES";
 
     private TextView mCountText;
     private TextView mScoreText;
@@ -68,14 +69,39 @@ public class TargetFragment extends BaseFragment {
 
     private TargetView mTargetView;
     private State mState = State.OVERVIEW;
+    private PrecisionSeries mPrecisionSeries;
+
 
     public static TargetFragment newInstance() {
-        return new TargetFragment();
+        return newInstance(null);
+    }
+
+    public static TargetFragment newInstance(PrecisionSeries precisionSeries) {
+
+        TargetFragment fragment = new TargetFragment();
+
+        if (precisionSeries != null) {
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(BUNDLE_TAG_PRECISION_SERIES, precisionSeries);
+
+            Log.d(TAG, "New instance with arguments");
+            fragment.setArguments(arguments);
+        } else {
+            Log.d(TAG, "Regular instance");
+        }
+
+        return fragment;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        Bundle arguments = getArguments();
+
+        if (arguments != null) {
+            mPrecisionSeries = arguments.getParcelable(BUNDLE_TAG_PRECISION_SERIES);
+        }
     }
 
     @Nullable
@@ -88,6 +114,14 @@ public class TargetFragment extends BaseFragment {
 
         mTargetView = (TargetView)view.findViewById(R.id.target_layout_target_view);
         mTargetView.setActionListener(mActionListener);
+
+        if(mPrecisionSeries != null) {
+            List<BulletHole> bulletHoles = mPrecisionSeries.getBulletHoles();
+            mTargetView.setBulletHoles(bulletHoles);
+        }
+
+        mCountText.setText("" + mTargetView.getNbrOfBullets());
+        mScoreText.setText("" + mTargetView.getTotalScore());
 
         mSaveButton = (Button)view.findViewById(R.id.target_layout_save_button);
         mSaveButton.setOnClickListener(mOnSaveClickedListener);
@@ -363,9 +397,13 @@ public class TargetFragment extends BaseFragment {
         public void onClick(View v) {
             List<BulletHole> bulletHoleList = mTargetView.getBulletHoles();
 
-            PrecisionSeries precisionSeries = new PrecisionSeries(bulletHoleList);
-
-            onPrecisionSeriesComplete(precisionSeries);
+            if (mPrecisionSeries == null) {
+                PrecisionSeries precisionSeries = new PrecisionSeries(bulletHoleList);
+                onPrecisionSeriesComplete(precisionSeries);
+            } else {
+                mPrecisionSeries.setBulletHoles(bulletHoleList);
+                onPrecisionSeriesUpdated();
+            }
         }
     };
 }

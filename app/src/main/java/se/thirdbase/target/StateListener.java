@@ -12,6 +12,10 @@ public interface StateListener {
 
     void onPrecision();
 
+    void onUpdatePrecisionSeries(PrecisionSeries precisionSeries);
+
+    void onPrecisionSeriesUpdated();
+
     void onPrecisionSeriesComplete(PrecisionSeries precisionSeries);
 
     void onPrecisionRoundComplete(PrecisionRound precisionRound);
