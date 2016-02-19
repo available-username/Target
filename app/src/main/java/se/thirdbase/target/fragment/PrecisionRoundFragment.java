@@ -20,7 +20,7 @@ import se.thirdbase.target.model.PrecisionSeries;
 /**
  * Created by alexp on 2/17/16.
  */
-public class PrecisionRoundFragment extends BaseFragment {
+public class PrecisionRoundFragment extends PrecisionBaseFragment {
 
     private static final String TAG = PrecisionRoundFragment.class.getSimpleName();
 

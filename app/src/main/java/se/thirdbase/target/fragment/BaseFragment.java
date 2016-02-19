@@ -34,31 +34,7 @@ abstract class BaseFragment extends Fragment {
             mListener.onPrecision();
         }
     }
-
-    protected void onUpdatePrecisionSeries(PrecisionSeries precisionSeries) {
-        if (mListener != null) {
-            mListener.onUpdatePrecisionSeries(precisionSeries);
-        }
-    }
-
-    protected void onPrecisionSeriesUpdated() {
-        if (mListener != null) {
-            mListener.onPrecisionSeriesUpdated();
-        }
-    }
-
-    protected void onPrecisionSeriesComplete(PrecisionSeries precisionSeries) {
-        if (mListener != null) {
-            mListener.onPrecisionSeriesComplete(precisionSeries);
-        }
-    }
-
-    protected void onPrecisionRoundComplete(PrecisionRound precisionRound) {
-        if (mListener != null) {
-            mListener.onPrecisionRoundComplete(precisionRound);
-        }
-    }
-
+    
     protected void onStatistics() {
         if (mListener != null) {
             mListener.onStatistics();

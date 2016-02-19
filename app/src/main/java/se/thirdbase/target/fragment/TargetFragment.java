@@ -22,7 +22,7 @@ import se.thirdbase.target.view.TargetView;
 /**
  * Created by alexp on 2/12/16.
  */
-public class TargetFragment extends BaseFragment {
+public class TargetFragment extends PrecisionBaseFragment {
 
     private static final String TAG = TargetFragment.class.getSimpleName();
 
