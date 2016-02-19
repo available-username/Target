@@ -107,7 +107,7 @@ public class TargetFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.target_layout, container, false);
+        View view = inflater.inflate(R.layout.precision_target_layout, container, false);
 
         mCountText = (TextView)view.findViewById(R.id.target_layout_nbr_bullets);
         mScoreText = (TextView)view.findViewById(R.id.target_layout_score);
@@ -120,7 +120,7 @@ public class TargetFragment extends BaseFragment {
             mTargetView.setBulletHoles(bulletHoles);
         }
 
-        mCountText.setText("" + mTargetView.getNbrOfBullets());
+        mCountText.setText("" + mTargetView.getNbrOfBulletsHoles());
         mScoreText.setText("" + mTargetView.getTotalScore());
 
         mSaveButton = (Button)view.findViewById(R.id.target_layout_save_button);
@@ -215,7 +215,7 @@ public class TargetFragment extends BaseFragment {
         clearButtons();
         toggleButton(mEditButton, R.drawable.edit);
 
-        int nbrBullets = mTargetView.getNbrOfBullets();
+        int nbrBullets = mTargetView.getNbrOfBulletsHoles();
 
         if (nbrBullets < 5) {
             toggleButton(mAddButton, R.drawable.add);
@@ -243,7 +243,7 @@ public class TargetFragment extends BaseFragment {
         clearButtons();
         toggleButton(mCancelButton, R.drawable.cancel);
 
-        switch (mTargetView.getNbrOfBullets()) {
+        switch (mTargetView.getNbrOfBulletsHoles()) {
             case 5:
                 toggleButton(mSelectBullet4, R.drawable.five);
             case 4:
@@ -293,8 +293,8 @@ public class TargetFragment extends BaseFragment {
                     if (v == mAddButton) {
                         Log.d(TAG, "mAddButton clicked");
 
-                        if (mTargetView.getNbrOfBullets() < 5) {
-                            mTargetView.addBulletHole();
+                        if (mTargetView.getNbrOfBulletsHoles() < 5) {
+                            mTargetView.addBullet();
 
                             //Transition to ADD_BULLET will be performed when the callback is
                             //received from the TargetView
@@ -312,14 +312,14 @@ public class TargetFragment extends BaseFragment {
                         mTargetView.commitBullet();
                     } else if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
-                        mTargetView.cancelMove();
+                        mTargetView.cancelMoveBullet();
                     }
                     onEnterOverview();
                     break;
                 case EDIT_BULLET:
                     if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
-                        mTargetView.cancelMove();
+                        mTargetView.cancelMoveBullet();
                         onEnterSelectBullet();
                     } else if (v == mDeleteButton) {
                         Log.d(TAG, "mDeleteButton clicked");
@@ -334,7 +334,7 @@ public class TargetFragment extends BaseFragment {
                 case SELECT_BULLET:
                     if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
-                        mTargetView.cancelMove();
+                        mTargetView.cancelMoveBullet();
                         onEnterOverview();
                     } else {
                         if (v == mSelectBullet0) {
@@ -361,7 +361,7 @@ public class TargetFragment extends BaseFragment {
                 case RELOCATE_BULLET:
                     if (v == mCancelButton) {
                         Log.d(TAG, "mCancelButton clicked");
-                        mTargetView.cancelMove();
+                        mTargetView.cancelMoveBullet();
                     } else if (v == mDeleteButton) {
                         Log.d(TAG, "mDeleteButton clicked");
                         mTargetView.removeBullet();

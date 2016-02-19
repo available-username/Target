@@ -24,7 +24,7 @@ import se.thirdbase.target.model.BulletHole;
 /**
  * Created by alexp on 2/8/16.
  */
-public class TargetView extends View {
+public abstract class TargetView extends View {
 
     public interface ZoomChangeListener {
         void onZoomIn();
@@ -71,15 +71,15 @@ public class TargetView extends View {
 
     private float mPixelsPerCm;
     private float mZoomLevel = MIN_ZOOM_FACTOR;
-    private Rect mSrcRect;
-    private Rect mDstRect;
-    private Rect mScaledRect;
+    private Rect mSrcRect = new Rect();
+    private Rect mDstRect = new Rect();
+    private Rect mScaledRect = new Rect();
 
     private ActionState mActionState = ActionState.IDLE;
     private ViewState mViewState = ViewState.OVERVIEW;
     private GestureDetector mGestureDetector;
 
-    private ArrayList<BulletHole> mBulletHoles = new ArrayList<>();
+    protected ArrayList<BulletHole> mBulletHoles = new ArrayList<>();
     private BulletHole mActiveBulletHole;
     private int mActiveBulletIdx = Integer.MIN_VALUE;
 
@@ -260,10 +260,6 @@ public class TargetView extends View {
         onZoomOut();
     }
 
-    public List<BulletHole> getBulletHoles() {
-        return Collections.unmodifiableList(mBulletHoles);
-    }
-
     private void onZoomIn() {
         if (mZoomChangeListener != null) {
             mZoomChangeListener.onZoomIn();
@@ -276,15 +272,16 @@ public class TargetView extends View {
         }
     }
 
-    public void addBulletHole() {
-        addBulletHole(mScaledRect.width() / 2, mScaledRect.height() / 2);
-        //addBulletHole(getWidth() / 2, getHeight() / 2);
+    public void addBullet() {
+        addBullet(mScaledRect.width() / 2, mScaledRect.height() / 2);
     }
 
-    public void addBulletHole(float x, float y) {
+    public abstract int getMaxNbrBullets();
+
+    public void addBullet(float x, float y) {
         testTransition(ActionState.ADD);
 
-        if (mBulletHoles.size() == mMaxNbrBullets) {
+        if (mBulletHoles.size() == getMaxNbrBullets()) {
             throw new IllegalStateException("The maximum number of bullets has already been added");
         }
 
@@ -295,18 +292,28 @@ public class TargetView extends View {
         y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
 
         float xOffset = VIRTUAL_WIDTH / 2 - x / zoomedPixelsPerCm;
-        //float yOffset = VIRTUAL_HEIGHT / 2 - y / zoomedPixelsPerCm;
         float yOffset = y / zoomedPixelsPerCm - VIRTUAL_HEIGHT / 2;
         float radius = (float)Math.sqrt(xOffset * xOffset + yOffset * yOffset);
         float angle = (float)(Math.PI - Math.atan2(yOffset, xOffset));
 
         Log.d(TAG, String.format("Radius: %.2f Angle: %.2f", radius, angle));
 
-        //mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, x / zoomedPixelsPerCm, y / zoomedPixelsPerCm);
         mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, radius, angle);
 
         invalidate();
         onAdd();
+    }
+
+    public int getNbrOfBulletsHoles() {
+        return mBulletHoles.size();
+    }
+
+    public List<BulletHole> getBulletHoles() {
+        return Collections.unmodifiableList(mBulletHoles);
+    }
+
+    protected BulletHole getActiveBulletHole() {
+        return mActiveBulletHole;
     }
 
     public void setBulletHoles(List<BulletHole> bulletHoles) {
@@ -328,7 +335,7 @@ public class TargetView extends View {
         onRelocate();
     }
 
-    public void cancelMove() {
+    public void cancelMoveBullet() {
         testTransition(ActionState.IDLE);
 
         mActiveBulletHole = null;
@@ -371,29 +378,9 @@ public class TargetView extends View {
         onIdle();
     }
 
-    public int getNbrOfBullets() {
-        return mBulletHoles.size();
-    }
+    public abstract int getBulletScore(int bulletIdx);
 
-    public int getBulletScore(int bulletIdx) {
-        BulletHole hole = mBulletHoles.get(bulletIdx);
-        float diameter = hole.getCaliber().getDiameter();
-        float radius = Math.abs(hole.getRadius() - diameter / 2);
-
-        Log.d(TAG, "Radius: " + radius);
-        return (int)Math.ceil(10 - radius / 2.5f);
-    }
-
-    public int getTotalScore() {
-        int total = 0;
-        int size = mBulletHoles.size();
-
-        for (int i = 0; i < size; i++) {
-            total += getBulletScore(i);
-        }
-
-        return total;
-    }
+    public abstract int getTotalScore();
 
     private void onIdle() {
         if (mActionListener != null) {
@@ -413,32 +400,32 @@ public class TargetView extends View {
         }
     }
 
-    private void drawActiveBullet(Canvas canvas) {
-        if (mActiveBulletHole != null) {
-            float pixelsPerCm = mZoomLevel * mPixelsPerCm;
-            float bulletDiameter = CM_PER_INCH * 0.22f * pixelsPerCm;
-            float radius = bulletDiameter / 2;
+    protected float getZoomLevel() {
+        return mZoomLevel;
+    }
 
+    protected float getPixelsPerCm() {
+        return mPixelsPerCm;
+    }
+
+    protected PointF getCenterPixelCoordinate() {
+        PointF center = new PointF();
+        center.x = mScaledRect.width() * mZoomLevel / 2 - mScaledRect.left;
+        center.y = mScaledRect.height() * mZoomLevel  / 2 - mScaledRect.top;
+
+        return center;
+    }
+
+    protected void drawActiveBullet(Canvas canvas) {
+        if (mActiveBulletHole != null) {
             Paint paint = new Paint();
             paint.setColor(Color.RED);
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
-
-            PointF p = mActiveBulletHole.toCartesianCoordinates();
-
-            p.x += VIRTUAL_WIDTH / 2;
-            p.y += VIRTUAL_HEIGHT / 2;
-            p.x *= pixelsPerCm;
-            p.y *= pixelsPerCm;
-
-            canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
+            drawBullet(canvas, paint, mActiveBulletHole);
         }
     }
 
-    private void drawBullets(Canvas canvas) {
-        float pixelsPerCm = mZoomLevel * mPixelsPerCm;
-        float bulletDiameter = CM_PER_INCH * 0.22f * pixelsPerCm;
-        float radius = bulletDiameter / 2;
-
+    protected void drawBullets(Canvas canvas) {
         Paint paint = new Paint();
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -446,146 +433,26 @@ public class TargetView extends View {
         int size = mBulletHoles.size();
         for (int i = 0; i < size; i++) {
             if (i != mActiveBulletIdx) {
-                PointF p = mBulletHoles.get(i).toCartesianCoordinates();
-                p.x += VIRTUAL_WIDTH / 2;
-                p.y += VIRTUAL_HEIGHT / 2;
-                p.x *= pixelsPerCm;
-                p.y *= pixelsPerCm;
-
-                canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
+                drawBullet(canvas, paint, mBulletHoles.get(i));
             }
         }
     }
 
-    private boolean touches(float bulletRadius, float bulletDiameter, float radius) {
-        float upperBound = bulletRadius + bulletDiameter / 2;
-        float lowerBound = bulletRadius - bulletDiameter / 2;
-
-        return lowerBound <= radius && radius <= upperBound;
-    }
-
-    private void drawTarget(Canvas canvas) {
+    protected void drawBullet(Canvas canvas, Paint paint, BulletHole bulletHole) {
         float pixelsPerCm = mZoomLevel * mPixelsPerCm;
+        float bulletDiameter = bulletHole.getCaliber().getDiameter() * pixelsPerCm;
+        float radius = bulletDiameter / 2;
 
-        float radiusIncrement = 2.5f; // cm
-        float textSize = pixelsPerCm * radiusIncrement * 0.75f;
-        float textHeightOffset = textSize / 2;
-        float textWidthOffset = (pixelsPerCm * radiusIncrement) / 2;
+        PointF p = bulletHole.toCartesianCoordinates();
+        p.x += VIRTUAL_WIDTH / 2;
+        p.y += VIRTUAL_HEIGHT / 2;
+        p.x *= pixelsPerCm;
+        p.y *= pixelsPerCm;
 
-        float cx = mScaledRect.width() * mZoomLevel / 2 - mScaledRect.left;
-        float cy = mScaledRect.height() * mZoomLevel  / 2 - mScaledRect.top;
-
-        Paint paint = new Paint();
-        paint.setColor(Color.GREEN);
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        canvas.drawColor(Color.WHITE);
-
-        paint.setAntiAlias(true);
-        paint.setStrokeWidth(2);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.BLACK);
-
-        float bulletRadius = Float.MAX_VALUE;
-        float bulletDiameter = 0f;
-        int ring;
-
-        if (mActiveBulletHole != null) {
-            bulletRadius = mActiveBulletHole.getRadius();
-            bulletDiameter = mActiveBulletHole.getCaliber().getDiameter();
-        }
-
-        for (ring = 10; ring > 4; ring--) {
-            float radius = ring * radiusIncrement;
-
-            if (touches(bulletRadius, bulletDiameter, radius)) {
-                paint.setColor(Color.RED);
-            } else {
-                paint.setColor(Color.BLACK);
-            }
-
-            canvas.drawCircle(cx, cy, radius * pixelsPerCm, paint);
-        }
-
-        paint.setColor(Color.BLACK);
-
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        canvas.drawCircle(cx, cy, ring * radiusIncrement * pixelsPerCm, paint);
-
-        paint.setStyle(Paint.Style.STROKE);
-        //paint.setColor(Color.WHITE);
-
-
-        for (; ring > 0; ring--) {
-            float radius = ring * radiusIncrement;
-
-            if (touches(bulletRadius, bulletDiameter, radius)) {
-                paint.setColor(Color.RED);
-            } else {
-                if (ring == 4) {
-                    paint.setColor(Color.BLACK);
-                } else {
-                    paint.setColor(Color.WHITE);
-                }
-            }
-
-            canvas.drawCircle(cx, cy, radius * pixelsPerCm, paint);
-        }
-
-        paint.setColor(Color.WHITE);
-
-        // finally, the inner ring
-        canvas.drawCircle(cx, cy, 1.25f * pixelsPerCm, paint);
-
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        paint.setStrokeWidth(1);
-        paint.setFakeBoldText(true);
-        paint.setTextSize(textSize);
-        paint.setTextAlign(Paint.Align.CENTER);
-
-        for (int i = 0; i < 4; i++) {
-            double angle = i * Math.PI / 2;
-
-            int num;
-            for (num = 1; num < 10; num++) {
-                int color;
-
-                if (num < 4) {
-                    color = Color.WHITE;
-                } else {
-                    color = Color.BLACK;
-                }
-
-                paint.setColor(color);
-
-                float r = pixelsPerCm * radiusIncrement * num;
-                float x = cx + (float) (r * Math.cos(angle));
-                float y = cy + (float) (r * Math.sin(angle));
-
-                switch (i) {
-                    case 0:
-                        paint.setTextAlign(Paint.Align.CENTER);
-                        x += textWidthOffset;
-                        y += textHeightOffset / 2;
-                        break;
-                    case 1:
-                        paint.setTextAlign(Paint.Align.CENTER);
-                        y += textHeightOffset * 2;
-                        break;
-                    case 2:
-                        paint.setTextAlign(Paint.Align.CENTER);
-                        x -= textWidthOffset;
-                        y += textHeightOffset / 2;
-                        break;
-                    case 3:
-                        paint.setTextAlign(Paint.Align.CENTER);
-                        y -= textHeightOffset;
-                        break;
-                }
-
-                canvas.drawText("" + (10 - num), x, y, paint);
-            }
-        }
+        canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
     }
+
+    protected abstract void drawTarget(Canvas canvas);
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -667,7 +534,7 @@ public class TargetView extends View {
 
             switch (mActionState) {
                 case IDLE:
-                    addBulletHole(event.getX(), event.getY());
+                    addBullet(event.getX(), event.getY());
                     break;
                 case ADD:
                     break;
@@ -687,7 +554,7 @@ public class TargetView extends View {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            updateTarget(e2.getX(), e2.getY(), distanceX, distanceY);
+            updateTarget(distanceX, distanceY);
 
             invalidate();
             return true;
@@ -696,12 +563,12 @@ public class TargetView extends View {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             Log.d(TAG, "onFling");
-            cancelMove();
+            cancelMoveBullet();
 
             return true;
         }
 
-        private void updateTarget(float pointerX, float pointerY, float distanceX, float distanceY) {
+        private void updateTarget(float distanceX, float distanceY) {
 
             if (mActiveBulletHole != null) {
                 float pixelsPercm = mZoomLevel * mPixelsPerCm;
