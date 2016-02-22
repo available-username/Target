@@ -65,8 +65,8 @@ public abstract class TargetView extends View {
     private static final float MIN_ZOOM_FACTOR = 1.0f;
     private static final float MAX_ZOOM_FACTOR = 5.0f;
 
-    private static final int VIRTUAL_WIDTH = 60; //cm
-    private static int VIRTUAL_HEIGHT;
+    private static final float VIRTUAL_WIDTH = 60f; //cm
+    private static float VIRTUAL_HEIGHT;
 
     protected ViewMath mViewMath;
 
@@ -206,9 +206,12 @@ public abstract class TargetView extends View {
     }
 
     public void zoomIn() {
-        Rect dstRect = mViewMath.getDstRect();
+        testTransition(ViewState.ZOOM);
 
-        zoomIn(dstRect.width() / 2, dstRect.height() / 2);
+        mViewMath.zoomIn();
+
+        invalidate();
+        onZoomIn();
     }
 
     public void zoomIn(float x, float y) {
@@ -243,7 +246,6 @@ public abstract class TargetView extends View {
 
     public void addBullet() {
         Rect scaledRect = mViewMath.getScaledRect();
-
         addBullet(scaledRect.width() / 2, scaledRect.height() / 2);
     }
 
@@ -257,6 +259,13 @@ public abstract class TargetView extends View {
         }
 
         PointF p = mViewMath.translateCoordinate(x, y);
+        Log.d(TAG, String.format("Add bullet: %s", p));
+        //p.x = mRealWidth / 2 - pixelX / zoomedPixelsPerCm;
+        //p.y = pixelY / zoomedPixelsPerCm - mRealHeight / 2;
+
+        float pixelsPerCm = mViewMath.getPixelsPerCm();
+        p.x = VIRTUAL_WIDTH / 2 - p.x / pixelsPerCm;
+        p.y = p.y / pixelsPerCm - VIRTUAL_HEIGHT / 2;
 
         float radius = (float)Math.sqrt(p.x * p.x + p.y * p.y);
         float angle = (float)(Math.PI - Math.atan2(p.y, p.x));
@@ -400,6 +409,7 @@ public abstract class TargetView extends View {
         float bulletDiameter = bulletHole.getCaliber().getDiameter() * pixelsPerCm;
         float radius = bulletDiameter / 2;
 
+        // Bullet coordinates unit is centimeters
         PointF p = bulletHole.toCartesianCoordinates();
         p.x += VIRTUAL_WIDTH / 2;
         p.y += VIRTUAL_HEIGHT / 2;
@@ -420,7 +430,7 @@ public abstract class TargetView extends View {
         Log.d(TAG, String.format("onSizeChanged(%d, %d, %d, %d)", w, h, oldw, oldh));
 
         float pixelsPerCm = w / VIRTUAL_WIDTH;
-        VIRTUAL_HEIGHT = (int)(h / pixelsPerCm);
+        VIRTUAL_HEIGHT = h / pixelsPerCm;
 
         mViewMath = new ViewMath(w, h, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, MAX_ZOOM_FACTOR);
     }

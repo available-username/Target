@@ -1,12 +1,16 @@
 package se.thirdbase.target.util;
 
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.util.Log;
 
 /**
  * Created by alexp on 2/22/16.
  */
 public class ViewMath {
+
+    private static final String TAG = ViewMath.class.getSimpleName();
 
     private float MIN_ZOOM_FACTOR = 1.0f;
 
@@ -29,7 +33,7 @@ public class ViewMath {
         return Math.max(min, Math.min(max, val));
     }
 
-    public ViewMath(int viewWidth, int viewHeight, int realWidth, int realHeight, float maxZoomFactor) {
+    public ViewMath(int viewWidth, int viewHeight, float realWidth, float realHeight, float maxZoomFactor) {
         mMaxZoomFactor = maxZoomFactor;
         mRealWidth = realWidth;
         mRealHeight = realHeight;
@@ -41,7 +45,11 @@ public class ViewMath {
         mScaledRect = new Rect(0, 0, viewWidth, viewHeight);
         mDstRect = new Rect(0, 0, viewWidth, viewHeight);
 
-        mPixelsPerCm = viewWidth / realWidth;
+        mPixelsPerCm = ((float)viewWidth) / realWidth;
+    }
+
+    public void zoomIn() {
+        zoomIn(mDstRect.width() / 2, mDstRect.height() / 2);
     }
 
     public void zoomIn(float pixelX, float pixelY) {
@@ -68,22 +76,26 @@ public class ViewMath {
         mZoomLevel = MIN_ZOOM_FACTOR;
     }
 
+    /**
+     * Translate from screen coordinates to source coordinates.
+     *
+     * @param pixelX screen x coordinate
+     * @param pixelY screen y coordnate
+     * @return a PointF representing the translation
+     */
     public PointF translateCoordinate(float pixelX, float pixelY) {
-        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
-
         // Find out where we are in the source rectangle
         pixelX = mScaledRect.left + mScaledRect.width() * pixelX / mDstRect.width();
         pixelY = mScaledRect.top + mScaledRect.height() * pixelY / mDstRect.height();
 
-        PointF point = new PointF();
-        point.x = mRealWidth / 2 - pixelX / zoomedPixelsPerCm;
-        point.y = pixelY / zoomedPixelsPerCm - mRealHeight / 2;
+        Log.d(TAG, "mScaledRect: " + mScaledRect.toShortString());
 
-        return point;
+        return new PointF(pixelX, pixelY);
     }
 
     public PointF getCenterPixelCoordinate() {
         PointF center = new PointF();
+
         center.x = mScaledRect.width() * mZoomLevel / 2 - mScaledRect.left;
         center.y = mScaledRect.height() * mZoomLevel / 2 - mScaledRect.top;
 
