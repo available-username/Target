@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class PrecisionRound implements Parcelable {
 
+    public static final int MAX_NBR_SERIES = 1;
+
     private List<PrecisionSeries> mPrecisionSeries;
     private int mScore;
     private String mNotes;
@@ -68,6 +70,10 @@ public class PrecisionRound implements Parcelable {
 
     public int getScore() {
         return mScore;
+    }
+
+    public int getNbrSeries() {
+        return mPrecisionSeries.size();
     }
 
     private int calculateScore(List<PrecisionSeries> precisionSeries) {

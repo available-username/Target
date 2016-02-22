@@ -14,7 +14,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String TAG = BaseActivity.class.getSimpleName();
 
-    protected FragmentManager mFragmentManager;
+    private FragmentManager mFragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +36,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
 
         transaction.commit();
+    }
+
+    protected void popBackStack() {
+        mFragmentManager.popBackStack();
     }
 
     private FragmentManager.OnBackStackChangedListener mBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {

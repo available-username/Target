@@ -24,7 +24,6 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
 
     private static final String TAG = PrecisionRoundFragment.class.getSimpleName();
 
-    private static final int MAX_NBR_SERIES = 9;
     private static final String BUNDLE_TAG_PRECISION_ROUND = "BUNDLE_TAG_PRECISION_ROUND";
 
     private ListView mSeriesList;
@@ -68,7 +67,7 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
 
         int nPrecisionSeries = mPrecisionRound.getPrecisionSeries().size();
 
-        boolean limitReached = nPrecisionSeries == MAX_NBR_SERIES;
+        boolean limitReached = nPrecisionSeries == PrecisionRound.MAX_NBR_SERIES;
 
         String[] seriesNames = new String[nPrecisionSeries + (limitReached ? 0 : 1)];
 
