@@ -65,15 +65,16 @@ public class PrecisionTargetView extends TargetView {
 
     @Override
     protected void drawTarget(Canvas canvas) {
-        float zoomLevel = getZoomLevel();
-        float pixelsPerCm = zoomLevel * getPixelsPerCm();
+        //float zoomLevel = getZoomLevel();
+        //float pixelsPerCm = zoomLevel * getPixelsPerCm();
+        float pixelsPerCm = mViewMath.getPixelsPerCm();
 
         float radiusIncrement = 2.5f; // cm
         float textSize = pixelsPerCm * radiusIncrement * 0.75f;
         float textHeightOffset = textSize / 2;
         float textWidthOffset = (pixelsPerCm * radiusIncrement) / 2;
 
-        PointF center = getCenterPixelCoordinate();
+        PointF center = mViewMath.getCenterPixelCoordinate();
 
         Paint paint = new Paint();
         paint.setColor(Color.GREEN);

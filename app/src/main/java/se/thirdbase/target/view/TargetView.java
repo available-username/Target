@@ -20,6 +20,7 @@ import java.util.List;
 
 import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
+import se.thirdbase.target.util.ViewMath;
 
 /**
  * Created by alexp on 2/8/16.
@@ -42,8 +43,6 @@ public abstract class TargetView extends View {
 
     private static final String TAG = TargetView.class.getSimpleName();
 
-    private static final float CM_PER_INCH = 2.54f;
-
     private static int clamp(int val, int min, int max) {
         return Math.max(min, Math.min(max, val));
     }
@@ -65,15 +64,11 @@ public abstract class TargetView extends View {
 
     private static final float MIN_ZOOM_FACTOR = 1.0f;
     private static final float MAX_ZOOM_FACTOR = 5.0f;
-    private static final int MAX_NBR_BULLETS = 5;
-    private static final float VIRTUAL_WIDTH = 60.0f; //cm
-    private static float VIRTUAL_HEIGHT;
 
-    private float mPixelsPerCm;
-    private float mZoomLevel = MIN_ZOOM_FACTOR;
-    private Rect mSrcRect = new Rect();
-    private Rect mDstRect = new Rect();
-    private Rect mScaledRect = new Rect();
+    private static final int VIRTUAL_WIDTH = 60; //cm
+    private static int VIRTUAL_HEIGHT;
+
+    protected ViewMath mViewMath;
 
     private ActionState mActionState = ActionState.IDLE;
     private ViewState mViewState = ViewState.OVERVIEW;
@@ -85,8 +80,6 @@ public abstract class TargetView extends View {
 
     private ZoomChangeListener mZoomChangeListener;
     private ActionListener mActionListener;
-
-    private int mMaxNbrBullets = MAX_NBR_BULLETS;
 
     public TargetView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -129,11 +122,6 @@ public abstract class TargetView extends View {
 
         Bundle bundle = new Bundle();
         bundle.putParcelable(BUNDLE_TAG_SUPER_PARCEL, parcel);
-        bundle.putFloat(BUNDLE_TAG_PIXELS_PER_CM, mPixelsPerCm);
-        bundle.putFloat(BUNDLE_TAG_ZOOM_LEVEL, mZoomLevel);
-        bundle.putParcelable(BUNDLE_TAG_SRC_RECT, mSrcRect);
-        bundle.putParcelable(BUNDLE_TAG_DST_RECT, mDstRect);
-        bundle.putParcelable(BUNDLE_TAG_SCALED_RECT, mScaledRect);
         bundle.putSerializable(BUNDLE_TAG_ACTION_STATE, mActionState);
         bundle.putSerializable(BUNDLE_TAG_VIEW_STATE, mViewState);
         bundle.putParcelableArrayList(BUNDLE_TAG_BULLET_HOLES, mBulletHoles);
@@ -150,11 +138,6 @@ public abstract class TargetView extends View {
 
         super.onRestoreInstanceState(superParcel);
 
-        mPixelsPerCm = bundle.getFloat(BUNDLE_TAG_PIXELS_PER_CM);
-        mZoomLevel = bundle.getFloat(BUNDLE_TAG_ZOOM_LEVEL);
-        mSrcRect = bundle.getParcelable(BUNDLE_TAG_SRC_RECT);
-        mDstRect = bundle.getParcelable(BUNDLE_TAG_DST_RECT);
-        mScaledRect = bundle.getParcelable(BUNDLE_TAG_SCALED_RECT);
         mActionState = (ActionState)bundle.getSerializable(BUNDLE_TAG_ACTION_STATE);
         mViewState = (ViewState) bundle.getSerializable(BUNDLE_TAG_VIEW_STATE);
         mBulletHoles = bundle.getParcelableArrayList(BUNDLE_TAG_BULLET_HOLES);
@@ -223,24 +206,15 @@ public abstract class TargetView extends View {
     }
 
     public void zoomIn() {
-        zoomIn(mDstRect.width() / 2, mDstRect.height() / 2);
+        Rect dstRect = mViewMath.getDstRect();
+
+        zoomIn(dstRect.width() / 2, dstRect.height() / 2);
     }
 
     public void zoomIn(float x, float y) {
         testTransition(ViewState.ZOOM);
 
-        int centerX = (int)((x / mDstRect.right) * mSrcRect.right);
-        int centerY = (int)((y / mDstRect.bottom) * mSrcRect.bottom);
-
-        int width = (int) ((mSrcRect.right - mSrcRect.left) / MAX_ZOOM_FACTOR);
-        int height = (int) ((mSrcRect.bottom - mSrcRect.top) / MAX_ZOOM_FACTOR);
-
-        mScaledRect.left = clamp(centerX - width / 2, 0, mSrcRect.right - width);
-        mScaledRect.top = clamp(centerY - height / 2, 0, mSrcRect.bottom - height);
-        mScaledRect.right = mScaledRect.left + mDstRect.width();
-        mScaledRect.bottom = mScaledRect.top + mDstRect.height();
-
-        mZoomLevel = MAX_ZOOM_FACTOR;
+        mViewMath.zoomIn(x, y);
 
         invalidate();
         onZoomIn();
@@ -249,12 +223,7 @@ public abstract class TargetView extends View {
     public void zoomOut() {
         testTransition(ViewState.OVERVIEW);
 
-        mScaledRect.top = mDstRect.top;
-        mScaledRect.left = mDstRect.left;
-        mScaledRect.bottom = mDstRect.bottom;
-        mScaledRect.right = mDstRect.right;
-
-        mZoomLevel = MIN_ZOOM_FACTOR;
+        mViewMath.zoomOut();
 
         invalidate();
         onZoomOut();
@@ -273,7 +242,9 @@ public abstract class TargetView extends View {
     }
 
     public void addBullet() {
-        addBullet(mScaledRect.width() / 2, mScaledRect.height() / 2);
+        Rect scaledRect = mViewMath.getScaledRect();
+
+        addBullet(scaledRect.width() / 2, scaledRect.height() / 2);
     }
 
     public abstract int getMaxNbrBullets();
@@ -285,16 +256,10 @@ public abstract class TargetView extends View {
             throw new IllegalStateException("The maximum number of bullets has already been added");
         }
 
-        float zoomedPixelsPerCm = mZoomLevel * mPixelsPerCm;
+        PointF p = mViewMath.translateCoordinate(x, y);
 
-        // Find out where we are in the source rectangle
-        x = mScaledRect.left + mScaledRect.width() * x / mDstRect.width();
-        y = mScaledRect.top + mScaledRect.height() * y / mDstRect.height();
-
-        float xOffset = VIRTUAL_WIDTH / 2 - x / zoomedPixelsPerCm;
-        float yOffset = y / zoomedPixelsPerCm - VIRTUAL_HEIGHT / 2;
-        float radius = (float)Math.sqrt(xOffset * xOffset + yOffset * yOffset);
-        float angle = (float)(Math.PI - Math.atan2(yOffset, xOffset));
+        float radius = (float)Math.sqrt(p.x * p.x + p.y * p.y);
+        float angle = (float)(Math.PI - Math.atan2(p.y, p.x));
 
         Log.d(TAG, String.format("Radius: %.2f Angle: %.2f", radius, angle));
 
@@ -362,7 +327,7 @@ public abstract class TargetView extends View {
     public void commitBullet() {
 
         if (mActionState == ActionState.ADD) {
-            if (mActiveBulletHole != null && mBulletHoles.size() < mMaxNbrBullets) {
+            if (mActiveBulletHole != null) {
                 mBulletHoles.add(mActiveBulletHole);
             }
         } else if (mActionState == ActionState.RELOCATE) {
@@ -401,19 +366,11 @@ public abstract class TargetView extends View {
     }
 
     protected float getZoomLevel() {
-        return mZoomLevel;
+        return mViewMath.getZoomLevel();
     }
 
     protected float getPixelsPerCm() {
-        return mPixelsPerCm;
-    }
-
-    protected PointF getCenterPixelCoordinate() {
-        PointF center = new PointF();
-        center.x = mScaledRect.width() * mZoomLevel / 2 - mScaledRect.left;
-        center.y = mScaledRect.height() * mZoomLevel  / 2 - mScaledRect.top;
-
-        return center;
+        return mViewMath.getPixelsPerCm();
     }
 
     protected void drawActiveBullet(Canvas canvas) {
@@ -439,7 +396,7 @@ public abstract class TargetView extends View {
     }
 
     protected void drawBullet(Canvas canvas, Paint paint, BulletHole bulletHole) {
-        float pixelsPerCm = mZoomLevel * mPixelsPerCm;
+        float pixelsPerCm = mViewMath.getPixelsPerCm();
         float bulletDiameter = bulletHole.getCaliber().getDiameter() * pixelsPerCm;
         float radius = bulletDiameter / 2;
 
@@ -449,7 +406,9 @@ public abstract class TargetView extends View {
         p.x *= pixelsPerCm;
         p.y *= pixelsPerCm;
 
-        canvas.drawCircle(p.x - mScaledRect.left, p.y - mScaledRect.top, radius, paint);
+        Rect scaledRect = mViewMath.getScaledRect();
+
+        canvas.drawCircle(p.x - scaledRect.left, p.y - scaledRect.top, radius, paint);
     }
 
     protected abstract void drawTarget(Canvas canvas);
@@ -460,17 +419,10 @@ public abstract class TargetView extends View {
 
         Log.d(TAG, String.format("onSizeChanged(%d, %d, %d, %d)", w, h, oldw, oldh));
 
-        int zoomWidth = (int) (w * MAX_ZOOM_FACTOR);
-        int zoomHeight = (int) (h * MAX_ZOOM_FACTOR);
+        float pixelsPerCm = w / VIRTUAL_WIDTH;
+        VIRTUAL_HEIGHT = (int)(h / pixelsPerCm);
 
-        mSrcRect = new Rect(0, 0, zoomWidth, zoomHeight);
-        mScaledRect = new Rect(0, 0, w, h);
-        mDstRect = new Rect(0, 0, w, h);
-
-        mPixelsPerCm = w / VIRTUAL_WIDTH;
-        VIRTUAL_HEIGHT = h / mPixelsPerCm;
-
-        Log.d(TAG, String.format("W/H %.2f %.2f", VIRTUAL_WIDTH, VIRTUAL_HEIGHT));
+        mViewMath = new ViewMath(w, h, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, MAX_ZOOM_FACTOR);
     }
 
     @Override
@@ -571,15 +523,10 @@ public abstract class TargetView extends View {
         private void updateTarget(float distanceX, float distanceY) {
 
             if (mActiveBulletHole != null) {
-                float pixelsPercm = mZoomLevel * mPixelsPerCm;
+                float pixelsPercm = mViewMath.getPixelsPerCm();
                 mActiveBulletHole.move(-distanceX / pixelsPercm, -distanceY / pixelsPercm);
             } else if (mViewState == ViewState.ZOOM){
-                int width = mDstRect.width();
-                int height = mDstRect.height();
-                mScaledRect.left = (int) clamp(mScaledRect.left + distanceX, 0, mSrcRect.right - width);
-                mScaledRect.top = (int) clamp(mScaledRect.top + distanceY, 0, mSrcRect.bottom - height);
-                mScaledRect.right = mScaledRect.left + width;
-                mScaledRect.bottom = mScaledRect.top + height;
+                mViewMath.translate(distanceX, distanceY);
             }
         }
     };
