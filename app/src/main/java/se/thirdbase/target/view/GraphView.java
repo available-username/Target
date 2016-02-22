@@ -10,6 +10,8 @@ import android.graphics.Rect;
 import android.support.v4.util.Pair;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -27,10 +29,15 @@ public class GraphView extends View {
 
     private static final String TAG = GraphView.class.getSimpleName();
 
+    private enum ViewState {
+        OVERVIEW,
+        ZOOM
+    };
+
     private static final float RATIO = 1.618034f; //Golden ratio
     private static final float VIRTUAL_WIDTH = 110;
     private static float VIRTUAL_HEIGHT;
-    private static final float MAX_ZOOM_FACTOR = 5f;
+    private static final float MAX_ZOOM_FACTOR = 3f;
 
     private static float XMARGIN = 5;
     private static float YMARGIN = 5;
@@ -41,6 +48,7 @@ public class GraphView extends View {
     private AtomicInteger mMapIndexer = new AtomicInteger();
 
     private ViewMath mViewMath;
+    private ViewState mViewState = ViewState.OVERVIEW;
 
     private float mMinXValue = Float.MAX_VALUE;
     private float mMaxXValue = Float.MIN_VALUE;
@@ -49,10 +57,14 @@ public class GraphView extends View {
     private float mNormXAxis;
     private float mNormYAxis;
 
+    private GestureDetector mGestureDetector;
 
     public GraphView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setSaveEnabled(true);
+
+        mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
+        setOnTouchListener(mOnTouchListener);
 
         createSampleData();
     }
@@ -178,10 +190,11 @@ public class GraphView extends View {
 
     private PointF translate(float x, float y) {
         float pixelsPerCm = mViewMath.getPixelsPerCm();
+        Rect rect = mViewMath.getScaledRect();
 
         PointF point = new PointF();
-        point.x = x * pixelsPerCm;
-        point.y = (VIRTUAL_HEIGHT - y) * pixelsPerCm;
+        point.x = x * pixelsPerCm - rect.left;
+        point.y = (VIRTUAL_HEIGHT - y) * pixelsPerCm - rect.top;
 
         return point;
     }
@@ -265,4 +278,62 @@ public class GraphView extends View {
 
         return idx;
     }
+
+    private OnTouchListener mOnTouchListener = new OnTouchListener() {
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            mGestureDetector.onTouchEvent(event);
+            return true;
+        }
+    };
+
+    private GestureDetector.SimpleOnGestureListener mSimpleGestureDetector = new GestureDetector.SimpleOnGestureListener() {
+
+        @Override
+        public boolean onDoubleTap(MotionEvent event) {
+            Log.d(TAG, "onDoubleTap()");
+
+            switch (mViewState) {
+                case OVERVIEW:
+                    mViewMath.zoomIn(event.getX(), event.getY());
+                    mViewState = ViewState.ZOOM;
+                    break;
+                case ZOOM:
+                    mViewMath.zoomOut();
+                    mViewState = ViewState.OVERVIEW;
+                    break;
+            }
+
+            invalidate();
+
+            return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent event) {
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            updateTarget(distanceX, distanceY);
+
+            invalidate();
+            return true;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            return false;
+        }
+
+        private void updateTarget(float distanceX, float distanceY) {
+            mViewMath.translate(distanceX, distanceY);
+        }
+    };
 }
