@@ -26,11 +26,15 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_precision);
 
+        Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
+        displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_SUMMARY);
+        /*
         Fragment roundFragment = PrecisionRoundFragment.newInstance(mPrecisionRound);
         displayFragment(roundFragment, false, BACK_STACK_TAG_PRECISION_ROUND);
 
         Fragment seriesFragment = TargetFragment.newInstance();
         displayFragment(seriesFragment, true, BACK_STACK_TAG_PRECISION_SERIES);
+        */
     }
 
     @Override
