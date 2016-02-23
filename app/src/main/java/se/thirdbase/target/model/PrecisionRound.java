@@ -1,5 +1,6 @@
 package se.thirdbase.target.model;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -12,7 +13,7 @@ import java.util.List;
  */
 public class PrecisionRound implements Parcelable {
 
-    public static final int MAX_NBR_SERIES = 1;
+    public static final int MAX_NBR_SERIES = 2; //real number is 7
 
     private List<PrecisionSeries> mPrecisionSeries;
     private int mScore;

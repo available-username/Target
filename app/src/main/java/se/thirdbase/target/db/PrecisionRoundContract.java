@@ -28,24 +28,20 @@ public final class PrecisionRoundContract {
         public static final String COLUMN_NAME_SERIES_5 = "series5";
         public static final String COLUMN_NAME_SERIES_6 = "series6";
         public static final String COLUMN_NAME_SERIES_7 = "series7";
-        public static final String COLUMN_NAME_SERIES_8 = "series8";
-        public static final String COLUMN_NAME_SERIES_9 = "series9";
         public static final String COLUMN_NAME_SCORE = "score";
         public static final String COLUMN_NAME_NOTES = "notes";
     }
 
     public static final String SQL_CREATE_PRECISION =
             String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "%s DATETIME," +
+                            "%s DATETIME DEFAULT CURRENT_TIMESTAMP," +
                             "%s INTEGER," + // SERIES_1
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
-                            "%s INTEGER," +
-                            "%s INTEGER," +
-                            "%s INTEGER," + // SERIES_9
+                            "%s INTEGER," + // SERIES_7
                             "%s INTEGER," + // SCORE
                             "%s TEXT);",
                     TABLE_NAME, PrecisionRoundEntry._ID,
@@ -57,8 +53,6 @@ public final class PrecisionRoundContract {
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
-                    PrecisionRoundEntry.COLUMN_NAME_SERIES_8,
-                    PrecisionRoundEntry.COLUMN_NAME_SERIES_9,
                     PrecisionRoundEntry.COLUMN_NAME_SCORE,
                     PrecisionRoundEntry.COLUMN_NAME_NOTES);
 
@@ -73,8 +67,6 @@ public final class PrecisionRoundContract {
             PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
             PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
             PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
-            PrecisionRoundEntry.COLUMN_NAME_SERIES_8,
-            PrecisionRoundEntry.COLUMN_NAME_SERIES_9,
             PrecisionRoundEntry.COLUMN_NAME_NOTES
         };
 
@@ -121,8 +113,6 @@ public final class PrecisionRoundContract {
                 PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
                 PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
                 PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_8,
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_9
         };
 
         int size = precisionSeries.size();

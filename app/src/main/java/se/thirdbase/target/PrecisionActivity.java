@@ -1,9 +1,20 @@
 package se.thirdbase.target;
 
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
+import java.util.Calendar;
+
+import se.thirdbase.target.db.PrecisionDBHelper;
+import se.thirdbase.target.db.PrecisionRoundContract;
 import se.thirdbase.target.fragment.PrecisionRoundFragment;
 import se.thirdbase.target.fragment.PrecisionRoundSummaryFragment;
 import se.thirdbase.target.fragment.PrecisionTargetFragment;
@@ -30,6 +41,10 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
 
         Fragment seriesFragment = PrecisionTargetFragment.newInstance();
         displayFragment(seriesFragment, true, BACK_STACK_TAG_PRECISION_SERIES);
+        /*
+        Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
+        displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SUMMARY);
+        */
     }
 
     @Override
@@ -69,8 +84,43 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     @Override
     public void onPrecisionRoundComplete(PrecisionRound precisionRound) {
         Log.d(TAG, "onPrecisionRoundComplete()");
+
+        PrecisionDBHelper dbHelper = PrecisionDBHelper.getInstance(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        PrecisionRoundContract.storePrecisionRound(db, precisionRound);
+
+        dump();
+
         popBackStack();
         Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
         displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SUMMARY);
+    }
+
+    private void dump() {
+        try {
+            //File sd = Environment.getExternalStorageDirectory();
+            //Environment.getEnvi
+            File sd = new File(Environment.DIRECTORY_DOWNLOADS);
+            File data = Environment.getDataDirectory();
+
+            Log.d(TAG,  "sd.canWrite(): " + (sd.canWrite() ? "true" : "false"));
+            if (sd.canWrite()) {
+                String currentDBPath = "//data//se.thirdbase.target//databases//Precision.db";
+                String backupDBPath = "Precision.db";
+                File currentDB = new File(data, currentDBPath);
+                File backupDB = new File(sd, backupDBPath);
+
+                Log.d(TAG,  "currentDB.exists(): " + (currentDB.exists() ? "true" : "false"));
+                if (currentDB.exists()) {
+                    FileChannel src = new FileInputStream(currentDB).getChannel();
+                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -96,7 +96,7 @@ public class GraphView extends View {
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
 
-        //createSampleData2();
+        createSampleData2();
     }
 
     public GraphView(Context context) {
@@ -252,8 +252,8 @@ public class GraphView extends View {
         int size = data.size();
 
         float barWidth = (VIRTUAL_WIDTH - 2 * XMARGIN) / size;
-        float barSpace = barWidth / 6;
-        barWidth -= 2 * barSpace;
+        float barSpace = barWidth / 4;
+        //barWidth -= 2 * barSpace;
 
         for (int i = 0; i < size; i++) {
             Pair<Float, Float> pair = data.get(i);
