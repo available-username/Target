@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import se.thirdbase.target.util.ViewMath;
@@ -29,12 +30,38 @@ public class GraphView extends View {
 
     private static final String TAG = GraphView.class.getSimpleName();
 
+    public interface Filter {
+        boolean keep(Pair<Float, Float> data);
+    }
+
     private enum ViewState {
         OVERVIEW,
         ZOOM
-    };
+    }
 
-    private static final float RATIO = 1.618034f; //Golden ratio
+    private static final String XMLNS = "http://kalle.arne.se/target";
+    private static final String XMLSTYLE = "style";
+    private static final String XMLSTYLE_LINES = "lines";
+    private static final String XMLSTYLE_THICK_BARS = "thick_bars";
+    private static final String XMLSTYLE_SPARSE_BARS = "sparse_bars";
+
+
+    private enum Style {
+        LINES(XMLSTYLE_LINES),
+        THICK_BARS(XMLSTYLE_THICK_BARS),
+        SPARSE_BARS(XMLSTYLE_SPARSE_BARS);
+
+        private String mStr;
+
+        Style(String str) {
+            mStr = str;
+        }
+
+        public boolean equals(String value) {
+            return mStr.equals(value);
+        }
+    }
+
     private static final float VIRTUAL_WIDTH = 110;
     private static float VIRTUAL_HEIGHT;
     private static final float MAX_ZOOM_FACTOR = 3f;
@@ -57,6 +84,9 @@ public class GraphView extends View {
     private float mNormXAxis;
     private float mNormYAxis;
 
+    private Map<Integer, Filter> mFilters = new HashMap<>();
+    private Style mStyle = Style.LINES; // The default style
+
     private GestureDetector mGestureDetector;
 
     public GraphView(Context context, AttributeSet attrs) {
@@ -66,17 +96,17 @@ public class GraphView extends View {
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
 
-        createSampleData();
+        createSampleData2();
     }
 
     public GraphView(Context context) {
         this(context, null);
     }
 
-    private void createSampleData() {
+    private void createSampleData1() {
         List data = new ArrayList();
 
-        Log.d(TAG, "createSampleData()");
+        Log.d(TAG, "createSampleData1()");
 
         float maxTime = (float)Math.PI * 2 * 6;
 
@@ -90,10 +120,26 @@ public class GraphView extends View {
         addDataPoints(data);
     }
 
+    private void createSampleData2() {
+        List<Pair<Float, Float>> data = new ArrayList<>();
+
+        Random rand = new Random();
+
+        for (int i = 0; i < 10; i++) {
+            //Pair<Float, Float> point = new Pair((float)(i + 1), (float)rand.nextInt(10));
+            Pair<Float, Float> point = new Pair((float)(i + 1), 10f);
+            data.add(point);
+        }
+
+        addDataPoints(data);
+    }
+
     private void normalizeData() {
         mNormalizedDataMap = new HashMap<>();
 
         Log.d(TAG, "normalizeData()");
+
+        StringBuilder points = new StringBuilder();
 
         for (Integer key : mDataMap.keySet()) {
 
@@ -101,12 +147,23 @@ public class GraphView extends View {
 
             List<Pair<Float, Float>> norm = new ArrayList<>();
 
+            Filter filter = mFilters.get(key);
+
             for (Pair<Float, Float> p : data) {
+
+                if (filter != null && !filter.keep(p)) {
+                    continue;
+                }
+
                 float normX = (VIRTUAL_WIDTH - 2 * XMARGIN) * p.first / mNormXAxis;
                 float normY = (VIRTUAL_HEIGHT - 2 * YMARGIN) * p.second / mNormYAxis;
                 Pair<Float, Float> q = new Pair<>(normX, normY);
                 norm.add(q);
+
+                points.append(String.format("(%.2f, %.2f) ", q.first, q.second));
             }
+
+            Log.d(TAG, points.toString());
 
             mNormalizedDataMap.put(key, norm);
         }
@@ -122,7 +179,8 @@ public class GraphView extends View {
 
         normalizeData();
 
-        Paint paint = new Paint(Color.BLACK);
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
         paint.setAntiAlias(true);
         paint.setStrokeWidth(1);
@@ -130,16 +188,27 @@ public class GraphView extends View {
         // Draw border
         drawRect(canvas, 0, VIRTUAL_HEIGHT, VIRTUAL_WIDTH, 0, paint);
 
-        // Draw axis
-        paint.setStrokeWidth(5);
-        drawLine(canvas, XMARGIN, YMARGIN, VIRTUAL_WIDTH - XMARGIN, YMARGIN, paint);
-        drawLine(canvas, XMARGIN, YMARGIN, XMARGIN, VIRTUAL_HEIGHT - YMARGIN, paint);
+        Paint fill = new Paint();
+        fill.setColor(0xffff9012);
+        fill.setStyle(Paint.Style.FILL_AND_STROKE);
+        Paint stroke = new Paint();
+        stroke.setColor(Color.BLACK);
+        stroke.setStyle(Paint.Style.STROKE);
+        stroke.setStrokeWidth(1);
 
         for (Integer key : mNormalizedDataMap.keySet()) {
             List<Pair<Float, Float>> data = mNormalizedDataMap.get(key);
 
-            drawData(canvas, data, paint);
+            //drawData(canvas, data, paint);
+            //drawThickBars(canvas, data, fill, stroke);
+            drawSparseBars(canvas, data, fill, stroke);
         }
+
+
+        // Draw axis
+        paint.setStrokeWidth(5);
+        drawLine(canvas, XMARGIN, YMARGIN, VIRTUAL_WIDTH - XMARGIN, YMARGIN, paint);
+        drawLine(canvas, XMARGIN, YMARGIN, XMARGIN, VIRTUAL_HEIGHT - YMARGIN, paint);
     }
 
     private void drawData(Canvas canvas, List<Pair<Float, Float>> data, Paint paint) {
@@ -160,6 +229,44 @@ public class GraphView extends View {
         }
 
         canvas.drawPath(path, paint);
+    }
+
+    private void drawThickBars(Canvas canvas, List<Pair<Float, Float>> data, Paint fill, Paint stroke) {
+        Log.d(TAG, "drawThickBars()");
+
+        int size = data.size();
+
+        float barWidth = (VIRTUAL_WIDTH - 2 * XMARGIN) / size;
+
+        for (int i = 0; i < size; i++) {
+            Pair<Float, Float> pair = data.get(i);
+
+            PointF topLeft = translate(i * barWidth + XMARGIN, pair.second);
+            PointF rightBottom = translate(((i + 1) * barWidth + XMARGIN), YMARGIN);
+
+            canvas.drawRect(topLeft.x, topLeft.y, rightBottom.x, rightBottom.y, fill);
+            canvas.drawRect(topLeft.x, topLeft.y, rightBottom.x, rightBottom.y, stroke);
+        }
+    }
+
+    private void drawSparseBars(Canvas canvas, List<Pair<Float, Float>> data, Paint fill, Paint stroke) {
+        Log.d(TAG, "drawSparseBars()");
+
+        int size = data.size();
+
+        float barWidth = (VIRTUAL_WIDTH - 2 * XMARGIN) / size;
+        float barSpace = barWidth / 6;
+        barWidth -= 2 * barSpace;
+
+        for (int i = 0; i < size; i++) {
+            Pair<Float, Float> pair = data.get(i);
+
+            PointF topLeft = translate(i * barWidth + XMARGIN + barSpace, pair.second);
+            PointF rightBottom = translate(((i + 1) * barWidth + XMARGIN - barSpace), YMARGIN);
+
+            canvas.drawRect(topLeft.x, topLeft.y, rightBottom.x, rightBottom.y, fill);
+            canvas.drawRect(topLeft.x, topLeft.y, rightBottom.x, rightBottom.y, stroke);
+        }
     }
 
     private void drawRect(Canvas canvas, float left, float top, float right, float bottom, Paint paint) {
@@ -269,8 +376,8 @@ public class GraphView extends View {
         Log.d(TAG, String.format("Max X: %.2f Min X: %.2f", mMaxXValue, mMinXValue));
         Log.d(TAG, String.format("Max Y: %.2f Min Y: %.2f", mMaxYValue, mMinYValue));
 
-        mNormXAxis = Math.abs(mMaxXValue - mMinXValue);
-        mNormYAxis = Math.abs(mMaxYValue - mMinYValue);
+        mNormXAxis = Math.abs(Math.max(0, mMaxXValue) - Math.min(0, mMinXValue));
+        mNormYAxis = Math.abs(Math.max(0, mMaxYValue) - Math.min(0, mMinYValue));
 
         Log.d(TAG, String.format("Nomalized axis %.2f, %.2f", mNormXAxis, mNormYAxis));
 
@@ -287,6 +394,14 @@ public class GraphView extends View {
             return true;
         }
     };
+
+    public void addFilter(int dataSet, Filter filter) {
+        mFilters.put(dataSet, filter);
+    }
+
+    public void removeFilter(int dataSet) {
+        mFilters.remove(dataSet);
+    }
 
     private GestureDetector.SimpleOnGestureListener mSimpleGestureDetector = new GestureDetector.SimpleOnGestureListener() {
 
