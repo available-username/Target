@@ -96,7 +96,7 @@ public class GraphView extends View {
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
 
-        createSampleData2();
+        //createSampleData2();
     }
 
     public GraphView(Context context) {
@@ -185,9 +185,6 @@ public class GraphView extends View {
         paint.setAntiAlias(true);
         paint.setStrokeWidth(1);
 
-        // Draw border
-        drawRect(canvas, 0, VIRTUAL_HEIGHT, VIRTUAL_WIDTH, 0, paint);
-
         Paint fill = new Paint();
         fill.setColor(0xffff9012);
         fill.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -206,7 +203,7 @@ public class GraphView extends View {
 
 
         // Draw axis
-        paint.setStrokeWidth(5);
+        paint.setStrokeWidth(1);
         drawLine(canvas, XMARGIN, YMARGIN, VIRTUAL_WIDTH - XMARGIN, YMARGIN, paint);
         drawLine(canvas, XMARGIN, YMARGIN, XMARGIN, VIRTUAL_HEIGHT - YMARGIN, paint);
     }
@@ -448,7 +445,9 @@ public class GraphView extends View {
         }
 
         private void updateTarget(float distanceX, float distanceY) {
-            mViewMath.translate(distanceX, distanceY);
+            if (mViewState == ViewState.ZOOM) {
+                mViewMath.translate(distanceX, distanceY);
+            }
         }
     };
 }

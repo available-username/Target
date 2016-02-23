@@ -3,17 +3,24 @@ package se.thirdbase.target.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.PrecisionTarget;
+import se.thirdbase.target.view.GraphView;
+import se.thirdbase.target.view.PrecisionTargetView;
 
 /**
  * Created by alexp on 2/19/16.
@@ -27,12 +34,15 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
     private TextView mScoreText;
     private TextView mMaxSpreadText;
     private TextView mAvgSpreadText;
+    private PrecisionTargetView mPrecisionTargetView;
+    private GraphView mDistributionGraphView;
 
     private PrecisionRound mPrecisionRound;
     private int mScore = 0;
     private int mNbrBullets = 0;
     private float mMaxSpread = 0;
     private float mAvgSpread = 0;
+    private List<Pair<Float, Float>> mScoreDistribution = new ArrayList<>();
 
     public static PrecisionRoundSummaryFragment newInstance(PrecisionRound precisionRound) {
         Bundle arguments = new Bundle();
@@ -55,6 +65,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mPrecisionRound = arguments.getParcelable(BUNDLE_TAG_PRECISION_ROUND);
 
         List<PrecisionSeries> precisionSeries = mPrecisionRound.getPrecisionSeries();
+        /*
         int nbrSeries = precisionSeries.size();
         int nbrDistances = 0;
 
@@ -85,6 +96,100 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
 
         // Let avgSpread be zero if there's only one bullet
         mAvgSpread = nbrDistances > 0 ? mAvgSpread / nbrDistances : 0;
+        */
+        mMaxSpread = calculateMaxSpread(precisionSeries);
+        mAvgSpread = calculateAverageSpread(precisionSeries);
+        mScore = calculateScore(precisionSeries);
+        mScoreDistribution = calculateDistribution(precisionSeries);
+    }
+
+    private float calculateMaxSpread(List<PrecisionSeries> precisionSeries) {
+        float maxSpread = 0;
+
+        int nbrSeries = precisionSeries.size();
+
+        for (int i = 0; i < nbrSeries; i++) {
+            PrecisionSeries series = precisionSeries.get(i);
+
+            List<BulletHole> bulletHoles = series.getBulletHoles();
+            int nbrBullets = bulletHoles.size();
+
+            for (int j = 0; j < nbrBullets - 1; j++) {
+                for (int k = j + 1; k < nbrBullets; k++) {
+
+                    float distance = getSpread(bulletHoles.get(j), bulletHoles.get(k));
+
+                    if (distance > maxSpread) {
+                        maxSpread = distance;
+                    }
+                }
+            }
+        }
+
+        return maxSpread;
+    }
+
+    private float calculateAverageSpread(List<PrecisionSeries> precisionSeries) {
+        float avgSpread = 0;
+
+        int nbrSeries = precisionSeries.size();
+        int nbrDistances = 0;
+
+        for (int i = 0; i < nbrSeries; i++) {
+            PrecisionSeries series = precisionSeries.get(i);
+
+            List<BulletHole> bulletHoles = series.getBulletHoles();
+            int nbrBullets = bulletHoles.size();
+
+            for (int j = 0; j < nbrBullets - 1; j++) {
+                for (int k = j + 1; k < nbrBullets; k++) {
+
+                    float distance = getSpread(bulletHoles.get(j), bulletHoles.get(k));
+
+                    avgSpread += distance;
+                    nbrDistances += 1;
+                }
+            }
+        }
+
+        // Let avgSpread be zero if there's only one bullet
+        return nbrDistances > 0 ? avgSpread / nbrDistances : 0;
+    }
+
+    private int calculateScore(List<PrecisionSeries> precisionSeries) {
+        int score = 0;
+        int nbrSeries = precisionSeries.size();
+
+        for (int i = 0; i < nbrSeries; i++) {
+            PrecisionSeries series = precisionSeries.get(i);
+            score += series.getScore();
+        }
+
+        return score;
+    }
+
+    private List<Pair<Float, Float>> calculateDistribution(List<PrecisionSeries> precisionSeries) {
+        int[] distribution = new int[10];
+
+        for (PrecisionSeries series : precisionSeries) {
+            for (BulletHole bulletHole : series.getBulletHoles()) {
+                int score = PrecisionTarget.getBulletScore(bulletHole) - 1;
+
+                if (score >= 0) {
+                    int count = distribution[score] + 1;
+                    distribution[score] = count;
+                }
+            }
+        }
+
+        List<Pair<Float, Float>> data = new ArrayList<>();
+
+        for (int i = 0; i < distribution.length; i++) {
+            Pair<Float, Float> pair = new Pair<>((float)(i + 1), (float)(distribution[i]));
+            data.add(pair);
+        }
+
+        return data;
     }
 
     @Nullable
@@ -104,6 +209,11 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
 
         mAvgSpreadText = (TextView) view.findViewById(R.id.precision_round_summary_layout_avg_spread);
         mAvgSpreadText.setText(String.format("%.2fcm", mAvgSpread));
+
+        mDistributionGraphView = (GraphView) view.findViewById(R.id.precision_round_summary_layout_graph_view);
+        mDistributionGraphView.addDataPoints(mScoreDistribution);
+
+        mPrecisionTargetView = (PrecisionTargetView) view.findViewById(R.id.precision_round_summary_layout_target_view);
 
         return view;
     }

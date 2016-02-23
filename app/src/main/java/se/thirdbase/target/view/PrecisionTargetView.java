@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import se.thirdbase.target.model.BulletHole;
+import se.thirdbase.target.model.PrecisionTarget;
 
 /**
  * Created by alexp on 2/19/16.
@@ -16,10 +17,6 @@ import se.thirdbase.target.model.BulletHole;
 public class PrecisionTargetView extends TargetView {
 
     private static final String TAG = PrecisionTargetView.class.getSimpleName();
-
-    private static final int MAX_NBR_BULLETS = 5;
-    private static final float VIRTUAL_WIDTH = 60.0f; //cm
-    private static float VIRTUAL_HEIGHT;
 
     public PrecisionTargetView(Context context) {
         super(context, null);
@@ -31,17 +28,13 @@ public class PrecisionTargetView extends TargetView {
 
     @Override
     public int getMaxNbrBullets() {
-        return MAX_NBR_BULLETS;
+        return PrecisionTarget.MAX_NBR_BULLETS;
     }
 
     @Override
     public int getBulletScore(int bulletIdx) {
         BulletHole hole = mBulletHoles.get(bulletIdx);
-        float diameter = hole.getCaliber().getDiameter();
-        float radius = Math.abs(hole.getRadius() - diameter / 2);
-
-        Log.d(TAG, "Radius: " + radius);
-        return (int)Math.ceil(10 - radius / 2.5f);
+        return PrecisionTarget.getBulletScore(hole);
     }
 
     @Override
@@ -65,8 +58,6 @@ public class PrecisionTargetView extends TargetView {
 
     @Override
     protected void drawTarget(Canvas canvas) {
-        //float zoomLevel = getZoomLevel();
-        //float pixelsPerCm = zoomLevel * getPixelsPerCm();
         float pixelsPerCm = mViewMath.getPixelsPerCm();
 
         float radiusIncrement = 2.5f; // cm

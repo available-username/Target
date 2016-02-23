@@ -2,6 +2,7 @@ package se.thirdbase.target.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class PrecisionSeries implements Parcelable {
 
     public void addBulletHole(BulletHole bulletHole) {
         mBulletHoles.add(bulletHole);
-        mScore += calculateScore(bulletHole);
+        mScore += PrecisionTarget.getBulletScore(bulletHole);
     }
 
     public void setBulletHoles(List<BulletHole> bulletHoles) {
@@ -60,18 +61,12 @@ public class PrecisionSeries implements Parcelable {
         int score = 0;
 
         for (BulletHole hole : bulletHoles) {
-            score += calculateScore(hole);
+            score += PrecisionTarget.getBulletScore(hole);
         }
 
         return score;
     }
 
-    private int calculateScore(BulletHole hole) {
-        float diameter = hole.getCaliber().getDiameter();
-        float radius = Math.abs(hole.getRadius() - diameter / 2);
-
-        return (int) Math.ceil(10 - radius / RING_RADIUS_INCREMENT);
-    }
 
     public int getScore() {
         return mScore;

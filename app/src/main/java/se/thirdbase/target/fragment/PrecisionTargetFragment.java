@@ -22,9 +22,9 @@ import se.thirdbase.target.view.TargetView;
 /**
  * Created by alexp on 2/12/16.
  */
-public class TargetFragment extends PrecisionBaseFragment {
+public class PrecisionTargetFragment extends PrecisionBaseFragment {
 
-    private static final String TAG = TargetFragment.class.getSimpleName();
+    private static final String TAG = PrecisionTargetFragment.class.getSimpleName();
 
     private enum State {
         OVERVIEW,
@@ -72,13 +72,13 @@ public class TargetFragment extends PrecisionBaseFragment {
     private PrecisionSeries mPrecisionSeries;
 
 
-    public static TargetFragment newInstance() {
+    public static PrecisionTargetFragment newInstance() {
         return newInstance(null);
     }
 
-    public static TargetFragment newInstance(PrecisionSeries precisionSeries) {
+    public static PrecisionTargetFragment newInstance(PrecisionSeries precisionSeries) {
 
-        TargetFragment fragment = new TargetFragment();
+        PrecisionTargetFragment fragment = new PrecisionTargetFragment();
 
         if (precisionSeries != null) {
             Bundle arguments = new Bundle();

@@ -93,7 +93,6 @@ public abstract class TargetView extends View {
     public TargetView(Context context) {
         super(context);
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
-        setOnTouchListener(mOnTouchListener);
     }
 
     public void setZoomChangedListener(ZoomChangeListener listener) {
@@ -496,7 +495,9 @@ public abstract class TargetView extends View {
 
             switch (mActionState) {
                 case IDLE:
-                    addBullet(event.getX(), event.getY());
+                    if (getNbrOfBulletsHoles() < getMaxNbrBullets()) {
+                        addBullet(event.getX(), event.getY());
+                    }
                     break;
                 case ADD:
                     break;

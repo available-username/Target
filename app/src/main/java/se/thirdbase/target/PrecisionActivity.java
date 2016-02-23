@@ -1,13 +1,12 @@
 package se.thirdbase.target;
 
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
 import se.thirdbase.target.fragment.PrecisionRoundFragment;
 import se.thirdbase.target.fragment.PrecisionRoundSummaryFragment;
-import se.thirdbase.target.fragment.TargetFragment;
+import se.thirdbase.target.fragment.PrecisionTargetFragment;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 
@@ -26,15 +25,11 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_precision);
 
-        Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
-        displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_SUMMARY);
-        /*
         Fragment roundFragment = PrecisionRoundFragment.newInstance(mPrecisionRound);
         displayFragment(roundFragment, false, BACK_STACK_TAG_PRECISION_ROUND);
 
-        Fragment seriesFragment = TargetFragment.newInstance();
+        Fragment seriesFragment = PrecisionTargetFragment.newInstance();
         displayFragment(seriesFragment, true, BACK_STACK_TAG_PRECISION_SERIES);
-        */
     }
 
     @Override
@@ -46,7 +41,7 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     public void onUpdatePrecisionSeries(PrecisionSeries precisionSeries) {
         Log.d(TAG, "onUpdatePrecisionSeries()");
 
-        Fragment fragment = TargetFragment.newInstance(precisionSeries);
+        Fragment fragment = PrecisionTargetFragment.newInstance(precisionSeries);
 
         displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_SERIES);
     }
@@ -65,8 +60,7 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         mPrecisionRound.addPrecisionSeries(precisionSeries);
 
         if (mPrecisionRound.getNbrSeries() == PrecisionRound.MAX_NBR_SERIES) {
-            Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
-            displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_SUMMARY);
+            onPrecisionRoundComplete(mPrecisionRound);
         } else {
             popBackStack();
         }
@@ -75,6 +69,8 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     @Override
     public void onPrecisionRoundComplete(PrecisionRound precisionRound) {
         Log.d(TAG, "onPrecisionRoundComplete()");
-
+        popBackStack();
+        Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
+        displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SUMMARY);
     }
 }
