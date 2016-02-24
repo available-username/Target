@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,33 +18,42 @@ import se.thirdbase.target.model.PrecisionSeries;
  */
 public final class PrecisionRoundContract {
 
+    private static final String TAG = PrecisionRoundContract.class.getSimpleName();
+
     public static final String TABLE_NAME = "precision_round";
 
-    public static final class PrecisionRoundEntry implements BaseColumns {
-        public static final String COLUMN_NAME_DATE_TIME = "date_time";
-        public static final String COLUMN_NAME_SERIES_1 = "series1";
-        public static final String COLUMN_NAME_SERIES_2 = "series2";
-        public static final String COLUMN_NAME_SERIES_3 = "series3";
-        public static final String COLUMN_NAME_SERIES_4 = "series4";
-        public static final String COLUMN_NAME_SERIES_5 = "series5";
-        public static final String COLUMN_NAME_SERIES_6 = "series6";
-        public static final String COLUMN_NAME_SERIES_7 = "series7";
-        public static final String COLUMN_NAME_SCORE = "score";
-        public static final String COLUMN_NAME_NOTES = "notes";
+    public interface PrecisionRoundEntry extends BaseColumns {
+        String COLUMN_NAME_DATE_TIME = "date_time";
+        String COLUMN_NAME_SERIES_1 = "series1";
+        String COLUMN_NAME_SERIES_2 = "series2";
+        String COLUMN_NAME_SERIES_3 = "series3";
+        String COLUMN_NAME_SERIES_4 = "series4";
+        String COLUMN_NAME_SERIES_5 = "series5";
+        String COLUMN_NAME_SERIES_6 = "series6";
+        String COLUMN_NAME_SERIES_7 = "series7";
+        String COLUMN_NAME_SCORE = "score";
+        String COLUMN_NAME_NOTES = "notes";
     }
 
     public static final String SQL_CREATE_PRECISION =
-            String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT," +
+            String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                             "%s DATETIME DEFAULT CURRENT_TIMESTAMP," +
-                            "%s INTEGER," + // SERIES_1
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
-                            "%s INTEGER," + // SERIES_7
+                            "%s INTEGER," +
+                            "%s INTEGER," +
                             "%s INTEGER," + // SCORE
-                            "%s TEXT);",
+                            "%s TEXT," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," + // SERIES_1
+                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE);", // SERIES_7
                     TABLE_NAME, PrecisionRoundEntry._ID,
                     PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_1,
@@ -54,11 +64,20 @@ public final class PrecisionRoundContract {
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
                     PrecisionRoundEntry.COLUMN_NAME_SCORE,
-                    PrecisionRoundEntry.COLUMN_NAME_NOTES);
+                    PrecisionRoundEntry.COLUMN_NAME_NOTES,
+                    PrecisionRoundEntry.COLUMN_NAME_SERIES_1, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID,
+                    PrecisionRoundEntry.COLUMN_NAME_SERIES_2, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID,
+                    PrecisionRoundEntry.COLUMN_NAME_SERIES_3, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID,
+                    PrecisionRoundEntry.COLUMN_NAME_SERIES_4, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID,
+                    PrecisionRoundEntry.COLUMN_NAME_SERIES_5, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID,
+                    PrecisionRoundEntry.COLUMN_NAME_SERIES_6, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID,
+                    PrecisionRoundEntry.COLUMN_NAME_SERIES_7, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID);
 
     public static final String SQL_DROP_PRECISION = String.format("DROP TABLE IF EXISTS %s", TABLE_NAME);
 
     public static PrecisionRound retrievePrecisionRound(SQLiteDatabase db, int id) {
+        Log.d(TAG, String.format("retrievePrecisionRound(%d)", id));
+
         String[] columns = {
             PrecisionRoundEntry.COLUMN_NAME_SERIES_1,
             PrecisionRoundEntry.COLUMN_NAME_SERIES_2,
@@ -71,28 +90,61 @@ public final class PrecisionRoundContract {
         };
 
         Cursor cursor = db.query(
-                PrecisionSeriesContract.TABLE_NAME,
+                PrecisionRoundContract.TABLE_NAME,
                 columns,
-                PrecisionSeriesContract.PrecisionSeriesEntry._ID + "=?",
+                PrecisionRoundContract.PrecisionRoundEntry._ID + "= ?",
                 new String[]{"" + id},
                 null,  // groupBy
                 null,  // having
                 null,  // orderBy
                 null); // limit
 
+        Log.d(TAG, String.format("Columns: %d, Rows: %d", cursor.getColumnCount(), cursor.getCount()));
+
         List<PrecisionSeries> precisionSeries = new ArrayList<>();
 
-        // -1 since the last columns is the notes
-        for (int i = 0; i < columns.length; i++) {
+        String notes = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            for (int i = 0; i < columns.length - 1; i++) {
+                int seriesId = cursor.getInt(cursor.getColumnIndex(columns[i]));
+                PrecisionSeries series = PrecisionSeriesContract.retrievePrecisionSeries(db, seriesId);
+                precisionSeries.add(series);
+            }
 
-            int seriesId = cursor.getInt(cursor.getColumnIndex(columns[i]));
-            PrecisionSeries series = PrecisionSeriesContract.retrievePrecisionSeries(db, seriesId);
-            precisionSeries.add(series);
+            notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundEntry.COLUMN_NAME_NOTES));
+
+            cursor.close();
         }
 
-        String notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundEntry.COLUMN_NAME_NOTES));
 
         return new PrecisionRound(precisionSeries, notes);
+    }
+
+    public static List<PrecisionRound> retrieveAllPrecisionRounds(SQLiteDatabase db) {
+        /*
+        String[] columns = { PrecisionRoundEntry.COLUMN_NAME_SCORE, PrecisionRoundEntry._ID};
+
+        Cursor cursor = db.rawQuery(String.format("SELECT %s FROM %s", PrecisionRoundEntry._ID, PrecisionRoundContract.TABLE_NAME), null);
+        */
+        String[] columns = { PrecisionRoundEntry._ID };
+
+        Cursor cursor = db.query(PrecisionRoundContract.TABLE_NAME, columns, null, null, null, null, null);
+
+        List<PrecisionRound> precisionRounds = new ArrayList<>();
+
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+            int roundId = cursor.getInt(cursor.getColumnIndex(PrecisionRoundEntry._ID));
+            PrecisionRound round = PrecisionRoundContract.retrievePrecisionRound(db, roundId);
+
+            precisionRounds.add(round);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return precisionRounds;
     }
 
     public static long storePrecisionRound(SQLiteDatabase db, PrecisionRound precisionRound) {

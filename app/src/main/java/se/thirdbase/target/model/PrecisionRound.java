@@ -81,7 +81,7 @@ public class PrecisionRound implements Parcelable {
         int score = 0;
 
         for (PrecisionSeries series : precisionSeries) {
-            score = series.getScore();
+            score += series.getScore();
         }
 
         return score;
@@ -97,5 +97,14 @@ public class PrecisionRound implements Parcelable {
         dest.writeTypedList(mPrecisionSeries);
         dest.writeInt(mScore);
         dest.writeString(mNotes);
+    }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        for (PrecisionSeries series : mPrecisionSeries) {
+            builder.append(String.format(" %d", series.getScore()));
+        }
+        return String.format("PrecisionRound(score=%d,%s)", mScore, builder.toString());
     }
 }

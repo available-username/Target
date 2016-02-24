@@ -12,11 +12,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import se.thirdbase.target.R;
+import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.PrecisionTarget;
 import se.thirdbase.target.view.TargetView;
 
 /**
@@ -156,7 +160,19 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
 
         onEnterOverview();
 
+        populateWithTestData();
+
         return view;
+    }
+
+    private void populateWithTestData() {
+        List<BulletHole> holes = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < PrecisionTarget.MAX_NBR_BULLETS; i++) {
+            BulletHole hole = new BulletHole(BulletCaliber.CAL_22, random.nextFloat() * 25f, (float)(random.nextFloat() * Math.PI * 2));
+            holes.add(hole);
+        }
+        mTargetView.setBulletHoles(holes);
     }
 
     @Override

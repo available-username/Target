@@ -15,14 +15,14 @@ public class BulletHoleContract {
 
     public static final String TABLE_NAME = "bullet_hole";
 
-    public static final class BulletHoleEntry implements BaseColumns {
-        public static final String COLUMN_NAME_CALIBER = "caliber";
-        public static final String COLUMN_NAME_RADIUS = "radius";
-        public static final String COLUMN_NAME_ANGLE = "angle";
+    public  interface BulletHoleEntry extends BaseColumns {
+        String COLUMN_NAME_CALIBER = "caliber";
+        String COLUMN_NAME_RADIUS = "radius";
+        String COLUMN_NAME_ANGLE = "angle";
     }
 
     public static final String SQL_CREATE_BULLET_HOLE =
-            String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s INTEGER, %s REAL, %s REAL);",
+            String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, %s INTEGER, %s REAL, %s REAL);",
                     TABLE_NAME,
                     BulletHoleEntry._ID,
                     BulletHoleEntry.COLUMN_NAME_CALIBER,
@@ -38,7 +38,7 @@ public class BulletHoleContract {
                 BulletHoleEntry.COLUMN_NAME_RADIUS
         };
 
-        Cursor c = db.query(BulletHoleContract.TABLE_NAME,
+        Cursor cursor = db.query(BulletHoleContract.TABLE_NAME,
                 columns,
                 BulletHoleEntry._ID + "=?",
                 new String[] {"" + id},
@@ -47,11 +47,16 @@ public class BulletHoleContract {
                 null,
                 null);
 
-        BulletCaliber caliber = BulletCaliber.values()[c.getInt(c.getColumnIndex(BulletHoleEntry.COLUMN_NAME_CALIBER))];
-        float angle = c.getFloat(c.getColumnIndex(BulletHoleEntry.COLUMN_NAME_ANGLE));
-        float radius = c.getFloat(c.getColumnIndex(BulletHoleEntry.COLUMN_NAME_RADIUS));
+        if (cursor != null && cursor.moveToFirst()) {
+            BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_CALIBER))];
+            float angle = cursor.getFloat(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_ANGLE));
+            float radius = cursor.getFloat(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_RADIUS));
 
-        return new BulletHole(caliber, radius, angle);
+            cursor.close();
+            return new BulletHole(caliber, radius, angle);
+        }
+
+        return null;
     }
 
     public static long storeBulletHole(SQLiteDatabase db, BulletHole bulletHole) {

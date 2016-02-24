@@ -13,12 +13,19 @@ public enum BulletCaliber {
     private static final float CM_PER_INCH = 2.54f;
 
     private float mDiameter;
+    private boolean mInches;
 
     BulletCaliber(float diameter, boolean inches) {
         mDiameter = inches ? diameter * CM_PER_INCH : diameter;
+        mInches = inches;
     }
 
     public float getDiameter() {
         return mDiameter;
+    }
+
+    public String toString() {
+        float diameter = mInches ? mDiameter / CM_PER_INCH : mDiameter / 10;
+        return String.format("%.2f%s", diameter, mInches ? "\"" : "mm");
     }
 }

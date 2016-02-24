@@ -6,47 +6,47 @@ import android.os.Parcelable;
 
 public class BulletHole implements Parcelable {
     final BulletCaliber mCaliber;
-    float radius;
-    float angle;
+    float mRadius;
+    float mAngle;
 
     public BulletHole(BulletCaliber caliber, float radius, float angle) {
         this.mCaliber = caliber;
-        this.radius = radius;
-        this.angle = angle;
+        this.mRadius = radius;
+        this.mAngle = angle;
     }
 
     protected BulletHole(Parcel in) {
         mCaliber = (BulletCaliber) in.readSerializable();
-        radius = in.readFloat();
-        angle = in.readFloat();
+        mRadius = in.readFloat();
+        mAngle = in.readFloat();
     }
 
     public BulletHole copy() {
-        return new BulletHole(mCaliber, radius, angle);
+        return new BulletHole(mCaliber, mRadius, mAngle);
     }
 
     public void move(float deltaX, float deltaY) {
-        float x = (float) (radius * Math.cos(angle)) + deltaX;
-        float y = (float) (radius * Math.sin(angle)) + deltaY;
+        float x = (float) (mRadius * Math.cos(mAngle)) + deltaX;
+        float y = (float) (mRadius * Math.sin(mAngle)) + deltaY;
 
-        radius = (float) Math.sqrt(x * x + y * y);
-        angle = (float) Math.atan2(y, x);
+        mRadius = (float) Math.sqrt(x * x + y * y);
+        mAngle = (float) Math.atan2(y, x);
     }
 
     public PointF toCartesianCoordinates() {
-        float x = (float) (radius * Math.cos(angle));
-        float y = (float) (radius * Math.sin(angle));
+        float x = (float) (mRadius * Math.cos(mAngle));
+        float y = (float) (mRadius * Math.sin(mAngle));
 
         return new PointF(x, y);
     }
 
 
     public float getRadius() {
-        return radius;
+        return mRadius;
     }
 
     public float getAngle() {
-        return angle;
+        return mAngle;
     }
 
     public BulletCaliber getCaliber() {
@@ -61,8 +61,8 @@ public class BulletHole implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeSerializable(mCaliber);
-        dest.writeFloat(radius);
-        dest.writeFloat(angle);
+        dest.writeFloat(mRadius);
+        dest.writeFloat(mAngle);
     }
 
     public static final Creator<BulletHole> CREATOR = new Creator<BulletHole>() {
@@ -76,4 +76,8 @@ public class BulletHole implements Parcelable {
             return new BulletHole[size];
         }
     };
+
+    public String toString() {
+        return String.format("%s r=%.2f a=%.2f", mCaliber, mRadius, mAngle);
+    }
 }

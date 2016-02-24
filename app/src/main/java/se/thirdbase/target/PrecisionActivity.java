@@ -88,39 +88,10 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         PrecisionDBHelper dbHelper = PrecisionDBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         PrecisionRoundContract.storePrecisionRound(db, precisionRound);
-
-        dump();
+        db.close();
 
         popBackStack();
         Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
         displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SUMMARY);
-    }
-
-    private void dump() {
-        try {
-            //File sd = Environment.getExternalStorageDirectory();
-            //Environment.getEnvi
-            File sd = new File(Environment.DIRECTORY_DOWNLOADS);
-            File data = Environment.getDataDirectory();
-
-            Log.d(TAG,  "sd.canWrite(): " + (sd.canWrite() ? "true" : "false"));
-            if (sd.canWrite()) {
-                String currentDBPath = "//data//se.thirdbase.target//databases//Precision.db";
-                String backupDBPath = "Precision.db";
-                File currentDB = new File(data, currentDBPath);
-                File backupDB = new File(sd, backupDBPath);
-
-                Log.d(TAG,  "currentDB.exists(): " + (currentDB.exists() ? "true" : "false"));
-                if (currentDB.exists()) {
-                    FileChannel src = new FileInputStream(currentDB).getChannel();
-                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
-                    dst.transferFrom(src, 0, src.size());
-                    src.close();
-                    dst.close();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

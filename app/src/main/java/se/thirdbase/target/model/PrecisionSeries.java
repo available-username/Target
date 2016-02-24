@@ -12,8 +12,6 @@ import java.util.List;
  */
 public class PrecisionSeries implements Parcelable {
 
-    private static final float RING_RADIUS_INCREMENT = 2.5f;
-
     private List<BulletHole> mBulletHoles;
     private int mScore;
 
@@ -81,6 +79,16 @@ public class PrecisionSeries implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mBulletHoles);
         dest.writeInt(mScore);
+    }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        for (BulletHole hole : mBulletHoles) {
+            builder.append(String.format(" %d", PrecisionTarget.getBulletScore(hole)));
+        }
+
+        return String.format("PrecisionSeries(score=%d,%s)", mScore, builder.toString());
     }
 }
 

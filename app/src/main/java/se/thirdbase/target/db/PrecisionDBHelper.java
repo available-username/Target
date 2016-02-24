@@ -3,6 +3,7 @@ package se.thirdbase.target.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Log;
 
 import se.thirdbase.target.model.PrecisionSeries;
@@ -14,7 +15,7 @@ public class PrecisionDBHelper extends SQLiteOpenHelper {
 
     private static final String TAG = PrecisionDBHelper.class.getSimpleName();
 
-    public static final String DATABASE_NAME = "Precision.db";
+    public static final String DATABASE_NAME = "precision.db";
     public static final int DATABASE_VERSION = 1;
 
     private static PrecisionDBHelper mInstance;
@@ -36,15 +37,25 @@ public class PrecisionDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d(TAG, "onCreate()");
-        db.execSQL(BulletHoleContract.SQL_CREATE_BULLET_HOLE);
-        db.execSQL(PrecisionSeriesContract.SQL_CREATE_SERIES);
-        db.execSQL(PrecisionRoundContract.SQL_CREATE_PRECISION);
+        db.beginTransaction();
+        try {
+            db.execSQL(BulletHoleContract.SQL_CREATE_BULLET_HOLE);
+            db.execSQL(PrecisionSeriesContract.SQL_CREATE_SERIES);
+            db.execSQL(PrecisionRoundContract.SQL_CREATE_PRECISION);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
     }
 
     @Override
     public void onOpen(SQLiteDatabase db) {
         Log.d(TAG, "onOpen()");
+
         super.onOpen(db);
+
+        db.execSQL("PRAGMA foreign_keys = ON;");
+        //db.setForeignKeyConstraintsEnabled(true);
     }
 
     @Override
