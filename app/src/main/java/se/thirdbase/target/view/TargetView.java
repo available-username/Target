@@ -65,9 +65,6 @@ public abstract class TargetView extends View {
     private static final float MIN_ZOOM_FACTOR = 1.0f;
     private static final float MAX_ZOOM_FACTOR = 5.0f;
 
-    private static final float VIRTUAL_WIDTH = 60f; //cm
-    private static float VIRTUAL_HEIGHT;
-
     protected ViewMath mViewMath;
 
     private ActionState mActionState = ActionState.IDLE;
@@ -259,12 +256,10 @@ public abstract class TargetView extends View {
 
         PointF p = mViewMath.translateCoordinate(x, y);
         Log.d(TAG, String.format("Add bullet: %s", p));
-        //p.x = mRealWidth / 2 - pixelX / zoomedPixelsPerCm;
-        //p.y = pixelY / zoomedPixelsPerCm - mRealHeight / 2;
 
         float pixelsPerCm = mViewMath.getPixelsPerCm();
-        p.x = VIRTUAL_WIDTH / 2 - p.x / pixelsPerCm;
-        p.y = p.y / pixelsPerCm - VIRTUAL_HEIGHT / 2;
+        p.x = getVirtualWidth() / 2 - p.x / pixelsPerCm;
+        p.y = p.y / pixelsPerCm - getVirtualHeight() / 2;
 
         float radius = (float)Math.sqrt(p.x * p.x + p.y * p.y);
         float angle = (float)(Math.PI - Math.atan2(p.y, p.x));
@@ -391,6 +386,8 @@ public abstract class TargetView extends View {
     }
 
     protected void drawBullets(Canvas canvas) {
+        Log.d(TAG, "drawBullets()");
+
         Paint paint = new Paint();
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -410,8 +407,8 @@ public abstract class TargetView extends View {
 
         // Bullet coordinates unit is centimeters
         PointF p = bulletHole.toCartesianCoordinates();
-        p.x += VIRTUAL_WIDTH / 2;
-        p.y += VIRTUAL_HEIGHT / 2;
+        p.x += getVirtualWidth() / 2;
+        p.y += getVirtualHeight() / 2;
         p.x *= pixelsPerCm;
         p.y *= pixelsPerCm;
 
@@ -422,16 +419,24 @@ public abstract class TargetView extends View {
 
     protected abstract void drawTarget(Canvas canvas);
 
+    protected abstract float getVirtualWidth();
+
+    protected abstract void setVirtualWidth(float width);
+
+    protected abstract float getVirtualHeight();
+
+    protected abstract void setVirtualHeight(float height);
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
         Log.d(TAG, String.format("onSizeChanged(%d, %d, %d, %d)", w, h, oldw, oldh));
 
-        float pixelsPerCm = w / VIRTUAL_WIDTH;
-        VIRTUAL_HEIGHT = h / pixelsPerCm;
+        float pixelsPerCm = w / getVirtualWidth();
+        setVirtualHeight(h / pixelsPerCm);
 
-        mViewMath = new ViewMath(w, h, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, MAX_ZOOM_FACTOR);
+        mViewMath = new ViewMath(w, h, getVirtualWidth(), getVirtualHeight(), MAX_ZOOM_FACTOR);
     }
 
     @Override

@@ -96,7 +96,7 @@ public class GraphView extends View {
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
 
-        createSampleData2();
+        //createSampleData2();
     }
 
     public GraphView(Context context) {
@@ -126,8 +126,8 @@ public class GraphView extends View {
         Random rand = new Random();
 
         for (int i = 0; i < 10; i++) {
-            //Pair<Float, Float> point = new Pair((float)(i + 1), (float)rand.nextInt(10));
-            Pair<Float, Float> point = new Pair((float)(i + 1), 10f);
+            Pair<Float, Float> point = new Pair((float)(i + 1), (float)rand.nextInt(10));
+            //Pair<Float, Float> point = new Pair((float)(i + 1), 10f);
             data.add(point);
         }
 
@@ -193,6 +193,9 @@ public class GraphView extends View {
         stroke.setStyle(Paint.Style.STROKE);
         stroke.setStrokeWidth(1);
 
+        // Draw level indicators
+        drawLevelIndicators(canvas);
+
         for (Integer key : mNormalizedDataMap.keySet()) {
             List<Pair<Float, Float>> data = mNormalizedDataMap.get(key);
 
@@ -201,9 +204,30 @@ public class GraphView extends View {
             drawSparseBars(canvas, data, fill, stroke);
         }
 
-
         // Draw axis
+        drawAxis(canvas);
+    }
+
+    private void drawLevelIndicators(Canvas canvas) {
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(1);
+
+
+        for (int i = 1; i < NBR_BAR_LEVES; i++) {
+            float y = (VIRTUAL_HEIGHT - 2 * YMARGIN) * i / NBR_BAR_LEVES;
+            drawLine(canvas, XMARGIN, y + YMARGIN, VIRTUAL_WIDTH - XMARGIN, y + YMARGIN, paint);
+        }
+    }
+
+    private void drawAxis(Canvas canvas) {
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setAntiAlias(true);
+        paint.setStrokeWidth(1);
+
         drawLine(canvas, XMARGIN, YMARGIN, VIRTUAL_WIDTH - XMARGIN, YMARGIN, paint);
         drawLine(canvas, XMARGIN, YMARGIN, XMARGIN, VIRTUAL_HEIGHT - YMARGIN, paint);
     }
@@ -246,14 +270,14 @@ public class GraphView extends View {
         }
     }
 
+    private static final int NBR_BAR_LEVES = 10;
+
     private void drawSparseBars(Canvas canvas, List<Pair<Float, Float>> data, Paint fill, Paint stroke) {
         Log.d(TAG, "drawSparseBars()");
 
         int size = data.size();
-
         float barWidth = (VIRTUAL_WIDTH - 2 * XMARGIN) / size;
         float barSpace = barWidth / 4;
-        //barWidth -= 2 * barSpace;
 
         for (int i = 0; i < size; i++) {
             Pair<Float, Float> pair = data.get(i);
@@ -270,7 +294,7 @@ public class GraphView extends View {
         PointF leftTop = translate(left, top);
         PointF rightBottom = translate(right, bottom);
 
-        Log.d(TAG, String.format("drawRect(%.2f, %.2f, %.2f, %.2f)", leftTop.x, leftTop.y, rightBottom.x, rightBottom.y));
+        //Log.d(TAG, String.format("drawRect(%.2f, %.2f, %.2f, %.2f)", leftTop.x, leftTop.y, rightBottom.x, rightBottom.y));
 
         canvas.drawRect(leftTop.x, leftTop.y, rightBottom.x, rightBottom.y, paint);
     }
@@ -279,7 +303,7 @@ public class GraphView extends View {
         PointF start = translate(startX, startY);
         PointF end = translate(endX, endY);
 
-        Log.d(TAG, String.format("drawLine(%.2f, %.2f, %.2f, %.2f", start.x, start.y, end.x, end.y));
+        //Log.d(TAG, String.format("drawLine(%.2f, %.2f, %.2f, %.2f", start.x, start.y, end.x, end.y));
 
         canvas.drawLine(start.x, start.y, end.x, end.y, paint);
     }
@@ -310,7 +334,6 @@ public class GraphView extends View {
         Log.d(TAG, String.format("onSizeChanged(%d, %d, %d, %d)", w, h, oldw, oldh));
         mRect = new Rect(0, 0, w, h);
 
-        //VIRTUAL_HEIGHT = VIRTUAL_WIDTH / RATIO;
         VIRTUAL_HEIGHT = (VIRTUAL_WIDTH / w) * h;
 
         Log.d(TAG, String.format("VIRTUAL WIDTH/HEIGHT: %.2f / %.2f", VIRTUAL_WIDTH, VIRTUAL_HEIGHT));

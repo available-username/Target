@@ -124,9 +124,6 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
             mTargetView.setBulletHoles(bulletHoles);
         }
 
-        mCountText.setText("" + mTargetView.getNbrOfBulletsHoles());
-        mScoreText.setText("" + mTargetView.getTotalScore());
-
         mSaveButton = (Button)view.findViewById(R.id.target_layout_save_button);
         mSaveButton.setOnClickListener(mOnSaveClickedListener);
 
@@ -162,14 +159,24 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
 
         populateWithTestData();
 
+        updateTextFields();
+
         return view;
+    }
+
+    private void updateTextFields() {
+        String countText = getResources().getString(R.string.number_of_bullets, mTargetView.getNbrOfBulletsHoles());
+        String scoreText = getResources().getString(R.string.points, mTargetView.getTotalScore());
+        mCountText.setText(countText);
+        mScoreText.setText(scoreText);
+
     }
 
     private void populateWithTestData() {
         List<BulletHole> holes = new ArrayList<>();
         Random random = new Random();
         for (int i = 0; i < PrecisionTarget.MAX_NBR_BULLETS; i++) {
-            BulletHole hole = new BulletHole(BulletCaliber.CAL_22, random.nextFloat() * 25f, (float)(random.nextFloat() * Math.PI * 2));
+            BulletHole hole = new BulletHole(BulletCaliber.CAL_22, random.nextFloat() * 10f, (float)(random.nextFloat() * Math.PI * 2));
             holes.add(hole);
         }
         mTargetView.setBulletHoles(holes);
@@ -237,10 +244,7 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
             toggleButton(mAddButton, R.drawable.add);
         }
 
-        int score = mTargetView.getTotalScore();
-
-        mCountText.setText("" + nbrBullets);
-        mScoreText.setText("" + score);
+        updateTextFields();
     }
 
     private void onEnterAddBullet() {

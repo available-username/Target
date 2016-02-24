@@ -20,6 +20,7 @@ import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 import se.thirdbase.target.model.PrecisionTarget;
 import se.thirdbase.target.view.GraphView;
+import se.thirdbase.target.view.PrecisionTargetHeatMapView;
 import se.thirdbase.target.view.PrecisionTargetView;
 
 /**
@@ -34,7 +35,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
     private TextView mScoreText;
     private TextView mMaxSpreadText;
     private TextView mAvgSpreadText;
-    private PrecisionTargetView mPrecisionTargetView;
+    private PrecisionTargetHeatMapView mPrecisionTargetView;
     private GraphView mDistributionGraphView;
 
     private PrecisionRound mPrecisionRound;
@@ -65,38 +66,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mPrecisionRound = arguments.getParcelable(BUNDLE_TAG_PRECISION_ROUND);
 
         List<PrecisionSeries> precisionSeries = mPrecisionRound.getPrecisionSeries();
-        /*
-        int nbrSeries = precisionSeries.size();
-        int nbrDistances = 0;
 
-        for (int i = 0; i < nbrSeries; i++) {
-            PrecisionSeries series = precisionSeries.get(i);
-
-            mScore += series.getScore();
-
-            List<BulletHole> bulletHoles = series.getBulletHoles();
-            int nbrBullets = bulletHoles.size();
-
-            mNbrBullets += nbrBullets;
-
-            for (int j = 0; j < nbrBullets - 1; j++) {
-                for (int k = j + 1; k < nbrBullets; k++) {
-
-                    float distance = getSpread(bulletHoles.get(j), bulletHoles.get(k));
-
-                    if (distance > mMaxSpread) {
-                        mMaxSpread = distance;
-                    }
-
-                    mAvgSpread += distance;
-                    nbrDistances += 1;
-                }
-            }
-        }
-
-        // Let avgSpread be zero if there's only one bullet
-        mAvgSpread = nbrDistances > 0 ? mAvgSpread / nbrDistances : 0;
-        */
         mMaxSpread = calculateMaxSpread(precisionSeries);
         mAvgSpread = calculateAverageSpread(precisionSeries);
         mScore = calculateScore(precisionSeries);
@@ -213,9 +183,30 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mDistributionGraphView = (GraphView) view.findViewById(R.id.precision_round_summary_layout_graph_view);
         mDistributionGraphView.addDataPoints(mScoreDistribution);
 
-        mPrecisionTargetView = (PrecisionTargetView) view.findViewById(R.id.precision_round_summary_layout_target_view);
+        mPrecisionTargetView = (PrecisionTargetHeatMapView) view.findViewById(R.id.precision_round_summary_layout_target_view);
+
+        addBulletsToView();
+
+        updateTextFields();
 
         return view;
+    }
+
+    private void updateTextFields() {
+        mScoreText.setText(getResources().getString(R.string.points, mScore));
+        mMaxSpreadText.setText(getResources().getString(R.string.max_spread, mMaxSpread));
+        mAvgSpreadText.setText(getResources().getString(R.string.mean_spread, mAvgSpread));
+    }
+
+    private void addBulletsToView() {
+        List<BulletHole> allHoles = new ArrayList<>();
+
+        for (PrecisionSeries series : mPrecisionRound.getPrecisionSeries()) {
+            List<BulletHole> holes = series.getBulletHoles();
+            allHoles.addAll(holes);
+        }
+
+        mPrecisionTargetView.setBulletHoles(allHoles);
     }
 
     @Override

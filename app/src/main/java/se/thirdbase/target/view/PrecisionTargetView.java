@@ -18,6 +18,9 @@ public class PrecisionTargetView extends TargetView {
 
     private static final String TAG = PrecisionTargetView.class.getSimpleName();
 
+    private float mVirtualWidth = 60f;
+    private float mVirtualHeight;
+
     public PrecisionTargetView(Context context) {
         super(context, null);
     }
@@ -47,6 +50,26 @@ public class PrecisionTargetView extends TargetView {
         }
 
         return total;
+    }
+
+    @Override
+    protected float getVirtualWidth() {
+        return mVirtualWidth;
+    }
+
+    @Override
+    protected void setVirtualWidth(float width) {
+        mVirtualWidth = width;
+    }
+
+    @Override
+    protected float getVirtualHeight() {
+        return mVirtualHeight;
+    }
+
+    @Override
+    protected void setVirtualHeight(float height) {
+        mVirtualHeight = height;
     }
 
     private boolean touches(float bulletRadius, float bulletDiameter, float radius) {
