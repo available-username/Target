@@ -15,6 +15,7 @@
 
     <!-- Round summary strings -->
     <string name="point_distribution">Poängdistribution</string>
+    <string name="hit_distribution">Träffbild</string>
     <string name="hit_center_of_mass">Träfftyngdpunkt</string>
     <string name="max_spread">Max spridning: %1$.2fcm</string>
     <string name="mean_spread">Medelspridning: %1$.2fcm</string>

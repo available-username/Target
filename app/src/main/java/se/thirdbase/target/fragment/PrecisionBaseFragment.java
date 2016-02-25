@@ -46,4 +46,16 @@ public class PrecisionBaseFragment extends Fragment {
             mListener.onPrecisionRoundComplete(precisionRound);
         }
     }
+
+    protected void onPrecisionRoundPointsDistribution(PrecisionRound precisionRound) {
+        if (mListener != null) {
+            mListener.onPrecisionRoundPointsDistribution(precisionRound);
+        }
+    }
+
+    protected void onPrecisionRoundHitsDistribution(PrecisionRound precisionRound) {
+        if (mListener != null) {
+            mListener.onPrecisionRoundHitsDistribution(precisionRound);
+        }
+    }
 }

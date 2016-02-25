@@ -40,6 +40,7 @@ public class PrecisionRound implements Parcelable {
         mPrecisionSeries = in.createTypedArrayList(PrecisionSeries.CREATOR);
         mScore = in.readInt();
         mNotes = in.readString();
+        mCalendar = (Calendar) in.readSerializable();
     }
 
     public static final Creator<PrecisionRound> CREATOR = new Creator<PrecisionRound>() {
@@ -112,6 +113,9 @@ public class PrecisionRound implements Parcelable {
         dest.writeTypedList(mPrecisionSeries);
         dest.writeInt(mScore);
         dest.writeString(mNotes);
+        if (mCalendar != null) {
+            dest.writeSerializable(mCalendar);
+        }
     }
 
     public String toString() {

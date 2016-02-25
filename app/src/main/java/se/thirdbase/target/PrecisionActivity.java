@@ -15,6 +15,8 @@ import java.util.Calendar;
 
 import se.thirdbase.target.db.PrecisionDBHelper;
 import se.thirdbase.target.db.PrecisionRoundContract;
+import se.thirdbase.target.fragment.PrecisionHitDistributionFragment;
+import se.thirdbase.target.fragment.PrecisionPointDistributionFragment;
 import se.thirdbase.target.fragment.PrecisionRoundFragment;
 import se.thirdbase.target.fragment.PrecisionRoundSummaryFragment;
 import se.thirdbase.target.fragment.PrecisionTargetFragment;
@@ -28,6 +30,8 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     private static final String BACK_STACK_TAG_PRECISION_ROUND = "BACK_STACK_TAG_PRECISION_ROUND";
     private static final String BACK_STACK_TAG_PRECISION_SERIES = "BACK_STACK_TAG_PRECISION_SERIES";
     private static final String BACK_STACK_TAG_PRECISION_SUMMARY = "BACK_STACK_TAG_PRECISION_SUMMARY";
+    private static final String BACK_STACK_TAG_PRECISION_POINT_DISTRIBUTION = "BACK_STACK_TAG_PRECISION_POINT_DISTRIBUTION";
+    private static final String BACK_STACK_TAG_PRECISION_HIT_DISTRIBUTION = "BACK_STACK_TAG_PRECISION_HIT_DISTRIBUTION";
 
     private PrecisionRound mPrecisionRound = new PrecisionRound();
 
@@ -93,5 +97,21 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         popBackStack();
         Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
         displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SUMMARY);
+    }
+
+    @Override
+    public void onPrecisionRoundPointsDistribution(PrecisionRound precisionRound) {
+        Log.d(TAG, "onPrecisionRoundPointsDistribution()");
+
+        Fragment fragment = PrecisionPointDistributionFragment.newInstance(precisionRound);
+        displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_POINT_DISTRIBUTION);
+    }
+
+    @Override
+    public void onPrecisionRoundHitsDistribution(PrecisionRound precisionRound) {
+        Log.d(TAG, "onPrecisionRoundHitsDistribution()");
+
+        Fragment fragment = PrecisionHitDistributionFragment.newInstance(precisionRound);
+        displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_HIT_DISTRIBUTION);
     }
 }

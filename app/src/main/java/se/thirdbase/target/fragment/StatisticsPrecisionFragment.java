@@ -107,7 +107,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
                     PrecisionRound precisionRound = PrecisionRoundContract.retrievePrecisionRound(db, id);
 
                     precisionRounds.add(precisionRound);
-                    
+
                     cursor.moveToNext();
                 }
             } finally {

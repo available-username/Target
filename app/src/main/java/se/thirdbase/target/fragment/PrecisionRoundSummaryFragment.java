@@ -7,21 +7,17 @@ import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 import se.thirdbase.target.model.PrecisionTarget;
-import se.thirdbase.target.view.GraphView;
-import se.thirdbase.target.view.PrecisionTargetHeatMapView;
-import se.thirdbase.target.view.PrecisionTargetView;
 
 /**
  * Created by alexp on 2/19/16.
@@ -35,8 +31,8 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
     private TextView mScoreText;
     private TextView mMaxSpreadText;
     private TextView mAvgSpreadText;
-    private PrecisionTargetHeatMapView mPrecisionTargetView;
-    private GraphView mDistributionGraphView;
+    private Button mPointsDistributionButton;
+    private Button mHitsDistributionButton;
 
     private PrecisionRound mPrecisionRound;
     private int mScore = 0;
@@ -180,12 +176,30 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mAvgSpreadText = (TextView) view.findViewById(R.id.precision_round_summary_layout_avg_spread);
         mAvgSpreadText.setText(String.format("%.2fcm", mAvgSpread));
 
+        /*
         mDistributionGraphView = (GraphView) view.findViewById(R.id.precision_round_summary_layout_graph_view);
         mDistributionGraphView.addDataPoints(mScoreDistribution);
 
         mPrecisionTargetView = (PrecisionTargetHeatMapView) view.findViewById(R.id.precision_round_summary_layout_target_view);
+        */
 
-        addBulletsToView();
+        mPointsDistributionButton = (Button) view.findViewById(R.id.precision_round_summary_layout_points_distribution_button);
+
+        mPointsDistributionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPrecisionRoundPointsDistribution(mPrecisionRound);
+            }
+        });
+
+        mHitsDistributionButton = (Button) view.findViewById(R.id.precision_round_summary_layout_hits_distribution_button);
+
+        mHitsDistributionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPrecisionRoundHitsDistribution(mPrecisionRound);
+            }
+        });
 
         updateTextFields();
 
@@ -206,7 +220,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
             allHoles.addAll(holes);
         }
 
-        mPrecisionTargetView.setBulletHoles(allHoles);
+        //mPrecisionTargetView.setBulletHoles(allHoles);
     }
 
     @Override

@@ -35,6 +35,7 @@ public class PrecisionSeries implements Parcelable {
     protected PrecisionSeries(Parcel in) {
         mBulletHoles = in.createTypedArrayList(BulletHole.CREATOR);
         mScore = in.readInt();
+        mCalendar = (Calendar) in.readSerializable();
     }
 
     public static final Creator<PrecisionSeries> CREATOR = new Creator<PrecisionSeries>() {
@@ -95,6 +96,9 @@ public class PrecisionSeries implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mBulletHoles);
         dest.writeInt(mScore);
+        if (mCalendar != null) {
+            dest.writeSerializable(mCalendar);
+        }
     }
 
     public String toString() {
