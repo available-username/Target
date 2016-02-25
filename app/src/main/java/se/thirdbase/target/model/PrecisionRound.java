@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,11 +14,12 @@ import java.util.List;
  */
 public class PrecisionRound implements Parcelable {
 
-    public static final int MAX_NBR_SERIES = 2; //real number is 7
+    public static final int MAX_NBR_SERIES = 7; //real number is 7
 
     private List<PrecisionSeries> mPrecisionSeries;
     private int mScore;
     private String mNotes;
+    private Calendar mCalendar;
 
     public PrecisionRound() {
         mPrecisionSeries = new ArrayList<>();
@@ -27,6 +29,11 @@ public class PrecisionRound implements Parcelable {
         mPrecisionSeries = precisionSeries;
         mScore = calculateScore(precisionSeries);
         mNotes = notes;
+    }
+
+    public PrecisionRound(List<PrecisionSeries> precisionSeries, String notes, Calendar calendar) {
+        this(precisionSeries, notes);
+        mCalendar = calendar;
     }
 
     protected PrecisionRound(Parcel in) {
@@ -75,6 +82,14 @@ public class PrecisionRound implements Parcelable {
 
     public int getNbrSeries() {
         return mPrecisionSeries.size();
+    }
+
+    public void setDate(Calendar calendar) {
+        mCalendar = calendar;
+    }
+
+    public Calendar getDate() {
+        return mCalendar;
     }
 
     private int calculateScore(List<PrecisionSeries> precisionSeries) {

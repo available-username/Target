@@ -7,10 +7,12 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.util.SQLUtil;
 
 /**
  * Created by alexp on 2/18/16.
@@ -22,6 +24,7 @@ public final class PrecisionSeriesContract {
     public static final String TABLE_NAME = "precision_series";
 
     public interface PrecisionSeriesEntry extends  BaseColumns {
+        String COLUMN_NAME_DATE_TIME = "date_time";
         String COLUMN_NAME_BULLET_1 = "bullet1";
         String COLUMN_NAME_BULLET_2 = "bullet2";
         String COLUMN_NAME_BULLET_3 = "bullet3";
@@ -32,6 +35,7 @@ public final class PrecisionSeriesContract {
 
     public static final String SQL_CREATE_SERIES =
             String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+                            "%s DATETIME DEFAULT CURRENT_TIMESTAMP," +
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
@@ -45,6 +49,7 @@ public final class PrecisionSeriesContract {
                             "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE);",
                     TABLE_NAME,
                     PrecisionSeriesEntry._ID,
+                    PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME,
                     PrecisionSeriesEntry.COLUMN_NAME_BULLET_1,
                     PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
                     PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
@@ -65,7 +70,9 @@ public final class PrecisionSeriesContract {
                 PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
                 PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
                 PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
-                PrecisionSeriesEntry.COLUMN_NAME_BULLET_5
+                PrecisionSeriesEntry.COLUMN_NAME_BULLET_5,
+                PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME,
+                PrecisionSeriesEntry.COLUMN_NAME_SCORE
         };
 
         Cursor cursor = db.query(
@@ -82,18 +89,24 @@ public final class PrecisionSeriesContract {
 
         List<BulletHole> bulletHoles = new ArrayList<>();
 
+        Calendar calendar = null;
         if (cursor != null && cursor.moveToFirst()) {
-            for (int i = 0; i < columns.length; i++) {
+            try {
+                for (int i = 0; i < columns.length - 2; i++) {
 
-                int bulletHoleId = cursor.getInt(cursor.getColumnIndex(columns[i]));
-                BulletHole bulletHole = BulletHoleContract.retrieveBulletHole(db, bulletHoleId);
-                bulletHoles.add(bulletHole);
+                    int bulletHoleId = cursor.getInt(cursor.getColumnIndex(columns[i]));
+                    BulletHole bulletHole = BulletHoleContract.retrieveBulletHole(db, bulletHoleId);
+                    bulletHoles.add(bulletHole);
+                }
+
+                String calendarStr = cursor.getString(cursor.getColumnIndex(PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME));
+                calendar = SQLUtil.string2Calendar(calendarStr);
+            } finally {
+                cursor.close();
             }
-
-            cursor.close();
         }
 
-        return new PrecisionSeries(bulletHoles);
+        return new PrecisionSeries(bulletHoles, calendar);
     }
 
     public static long storePrecisionSeries(SQLiteDatabase db, PrecisionSeries precisionSeries) {

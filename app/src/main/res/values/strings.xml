@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Target</string>
+
+    <!-- Startup strings -->
+    <string name="new_precision_round">Precision</string>
+    <string name="statistics">Statistik</string>
+    <string name="settings">Inställningar</string>
+
+    <!-- Target view strings -->
+    <string name="number_of_bullets">Antal kulor: %1$d</string>
+    <string name="points">Poäng: %1$d</string>
+    <string name="points_short">%dp</string>
+    <string name="save">Spara</string>
+    <string name="max_bullets_reached">Kan inte lägga till fler kulor</string>
+
+    <!-- Round summary strings -->
+    <string name="point_distribution">Poängdistribution</string>
+    <string name="hit_center_of_mass">Träfftyngdpunkt</string>
+    <string name="max_spread">Max spridning: %1$.2fcm</string>
+    <string name="mean_spread">Medelspridning: %1$.2fcm</string>
+
+    <!-- Statistics strings -->
+    <string name="progress">Utveckling</string>
+</resources>

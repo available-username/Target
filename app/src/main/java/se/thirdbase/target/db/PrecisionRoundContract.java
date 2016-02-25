@@ -7,11 +7,13 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.util.SQLUtil;
 
 /**
  * Created by alexp on 2/15/16.
@@ -86,6 +88,7 @@ public final class PrecisionRoundContract {
             PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
             PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
             PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
+            PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
             PrecisionRoundEntry.COLUMN_NAME_NOTES
         };
 
@@ -104,28 +107,30 @@ public final class PrecisionRoundContract {
         List<PrecisionSeries> precisionSeries = new ArrayList<>();
 
         String notes = null;
+        Calendar calendar = null;
+
         if (cursor != null && cursor.moveToFirst()) {
-            for (int i = 0; i < columns.length - 1; i++) {
-                int seriesId = cursor.getInt(cursor.getColumnIndex(columns[i]));
-                PrecisionSeries series = PrecisionSeriesContract.retrievePrecisionSeries(db, seriesId);
-                precisionSeries.add(series);
+            try {
+                for (int i = 0; i < columns.length - 2; i++) {
+                    int seriesId = cursor.getInt(cursor.getColumnIndex(columns[i]));
+                    PrecisionSeries series = PrecisionSeriesContract.retrievePrecisionSeries(db, seriesId);
+                    precisionSeries.add(series);
+                }
+
+                String calendarStr = cursor.getString(cursor.getColumnIndex(PrecisionRoundEntry.COLUMN_NAME_DATE_TIME));
+                calendar = SQLUtil.string2Calendar(calendarStr);
+
+                notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundEntry.COLUMN_NAME_NOTES));
+            } finally {
+                cursor.close();
             }
-
-            notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundEntry.COLUMN_NAME_NOTES));
-
-            cursor.close();
         }
 
 
-        return new PrecisionRound(precisionSeries, notes);
+        return new PrecisionRound(precisionSeries, notes, calendar);
     }
 
     public static List<PrecisionRound> retrieveAllPrecisionRounds(SQLiteDatabase db) {
-        /*
-        String[] columns = { PrecisionRoundEntry.COLUMN_NAME_SCORE, PrecisionRoundEntry._ID};
-
-        Cursor cursor = db.rawQuery(String.format("SELECT %s FROM %s", PrecisionRoundEntry._ID, PrecisionRoundContract.TABLE_NAME), null);
-        */
         String[] columns = { PrecisionRoundEntry._ID };
 
         Cursor cursor = db.query(PrecisionRoundContract.TABLE_NAME, columns, null, null, null, null, null);

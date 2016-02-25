@@ -16,6 +16,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".PrecisionActivity"></activity>
+        <activity android:name=".StatisticsActivity"></activity>
     </application>
 
 </manifest>

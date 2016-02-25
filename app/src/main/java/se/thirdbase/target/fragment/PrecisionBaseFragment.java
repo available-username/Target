@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 
 import se.thirdbase.target.PrecisionStateListener;
-import se.thirdbase.target.StateListener;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 

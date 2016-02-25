@@ -56,6 +56,9 @@ public class MainActivity extends BaseActivity implements StateListener {
     @Override
     public void onStatistics() {
         Log.d(TAG, "onStatistics()");
+
+        Intent intent = new Intent(this, StatisticsActivity.class);
+        startActivity(intent);
     }
 
     private void dumpDB() {

@@ -47,16 +47,21 @@ public class BulletHoleContract {
                 null,
                 null);
 
-        if (cursor != null && cursor.moveToFirst()) {
-            BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_CALIBER))];
-            float angle = cursor.getFloat(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_ANGLE));
-            float radius = cursor.getFloat(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_RADIUS));
+        BulletHole hole = null;
 
-            cursor.close();
-            return new BulletHole(caliber, radius, angle);
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_CALIBER))];
+                float angle = cursor.getFloat(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_ANGLE));
+                float radius = cursor.getFloat(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_RADIUS));
+
+                hole = new BulletHole(caliber, radius, angle);
+            } finally {
+                cursor.close();
+            }
         }
 
-        return null;
+        return hole;
     }
 
     public static long storeBulletHole(SQLiteDatabase db, BulletHole bulletHole) {

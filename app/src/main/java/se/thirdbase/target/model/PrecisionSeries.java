@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -15,6 +16,8 @@ public class PrecisionSeries implements Parcelable {
     private List<BulletHole> mBulletHoles;
     private int mScore;
 
+    private Calendar mCalendar;
+
     public PrecisionSeries() {
         mBulletHoles = new ArrayList<>();
     }
@@ -22,6 +25,11 @@ public class PrecisionSeries implements Parcelable {
     public PrecisionSeries(List<BulletHole> bulletHoles) {
         mBulletHoles = bulletHoles;
         mScore = calculateScore(bulletHoles);
+    }
+
+    public PrecisionSeries(List<BulletHole> bulletHoles, Calendar calendar) {
+        this(bulletHoles);
+        mCalendar = calendar;
     }
 
     protected PrecisionSeries(Parcel in) {
@@ -68,6 +76,14 @@ public class PrecisionSeries implements Parcelable {
 
     public int getScore() {
         return mScore;
+    }
+
+    public void setDate(Calendar calendar) {
+        mCalendar = calendar;
+    }
+
+    public Calendar getDate() {
+        return mCalendar;
     }
 
     @Override

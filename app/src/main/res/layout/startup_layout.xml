@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/new_precision_round"
+        android:drawableLeft="@drawable/add"
+        android:drawableStart="@drawable/add"
+        android:background="@null"
+        android:id="@+id/startup_layout_new_precision_round"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/statistics"
+        android:drawableLeft="@drawable/statistics"
+        android:drawableStart="@drawable/statistics"
+        android:background="@null"
+        android:id="@+id/startup_layout_statistics"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/settings"
+        android:drawableLeft="@drawable/settings"
+        android:drawableStart="@drawable/settings"
+        android:background="@null"
+        android:id="@+id/startup_layout_settings"/>
+</LinearLayout>

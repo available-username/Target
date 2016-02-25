@@ -9,11 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.List;
 
 import se.thirdbase.target.R;
+import se.thirdbase.target.adapter.PrecisionRoundListAdapter;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 
@@ -27,6 +29,7 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
     private static final String BUNDLE_TAG_PRECISION_ROUND = "BUNDLE_TAG_PRECISION_ROUND";
 
     private ListView mSeriesList;
+    private Button mAddButton;
     private PrecisionRound mPrecisionRound;
 
     public static PrecisionRoundFragment newInstance() {
@@ -61,28 +64,18 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
         mSeriesList = (ListView)view.findViewById(R.id.precision_layout_series_list);
         mSeriesList.setOnItemClickListener(mSeriesClickedListener);
 
+        mAddButton = (Button) view.findViewById(R.id.precision_layout_add_series);
+        mAddButton.setOnClickListener(mAddButtonClicked);
+
         if (savedInstanceState != null) {
             onRestoreInstanceState(savedInstanceState);
         }
 
         int nPrecisionSeries = mPrecisionRound.getPrecisionSeries().size();
+        PrecisionSeries[] precisionSeries = new PrecisionSeries[nPrecisionSeries];
+        mPrecisionRound.getPrecisionSeries().toArray(precisionSeries);
 
-        boolean limitReached = nPrecisionSeries == PrecisionRound.MAX_NBR_SERIES;
-
-        String[] seriesNames = new String[nPrecisionSeries + (limitReached ? 0 : 1)];
-
-        int i;
-        for (i = 0; i < nPrecisionSeries; i++) {
-            PrecisionSeries precisionSeries = mPrecisionRound.getPrecisionSeries().get(i);
-            seriesNames[i] = String.format("Serie %d: %d poäng", i + 1, precisionSeries.getScore());
-        }
-
-        if (!limitReached) {
-            seriesNames[i] = "+";
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, seriesNames);
-
+        PrecisionRoundListAdapter adapter = new PrecisionRoundListAdapter(getContext(), R.layout.precision_round_list_row, precisionSeries);
         mSeriesList.setAdapter(adapter);
 
         return view;
@@ -98,14 +91,22 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
         mPrecisionRound = bundle.getParcelable(BUNDLE_TAG_PRECISION_ROUND);
     }
 
-    AdapterView.OnItemClickListener mSeriesClickedListener = new AdapterView.OnItemClickListener() {
+    private View.OnClickListener mAddButtonClicked = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            onUpdatePrecisionSeries(null);
+        }
+    };
+
+    private AdapterView.OnItemClickListener mSeriesClickedListener = new AdapterView.OnItemClickListener() {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Log.d(TAG, String.format("Position: %d", position));
 
             List<PrecisionSeries> precisionSeries = mPrecisionRound.getPrecisionSeries();
-            PrecisionSeries series = position == precisionSeries.size() ? null : precisionSeries.get(position);
+            //PrecisionSeries series = position == precisionSeries.size() ? null : precisionSeries.get(position);
+            PrecisionSeries series = precisionSeries.get(position);
 
             onUpdatePrecisionSeries(series);
         }
