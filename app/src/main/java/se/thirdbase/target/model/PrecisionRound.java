@@ -214,29 +214,34 @@ public class PrecisionRound implements Parcelable {
                 null,  // orderBy
                 null); // limit
 
-        List<PrecisionSeries> precisionSeries = new ArrayList<>();
 
-        String notes = null;
-        long timestamp = 0;
+        PrecisionRound precisionRound = null;
 
         if (cursor != null && cursor.moveToFirst()) {
             try {
+                List<PrecisionSeries> precisionSeries = new ArrayList<>();
+
                 for (int i = 0; i < columns.length - 2; i++) {
                     int seriesId = cursor.getInt(cursor.getColumnIndex(columns[i]));
                     PrecisionSeries series = PrecisionSeries.fetch(db, seriesId);
-                    precisionSeries.add(series);
+                    if (series != null) {
+                        precisionSeries.add(series);
+                    }
                 }
 
-                timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME));
+                long timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME));
 
-                notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES));
+                String notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES));
+
+                precisionRound = new PrecisionRound(precisionSeries, notes, timestamp);
+
+                precisionRound.mDBHandle = id;
             } finally {
                 cursor.close();
             }
         }
 
-
-        return new PrecisionRound(precisionSeries, notes, timestamp);
+        return precisionRound;
     }
 
     public static List<PrecisionRound> fetchAll(SQLiteDatabase db, String orderBy) {

@@ -152,6 +152,7 @@ public class BulletHole implements Parcelable {
                 float radius = cursor.getFloat(cursor.getColumnIndex(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_RADIUS));
 
                 hole = new BulletHole(caliber, radius, angle);
+                hole.mDBHandle = id;
             } finally {
                 cursor.close();
             }

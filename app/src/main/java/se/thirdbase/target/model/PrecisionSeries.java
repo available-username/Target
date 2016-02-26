@@ -184,11 +184,12 @@ public class PrecisionSeries implements Parcelable {
                 null,  // orderBy
                 null); // limit
 
-        List<BulletHole> bulletHoles = new ArrayList<>();
+        PrecisionSeries precisionSeries = null;
 
-        long timestamp = 0;
         if (cursor != null && cursor.moveToFirst()) {
             try {
+                List<BulletHole> bulletHoles = new ArrayList<>();
+
                 for (int i = 0; i < columns.length - 2; i++) {
 
                     int bulletHoleId = cursor.getInt(cursor.getColumnIndex(columns[i]));
@@ -196,13 +197,16 @@ public class PrecisionSeries implements Parcelable {
                     bulletHoles.add(bulletHole);
                 }
 
-                timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME));
+                long timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME));
+
+                precisionSeries = new PrecisionSeries(bulletHoles, timestamp);
+                precisionSeries.mDBHandle = id;
             } finally {
                 cursor.close();
             }
         }
 
-        return new PrecisionSeries(bulletHoles, timestamp);
+        return precisionSeries;
     }
 
     public static List<PrecisionSeries> fetchAll(SQLiteDatabase db, String orderBy) {
