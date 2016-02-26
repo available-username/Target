@@ -3,10 +3,13 @@ package se.thirdbase.target.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 
 import se.thirdbase.target.R;
 
@@ -15,9 +18,7 @@ import se.thirdbase.target.R;
  */
 public class StartupFragment extends BaseFragment {
 
-    private Button mPrecisionButton;
-    private Button mStatisticsButton;
-    private Button mSettingsButton;
+    private static final String TAG = StartupFragment.class.getSimpleName();
 
     public static StartupFragment newInstance() {
         return new StartupFragment();
@@ -33,27 +34,29 @@ public class StartupFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.startup_layout, container, false);
 
-        mPrecisionButton = (Button) view.findViewById(R.id.startup_layout_new_precision_round);
-        mStatisticsButton = (Button) view.findViewById(R.id.startup_layout_statistics);
-        mSettingsButton = (Button) view.findViewById(R.id.startup_layout_settings);
+        ListView listView = (ListView) view.findViewById(R.id.startup_layout_list);
 
-        mPrecisionButton.setOnClickListener(mOnClickListener);
-        mStatisticsButton.setOnClickListener(mOnClickListener);
-        mSettingsButton.setOnClickListener(mOnClickListener);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG, String.format("position: %d, id: %d", position, id));
+                switch (position) {
+                    case 0:
+                        onPrecision();
+                        break;
+                    case 1:
+                        onStatistics();
+                        break;
+                    case 2:
+                    default:
+                        onStatistics();
+                        break;
+                }
+            }
+
+        });
 
         return view;
     }
-
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (v == mPrecisionButton) {
-                onPrecision();
-            } else if (v == mStatisticsButton) {
-                onStatistics();
-            } else if (v == mSettingsButton) {
-                onStatistics();
-            }
-        }
-    };
 }

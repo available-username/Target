@@ -3,7 +3,8 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+
+    <!--Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/new_precision_round"
@@ -28,5 +29,11 @@
         android:drawableLeft="@drawable/settings"
         android:drawableStart="@drawable/settings"
         android:background="@null"
-        android:id="@+id/startup_layout_settings"/>
+        android:id="@+id/startup_layout_settings"/-->
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:entries="@array/startup_options"
+        android:id="@+id/startup_layout_list"/>
 </LinearLayout>

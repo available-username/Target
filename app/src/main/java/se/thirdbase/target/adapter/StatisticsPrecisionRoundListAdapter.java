@@ -2,6 +2,7 @@ package se.thirdbase.target.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,8 +49,7 @@ public class StatisticsPrecisionRoundListAdapter extends ArrayAdapter<PrecisionR
             holder = (RoundHolder)row.getTag();
         }
 
-        Date date = new Date(mData[position].getTimestamp());
-        String dateText = date.toString();
+        String dateText = DateUtils.getRelativeTimeSpanString(mData[position].getTimestamp()).toString();
         String scoreText = getContext().getResources().getString(R.string.points_short, mData[position].getScore());
 
         holder.date.setText(dateText);

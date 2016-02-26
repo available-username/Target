@@ -6,6 +6,13 @@
     <string name="statistics">Statistik</string>
     <string name="settings">Inställningar</string>
 
+    <string-array name="startup_options">
+        <item>Precision</item>
+        <item>Statistik</item>
+        <item>Inställningar</item>
+    </string-array>
+
+
     <!-- Target view strings -->
     <string name="number_of_bullets">Antal kulor: %1$d</string>
     <string name="points">Poäng: %1$d</string>
