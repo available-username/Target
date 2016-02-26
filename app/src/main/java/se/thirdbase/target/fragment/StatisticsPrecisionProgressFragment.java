@@ -126,7 +126,7 @@ public class StatisticsPrecisionProgressFragment extends Fragment {
     public static List<PrecisionSeries> getAllPrecisionSeries(SQLiteDatabase db) {
         String orderBy = String.format("datetime(%s) DESC", PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME);
 
-        List<PrecisionSeries> precisionSeries = PrecisionSeriesContract.retrieveAllPrecisionSeries(db, orderBy);
+        List<PrecisionSeries> precisionSeries = PrecisionSeries.fetchAll(db, orderBy);
 
         Log.d(TAG, "Length: " + precisionSeries.size());
 

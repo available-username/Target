@@ -65,7 +65,7 @@ public class MainActivity extends BaseActivity implements StateListener {
         PrecisionDBHelper helper = PrecisionDBHelper.getInstance(this);
         SQLiteDatabase db = helper.getReadableDatabase();
 
-        List<PrecisionRound> precisionRoundList = PrecisionRoundContract.retrieveAllPrecisionRounds(db);
+        List<PrecisionRound> precisionRoundList = PrecisionRound.fetchAll(db, null);
 
         for (PrecisionRound round : precisionRoundList) {
             System.out.println(round);

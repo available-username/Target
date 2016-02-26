@@ -97,6 +97,16 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
         PrecisionDBHelper helper = PrecisionDBHelper.getInstance(getContext());
         SQLiteDatabase db = helper.getReadableDatabase();
 
+        String orderBy = String.format("%s DESC", PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME);
+
+        return PrecisionRound.fetchAll(db, orderBy);
+    }
+
+    /*
+    private List<PrecisionRound> getPrecisionRounds() {
+        PrecisionDBHelper helper = PrecisionDBHelper.getInstance(getContext());
+        SQLiteDatabase db = helper.getReadableDatabase();
+
 
         String[] columns = {
                 PrecisionRoundContract.PrecisionRoundEntry._ID,
@@ -119,7 +129,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
                 while (!cursor.isAfterLast()) {
                     int id = cursor.getInt(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry._ID));
 
-                    PrecisionRound precisionRound = PrecisionRoundContract.retrievePrecisionRound(db, id);
+                    PrecisionRound precisionRound = PrecisionRound.fetchAll(db, id);
 
                     precisionRounds.add(precisionRound);
 
@@ -132,6 +142,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
 
         return precisionRounds;
     }
+    */
 
     AdapterView.OnItemClickListener mPrecisionRoundSelectedListener = new AdapterView.OnItemClickListener() {
         @Override

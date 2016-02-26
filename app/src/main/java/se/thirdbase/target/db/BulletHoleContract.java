@@ -30,37 +30,4 @@ public class BulletHoleContract {
                     BulletHoleEntry.COLUMN_NAME_RADIUS);
 
     public static final String SQL_DROP_BULLET_HOLE = String.format("DROP TABLE IF EXISTS %s", TABLE_NAME);
-
-    public static BulletHole retrieveBulletHole(SQLiteDatabase db, long id) {
-        String[] columns = {
-                BulletHoleEntry.COLUMN_NAME_CALIBER,
-                BulletHoleEntry.COLUMN_NAME_ANGLE,
-                BulletHoleEntry.COLUMN_NAME_RADIUS
-        };
-
-        Cursor cursor = db.query(BulletHoleContract.TABLE_NAME,
-                columns,
-                BulletHoleEntry._ID + "=?",
-                new String[] {"" + id},
-                null,
-                null,
-                null,
-                null);
-
-        BulletHole hole = null;
-
-        if (cursor != null && cursor.moveToFirst()) {
-            try {
-                BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_CALIBER))];
-                float angle = cursor.getFloat(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_ANGLE));
-                float radius = cursor.getFloat(cursor.getColumnIndex(BulletHoleEntry.COLUMN_NAME_RADIUS));
-
-                hole = new BulletHole(caliber, radius, angle);
-            } finally {
-                cursor.close();
-            }
-        }
-
-        return hole;
-    }
 }

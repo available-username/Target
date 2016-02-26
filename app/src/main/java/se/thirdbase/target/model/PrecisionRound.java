@@ -1,15 +1,18 @@
 package se.thirdbase.target.model;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import se.thirdbase.target.db.PrecisionRoundContract;
+import se.thirdbase.target.db.PrecisionSeriesContract;
 
 /**
  * Created by alexp on 2/18/16.
@@ -186,6 +189,85 @@ public class PrecisionRound implements Parcelable {
         values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
         db.update(PrecisionRoundContract.TABLE_NAME, values, PrecisionRoundContract.PrecisionRoundEntry._ID, new String[]{"" + mDBHandle  });
+    }
+
+    public static PrecisionRound fetch(SQLiteDatabase db, int id) {
+        String[] columns = {
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_1,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_2,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_3,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_4,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES
+        };
+
+        Cursor cursor = db.query(
+                PrecisionRoundContract.TABLE_NAME,
+                columns,
+                PrecisionRoundContract.PrecisionRoundEntry._ID + "= ?",
+                new String[]{"" + id},
+                null,  // groupBy
+                null,  // having
+                null,  // orderBy
+                null); // limit
+
+        List<PrecisionSeries> precisionSeries = new ArrayList<>();
+
+        String notes = null;
+        long timestamp = 0;
+
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                for (int i = 0; i < columns.length - 2; i++) {
+                    int seriesId = cursor.getInt(cursor.getColumnIndex(columns[i]));
+                    PrecisionSeries series = PrecisionSeries.fetch(db, seriesId);
+                    precisionSeries.add(series);
+                }
+
+                timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME));
+
+                notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES));
+            } finally {
+                cursor.close();
+            }
+        }
+
+
+        return new PrecisionRound(precisionSeries, notes, timestamp);
+    }
+
+    public static List<PrecisionRound> fetchAll(SQLiteDatabase db, String orderBy) {
+        String[] columns = { PrecisionRoundContract.PrecisionRoundEntry._ID };
+
+        Cursor cursor = db.query(PrecisionRoundContract.TABLE_NAME,
+                columns,
+                null,
+                null,
+                null,
+                null,
+                orderBy);
+
+        List<PrecisionRound> precisionRounds = new ArrayList<>();
+
+        if (cursor != null && cursor.moveToFirst()) {
+
+            try {
+                while (!cursor.isAfterLast()) {
+                    int roundId = cursor.getInt(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry._ID));
+                    PrecisionRound round = PrecisionRound.fetch(db, roundId);
+
+                    precisionRounds.add(round);
+                    cursor.moveToNext();
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return precisionRounds;
     }
 
 }
