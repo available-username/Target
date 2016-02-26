@@ -153,41 +153,4 @@ public final class PrecisionRoundContract {
 
         return precisionRounds;
     }
-
-    public static long storePrecisionRound(SQLiteDatabase db, PrecisionRound precisionRound) {
-        List<PrecisionSeries> precisionSeries = precisionRound.getPrecisionSeries();
-        List<Long> ids = new ArrayList<>();
-
-        for (PrecisionSeries series : precisionSeries) {
-            long id = series.getDBHandle();
-            ids.add(id);
-        }
-
-        ContentValues values = new ContentValues();
-        String[] columns = {
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_1,
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_2,
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_3,
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_4,
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
-                PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
-                PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
-        };
-
-        int size = precisionSeries.size();
-        for (int i = 0; i < size; i++) {
-            values.put(columns[i], ids.get(i));
-        }
-
-        values.put(PrecisionRoundEntry.COLUMN_NAME_SCORE, precisionRound.getScore());
-        values.put(PrecisionRoundEntry.COLUMN_NAME_NOTES, precisionRound.getNotes());
-        values.put(PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
-
-        return db.insert(PrecisionRoundContract.TABLE_NAME, null, values);
-    }
-
-    public static void updatePrecisionRound(SQLiteDatabase db, ContentValues values, long id) {
-        db.update(PrecisionRoundContract.TABLE_NAME, values, PrecisionRoundEntry._ID, new String[] { "" + id });
-    }
 }

@@ -94,23 +94,35 @@ public class BulletHole implements Parcelable {
         return String.format("%s r=%.2f a=%.2f", mCaliber, mRadius, mAngle);
     }
 
+    /*** Database handling ***/
+
     public long getDBHandle() {
         return mDBHandle;
     }
 
     public long store(SQLiteDatabase db) {
         if (mDBHandle == Long.MIN_VALUE) {
-            mDBHandle = BulletHoleContract.storeBulletHole(db, this);
-        } else {
             ContentValues values = new ContentValues();
 
             values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_CALIBER, getCaliber().ordinal());
             values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_ANGLE, getAngle());
             values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_RADIUS, getRadius());
 
-            BulletHoleContract.updateBulletHole(db, values, mDBHandle);
+            mDBHandle = db.insert(BulletHoleContract.TABLE_NAME, null, values);
+        } else {
+            update(db);
         }
 
         return mDBHandle;
+    }
+
+    public void update(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
+
+        values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_CALIBER, getCaliber().ordinal());
+        values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_ANGLE, getAngle());
+        values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_RADIUS, getRadius());
+
+        db.update(BulletHoleContract.TABLE_NAME, values, BulletHoleContract.BulletHoleEntry._ID, new String[]{"" + mDBHandle});
     }
 }

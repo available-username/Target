@@ -109,7 +109,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
                 null, //selectionArgs
                 null, //groupBy
                 null, //having
-                String.format("datetime(%s) DESC", PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME), //orderBy,
+                String.format("%s DESC", PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME), //orderBy,
                 "10");
 
         List<PrecisionRound> precisionRounds = new ArrayList<>();

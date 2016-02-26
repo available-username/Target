@@ -128,29 +128,64 @@ public class PrecisionRound implements Parcelable {
         return String.format("PrecisionRound(timestamp=%d, score=%d,%s)", mTimestamp, mScore, builder.toString());
     }
 
+    /*** Database handling ***/
+
     public long getDBHandle() {
         return mDBHandle;
     }
 
     public long store(SQLiteDatabase db) {
         if (mDBHandle == Long.MIN_VALUE) {
-            mDBHandle = PrecisionRoundContract.storePrecisionRound(db, this);
-        } else {
-            ContentValues values = new ContentValues();
+            List<Long> ids = new ArrayList<>();
 
+            for (PrecisionSeries series : mPrecisionSeries) {
+                long id = series.getDBHandle();
+                ids.add(id);
+            }
+
+            ContentValues values = new ContentValues();
             String[] columns = {
-                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE,
-                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_1,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_2,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_3,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_4,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
                     PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
             };
+
+            int size = mPrecisionSeries.size();
+            for (int i = 0; i < size; i++) {
+                values.put(columns[i], ids.get(i));
+            }
 
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE, getScore());
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES, getNotes());
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
-            PrecisionRoundContract.updatePrecisionRound(db, values, mDBHandle);
+            mDBHandle = db.insert(PrecisionRoundContract.TABLE_NAME, null, values);
+        } else {
+            update(db);
         }
 
         return mDBHandle;
     }
+
+    public void update(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
+
+        String[] columns = {
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
+        };
+
+        values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE, getScore());
+        values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES, getNotes());
+        values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
+
+        db.update(PrecisionRoundContract.TABLE_NAME, values, PrecisionRoundContract.PrecisionRoundEntry._ID, new String[]{"" + mDBHandle  });
+    }
+
 }

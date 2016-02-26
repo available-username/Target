@@ -111,23 +111,53 @@ public class PrecisionSeries implements Parcelable {
         return String.format("PrecisionSeries(timestamp=%d, score=%d,%s)", mTimestamp, mScore, builder.toString());
     }
 
+    /*** Database handling ***/
+
     public long getDBHandle() {
         return mDBHandle;
     }
 
     public long store(SQLiteDatabase db) {
         if (mDBHandle == Long.MIN_VALUE) {
-            mDBHandle = PrecisionSeriesContract.storePrecisionSeries(db, this);
-        } else {
+            List<Long> ids = new ArrayList<>();
+
+            for (BulletHole bulletHole : mBulletHoles) {
+                long id = bulletHole.store(db);
+                ids.add(id);
+            }
+
             ContentValues values = new ContentValues();
+            String[] columns = {
+                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_1,
+                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
+                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
+                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
+                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5
+            };
+
+            int size = mBulletHoles.size();
+            for (int i = 0; i < size; i++) {
+                values.put(columns[i], ids.get(i));
+            }
 
             values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_SCORE, getScore());
             values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
-            PrecisionSeriesContract.updatePrecisionSeries(db, values, mDBHandle);
+            mDBHandle = db.insert(PrecisionSeriesContract.TABLE_NAME, null, values);
+        } else {
+            update(db);
         }
 
         return mDBHandle;
+    }
+
+    public void update(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
+
+        values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_SCORE, getScore());
+        values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
+
+        db.update(PrecisionSeriesContract.TABLE_NAME, values, PrecisionSeriesContract.PrecisionSeriesEntry._ID, new String[]{"" + mDBHandle});
     }
 }
 

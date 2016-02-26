@@ -63,18 +63,4 @@ public class BulletHoleContract {
 
         return hole;
     }
-
-    public static long storeBulletHole(SQLiteDatabase db, BulletHole bulletHole) {
-        ContentValues values = new ContentValues();
-
-        values.put(BulletHoleEntry.COLUMN_NAME_CALIBER, bulletHole.getCaliber().ordinal());
-        values.put(BulletHoleEntry.COLUMN_NAME_ANGLE, bulletHole.getAngle());
-        values.put(BulletHoleEntry.COLUMN_NAME_RADIUS, bulletHole.getRadius());
-
-        return db.insert(BulletHoleContract.TABLE_NAME, null, values);
-    }
-
-    public static void updateBulletHole(SQLiteDatabase db, ContentValues values, long id) {
-        db.update(BulletHoleContract.TABLE_NAME, values, BulletHoleEntry._ID, new String[]{"" + id});
-    }
 }

@@ -139,37 +139,4 @@ public final class PrecisionSeriesContract {
 
         return precisionSeries;
     }
-
-    public static long storePrecisionSeries(SQLiteDatabase db, PrecisionSeries precisionSeries) {
-        List<BulletHole> bulletHoles = precisionSeries.getBulletHoles();
-        List<Long> ids = new ArrayList<>();
-
-        for (BulletHole bulletHole : bulletHoles) {
-            long id = bulletHole.store(db);
-            ids.add(id);
-        }
-
-        ContentValues values = new ContentValues();
-        String[] columns = {
-                PrecisionSeriesEntry.COLUMN_NAME_BULLET_1,
-                PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
-                PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
-                PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
-                PrecisionSeriesEntry.COLUMN_NAME_BULLET_5
-        };
-
-        int size = bulletHoles.size();
-        for (int i = 0; i < size; i++) {
-            values.put(columns[i], ids.get(i));
-        }
-
-        values.put(PrecisionSeriesEntry.COLUMN_NAME_SCORE, precisionSeries.getScore());
-        values.put(PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
-
-        return db.insert(PrecisionSeriesContract.TABLE_NAME, null, values);
-    }
-
-    public static void updatePrecisionSeries(SQLiteDatabase db, ContentValues values, long id) {
-        db.update(PrecisionSeriesContract.TABLE_NAME, values, PrecisionSeriesEntry._ID, new String[]{"" + id});
-    }
 }
