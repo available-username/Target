@@ -39,7 +39,7 @@ public final class PrecisionRoundContract {
 
     public static final String SQL_CREATE_PRECISION =
             String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-                            "%s DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                            "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
@@ -107,7 +107,7 @@ public final class PrecisionRoundContract {
         List<PrecisionSeries> precisionSeries = new ArrayList<>();
 
         String notes = null;
-        Calendar calendar = null;
+        long timestamp = 0;
 
         if (cursor != null && cursor.moveToFirst()) {
             try {
@@ -117,8 +117,7 @@ public final class PrecisionRoundContract {
                     precisionSeries.add(series);
                 }
 
-                String calendarStr = cursor.getString(cursor.getColumnIndex(PrecisionRoundEntry.COLUMN_NAME_DATE_TIME));
-                calendar = SQLUtil.string2Calendar(calendarStr);
+                timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionRoundEntry.COLUMN_NAME_DATE_TIME));
 
                 notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundEntry.COLUMN_NAME_NOTES));
             } finally {
@@ -127,7 +126,7 @@ public final class PrecisionRoundContract {
         }
 
 
-        return new PrecisionRound(precisionSeries, notes, calendar);
+        return new PrecisionRound(precisionSeries, notes, timestamp);
     }
 
     public static List<PrecisionRound> retrieveAllPrecisionRounds(SQLiteDatabase db) {
@@ -160,7 +159,7 @@ public final class PrecisionRoundContract {
         List<Long> ids = new ArrayList<>();
 
         for (PrecisionSeries series : precisionSeries) {
-            long id = PrecisionSeriesContract.storePrecisionSeries(db, series);
+            long id = series.getDBHandle();
             ids.add(id);
         }
 
@@ -173,6 +172,7 @@ public final class PrecisionRoundContract {
                 PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
                 PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
                 PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
+                PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
         };
 
         int size = precisionSeries.size();
@@ -182,7 +182,12 @@ public final class PrecisionRoundContract {
 
         values.put(PrecisionRoundEntry.COLUMN_NAME_SCORE, precisionRound.getScore());
         values.put(PrecisionRoundEntry.COLUMN_NAME_NOTES, precisionRound.getNotes());
+        values.put(PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
         return db.insert(PrecisionRoundContract.TABLE_NAME, null, values);
+    }
+
+    public static void updatePrecisionRound(SQLiteDatabase db, ContentValues values, long id) {
+        db.update(PrecisionRoundContract.TABLE_NAME, values, PrecisionRoundEntry._ID, new String[] { "" + id });
     }
 }

@@ -36,7 +36,7 @@ public final class PrecisionSeriesContract {
 
     public static final String SQL_CREATE_SERIES =
             String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-                            "%s DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                            "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," +
@@ -90,7 +90,7 @@ public final class PrecisionSeriesContract {
 
         List<BulletHole> bulletHoles = new ArrayList<>();
 
-        Calendar calendar = null;
+        long timestamp = 0;
         if (cursor != null && cursor.moveToFirst()) {
             try {
                 for (int i = 0; i < columns.length - 2; i++) {
@@ -100,20 +100,25 @@ public final class PrecisionSeriesContract {
                     bulletHoles.add(bulletHole);
                 }
 
-                String calendarStr = cursor.getString(cursor.getColumnIndex(PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME));
-                calendar = SQLUtil.string2Calendar(calendarStr);
+                timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME));
             } finally {
                 cursor.close();
             }
         }
 
-        return new PrecisionSeries(bulletHoles, calendar);
+        return new PrecisionSeries(bulletHoles, timestamp);
     }
 
-    public static List<PrecisionSeries> retrieveAllPrecisionSeries(SQLiteDatabase db) {
+    public static List<PrecisionSeries> retrieveAllPrecisionSeries(SQLiteDatabase db, String orderBy) {
         String[] columns = { PrecisionSeriesEntry._ID };
 
-        Cursor cursor = db.query(PrecisionSeriesContract.TABLE_NAME, columns, null, null, null, null, null);
+        Cursor cursor = db.query(PrecisionSeriesContract.TABLE_NAME,
+                columns,
+                null, // selection
+                null, // selectionArgs
+                null, // groupBy
+                null, // having
+                orderBy);
 
         List<PrecisionSeries> precisionSeries = new ArrayList<>();
 
@@ -140,7 +145,7 @@ public final class PrecisionSeriesContract {
         List<Long> ids = new ArrayList<>();
 
         for (BulletHole bulletHole : bulletHoles) {
-            long id = BulletHoleContract.storeBulletHole(db, bulletHole);
+            long id = bulletHole.store(db);
             ids.add(id);
         }
 
@@ -159,7 +164,12 @@ public final class PrecisionSeriesContract {
         }
 
         values.put(PrecisionSeriesEntry.COLUMN_NAME_SCORE, precisionSeries.getScore());
+        values.put(PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
         return db.insert(PrecisionSeriesContract.TABLE_NAME, null, values);
+    }
+
+    public static void updatePrecisionSeries(SQLiteDatabase db, ContentValues values, long id) {
+        db.update(PrecisionSeriesContract.TABLE_NAME, values, PrecisionSeriesEntry._ID, new String[]{"" + id});
     }
 }

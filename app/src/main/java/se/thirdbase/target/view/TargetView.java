@@ -334,7 +334,12 @@ public abstract class TargetView extends View {
                 mBulletHoles.add(mActiveBulletHole);
             }
         } else if (mActionState == ActionState.RELOCATE) {
-            mBulletHoles.set(mActiveBulletIdx, mActiveBulletHole);
+            BulletHole bulletHole = mBulletHoles.get(mActiveBulletIdx);
+
+            bulletHole.setAngle(mActiveBulletHole.getAngle());
+            bulletHole.setRadius(mActiveBulletHole.getRadius());
+
+            //mBulletHoles.set(mActiveBulletIdx, mActiveBulletHole);
             mActiveBulletIdx = Integer.MIN_VALUE;
         }
 

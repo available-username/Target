@@ -33,6 +33,7 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     private static final String BACK_STACK_TAG_PRECISION_POINT_DISTRIBUTION = "BACK_STACK_TAG_PRECISION_POINT_DISTRIBUTION";
     private static final String BACK_STACK_TAG_PRECISION_HIT_DISTRIBUTION = "BACK_STACK_TAG_PRECISION_HIT_DISTRIBUTION";
 
+    private SQLiteDatabase mSQLiteDatabase;
     private PrecisionRound mPrecisionRound = new PrecisionRound();
 
     @Override
@@ -49,6 +50,19 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
         displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SUMMARY);
         */
+
+        PrecisionDBHelper dbHelper = PrecisionDBHelper.getInstance(this);
+        mSQLiteDatabase = dbHelper.getWritableDatabase();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mSQLiteDatabase != null) {
+            mSQLiteDatabase.close();
+            mSQLiteDatabase = null;
+        }
     }
 
     @Override
@@ -66,8 +80,10 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     }
 
     @Override
-    public void onPrecisionSeriesUpdated() {
+    public void onPrecisionSeriesUpdated(PrecisionSeries precisionSeries) {
         Log.d(TAG, "onPrecisionSeriesUpdated()");
+
+        precisionSeries.store(mSQLiteDatabase);
 
         popBackStack();
     }
@@ -75,6 +91,8 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     @Override
     public void onPrecisionSeriesComplete(PrecisionSeries precisionSeries) {
         Log.d(TAG, "onPrecisionSeriesComplete()");
+
+        precisionSeries.store(mSQLiteDatabase);
 
         mPrecisionRound.addPrecisionSeries(precisionSeries);
 
@@ -89,12 +107,10 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     public void onPrecisionRoundComplete(PrecisionRound precisionRound) {
         Log.d(TAG, "onPrecisionRoundComplete()");
 
-        PrecisionDBHelper dbHelper = PrecisionDBHelper.getInstance(this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        PrecisionRoundContract.storePrecisionRound(db, precisionRound);
-        db.close();
+        precisionRound.store(mSQLiteDatabase);
 
         popBackStack();
+
         Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
         displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SUMMARY);
     }

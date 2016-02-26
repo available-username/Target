@@ -1,13 +1,15 @@
 package se.thirdbase.target.model;
 
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+
+import se.thirdbase.target.db.PrecisionRoundContract;
 
 /**
  * Created by alexp on 2/18/16.
@@ -19,7 +21,8 @@ public class PrecisionRound implements Parcelable {
     private List<PrecisionSeries> mPrecisionSeries;
     private int mScore;
     private String mNotes;
-    private Calendar mCalendar;
+    private long mTimestamp;
+    private long mDBHandle = Long.MIN_VALUE;
 
     public PrecisionRound() {
         mPrecisionSeries = new ArrayList<>();
@@ -31,16 +34,16 @@ public class PrecisionRound implements Parcelable {
         mNotes = notes;
     }
 
-    public PrecisionRound(List<PrecisionSeries> precisionSeries, String notes, Calendar calendar) {
+    public PrecisionRound(List<PrecisionSeries> precisionSeries, String notes, long timestamp) {
         this(precisionSeries, notes);
-        mCalendar = calendar;
+        mTimestamp = timestamp;
     }
 
     protected PrecisionRound(Parcel in) {
         mPrecisionSeries = in.createTypedArrayList(PrecisionSeries.CREATOR);
         mScore = in.readInt();
         mNotes = in.readString();
-        mCalendar = (Calendar) in.readSerializable();
+        mTimestamp = in.readLong();
     }
 
     public static final Creator<PrecisionRound> CREATOR = new Creator<PrecisionRound>() {
@@ -85,12 +88,12 @@ public class PrecisionRound implements Parcelable {
         return mPrecisionSeries.size();
     }
 
-    public void setDate(Calendar calendar) {
-        mCalendar = calendar;
+    public void setTimestamp(long timestamp) {
+        mTimestamp = timestamp;
     }
 
-    public Calendar getDate() {
-        return mCalendar;
+    public long getTimestamp() {
+        return mTimestamp;
     }
 
     private int calculateScore(List<PrecisionSeries> precisionSeries) {
@@ -113,9 +116,7 @@ public class PrecisionRound implements Parcelable {
         dest.writeTypedList(mPrecisionSeries);
         dest.writeInt(mScore);
         dest.writeString(mNotes);
-        if (mCalendar != null) {
-            dest.writeSerializable(mCalendar);
-        }
+        dest.writeLong(mTimestamp);
     }
 
     public String toString() {
@@ -124,6 +125,32 @@ public class PrecisionRound implements Parcelable {
         for (PrecisionSeries series : mPrecisionSeries) {
             builder.append(String.format(" %d", series.getScore()));
         }
-        return String.format("PrecisionRound(score=%d,%s)", mScore, builder.toString());
+        return String.format("PrecisionRound(timestamp=%d, score=%d,%s)", mTimestamp, mScore, builder.toString());
+    }
+
+    public long getDBHandle() {
+        return mDBHandle;
+    }
+
+    public long store(SQLiteDatabase db) {
+        if (mDBHandle == Long.MIN_VALUE) {
+            mDBHandle = PrecisionRoundContract.storePrecisionRound(db, this);
+        } else {
+            ContentValues values = new ContentValues();
+
+            String[] columns = {
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
+            };
+
+            values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE, getScore());
+            values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES, getNotes());
+            values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
+
+            PrecisionRoundContract.updatePrecisionRound(db, values, mDBHandle);
+        }
+
+        return mDBHandle;
     }
 }

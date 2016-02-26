@@ -29,9 +29,9 @@ public class PrecisionBaseFragment extends Fragment {
         }
     }
 
-    protected void onPrecisionSeriesUpdated() {
+    protected void onPrecisionSeriesUpdated(PrecisionSeries precisionSeries) {
         if (mListener != null) {
-            mListener.onPrecisionSeriesUpdated();
+            mListener.onPrecisionSeriesUpdated(precisionSeries);
         }
     }
 

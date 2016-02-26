@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.util.Date;
+
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.util.SQLUtil;
@@ -46,7 +48,8 @@ public class StatisticsPrecisionRoundListAdapter extends ArrayAdapter<PrecisionR
             holder = (RoundHolder)row.getTag();
         }
 
-        String dateText = SQLUtil.calendar2String(mData[position].getDate());
+        Date date = new Date(mData[position].getTimestamp());
+        String dateText = date.toString();
         String scoreText = getContext().getResources().getString(R.string.points_short, mData[position].getScore());
 
         holder.date.setText(dateText);

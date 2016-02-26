@@ -10,7 +10,7 @@ public interface PrecisionStateListener {
 
     void onUpdatePrecisionSeries(PrecisionSeries precisionSeries);
 
-    void onPrecisionSeriesUpdated();
+    void onPrecisionSeriesUpdated(PrecisionSeries precisionSeries);
 
     void onPrecisionSeriesComplete(PrecisionSeries precisionSeries);
 

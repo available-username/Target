@@ -419,10 +419,11 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
 
             if (mPrecisionSeries == null) {
                 PrecisionSeries precisionSeries = new PrecisionSeries(bulletHoleList);
+
                 onPrecisionSeriesComplete(precisionSeries);
             } else {
                 mPrecisionSeries.setBulletHoles(bulletHoleList);
-                onPrecisionSeriesUpdated();
+                onPrecisionSeriesUpdated(mPrecisionSeries);
             }
         }
     };

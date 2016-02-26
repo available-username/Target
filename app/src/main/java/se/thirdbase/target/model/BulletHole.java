@@ -1,13 +1,18 @@
 package se.thirdbase.target.model;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PointF;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import se.thirdbase.target.db.BulletHoleContract;
 
 public class BulletHole implements Parcelable {
     final BulletCaliber mCaliber;
     float mRadius;
     float mAngle;
+    long mDBHandle = Long.MIN_VALUE;
 
     public BulletHole(BulletCaliber caliber, float radius, float angle) {
         this.mCaliber = caliber;
@@ -45,8 +50,16 @@ public class BulletHole implements Parcelable {
         return mRadius;
     }
 
+    public void setRadius(float radius) {
+        mRadius = radius;
+    }
+
     public float getAngle() {
         return mAngle;
+    }
+
+    public void setAngle(float angle) {
+        mAngle = angle;
     }
 
     public BulletCaliber getCaliber() {
@@ -79,5 +92,25 @@ public class BulletHole implements Parcelable {
 
     public String toString() {
         return String.format("%s r=%.2f a=%.2f", mCaliber, mRadius, mAngle);
+    }
+
+    public long getDBHandle() {
+        return mDBHandle;
+    }
+
+    public long store(SQLiteDatabase db) {
+        if (mDBHandle == Long.MIN_VALUE) {
+            mDBHandle = BulletHoleContract.storeBulletHole(db, this);
+        } else {
+            ContentValues values = new ContentValues();
+
+            values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_CALIBER, getCaliber().ordinal());
+            values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_ANGLE, getAngle());
+            values.put(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_RADIUS, getRadius());
+
+            BulletHoleContract.updateBulletHole(db, values, mDBHandle);
+        }
+
+        return mDBHandle;
     }
 }

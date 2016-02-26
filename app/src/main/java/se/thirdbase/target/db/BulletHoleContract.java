@@ -73,4 +73,8 @@ public class BulletHoleContract {
 
         return db.insert(BulletHoleContract.TABLE_NAME, null, values);
     }
+
+    public static void updateBulletHole(SQLiteDatabase db, ContentValues values, long id) {
+        db.update(BulletHoleContract.TABLE_NAME, values, BulletHoleEntry._ID, new String[]{"" + id});
+    }
 }

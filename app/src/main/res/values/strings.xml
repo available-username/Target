@@ -22,4 +22,8 @@
 
     <!-- Statistics strings -->
     <string name="progress">Utveckling</string>
+
+    <!-- GraphView strings -->
+    <string name="legend_score">Poäng</string>
+    <string name="legend_average_score">Medel</string>
 </resources>
