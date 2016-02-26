@@ -3,12 +3,14 @@ package se.thirdbase.target.util;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 /**
  * Created by alexp on 2/22/16.
  */
-public class ViewMath {
+public class ViewMath implements Parcelable {
 
     private static final String TAG = ViewMath.class.getSimpleName();
 
@@ -24,6 +26,30 @@ public class ViewMath {
     public Rect mSrcRect = new Rect();
     public Rect mDstRect = new Rect();
     public Rect mScaledRect = new Rect();
+
+    protected ViewMath(Parcel in) {
+        MIN_ZOOM_FACTOR = in.readFloat();
+        mMaxZoomFactor = in.readFloat();
+        mPixelsPerCm = in.readFloat();
+        mZoomLevel = in.readFloat();
+        mRealWidth = in.readFloat();
+        mRealHeight = in.readFloat();
+        mSrcRect = in.readParcelable(Rect.class.getClassLoader());
+        mDstRect = in.readParcelable(Rect.class.getClassLoader());
+        mScaledRect = in.readParcelable(Rect.class.getClassLoader());
+    }
+
+    public static final Creator<ViewMath> CREATOR = new Creator<ViewMath>() {
+        @Override
+        public ViewMath createFromParcel(Parcel in) {
+            return new ViewMath(in);
+        }
+
+        @Override
+        public ViewMath[] newArray(int size) {
+            return new ViewMath[size];
+        }
+    };
 
     private static int clamp(int val, int min, int max) {
         return Math.max(min, Math.min(max, val));
@@ -46,6 +72,28 @@ public class ViewMath {
         mDstRect = new Rect(0, 0, viewWidth, viewHeight);
 
         mPixelsPerCm = ((float)viewWidth) / realWidth;
+    }
+
+    public void rotate() {
+        rotate(mSrcRect);
+        rotate(mScaledRect);
+        rotate(mDstRect);
+
+        float tmpf = mRealWidth;
+        mRealWidth = mRealHeight;
+        mRealHeight = tmpf;
+    }
+
+    private void rotate(Rect rect) {
+        int left = rect.left;
+        int top = rect.top;
+        int right = rect.right;
+        int bottom = rect.bottom;
+
+        rect.left = top;
+        rect.top = left;
+        rect.bottom = right;
+        rect.right = bottom;
     }
 
     public void zoomIn() {
@@ -129,5 +177,23 @@ public class ViewMath {
 
     public float getZoomLevel() {
         return mZoomLevel;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeFloat(MIN_ZOOM_FACTOR);
+        dest.writeFloat(mMaxZoomFactor);
+        dest.writeFloat(mPixelsPerCm);
+        dest.writeFloat(mZoomLevel);
+        dest.writeFloat(mRealWidth);
+        dest.writeFloat(mRealHeight);
+        dest.writeParcelable(mSrcRect, flags);
+        dest.writeParcelable(mDstRect, flags);
+        dest.writeParcelable(mScaledRect, flags);
     }
 }

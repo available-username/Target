@@ -49,6 +49,16 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.statistics_precision_layout, container, false);
 
+
+        mRoundsProgressButton = (Button) view.findViewById(R.id.statistics_precision_layout_rounds_progress_button);
+        mRoundsProgressButton.setOnClickListener(new View.OnClickListener() {
+                 @Override
+                 public void onClick(View v) {
+                     onPrecisionProgress();
+                 }
+             }
+        );
+
         List<PrecisionRound> precisionRounds = getPrecisionRounds();
 
         PrecisionRound[] precisionRoundsArray = new PrecisionRound[precisionRounds.size()];

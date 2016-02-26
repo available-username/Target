@@ -32,4 +32,10 @@ public abstract class StatisticsBaseFragment extends Fragment {
             mListener.onPrecision();
         }
     }
+
+    protected void onPrecisionProgress() {
+        if (mListener != null) {
+            mListener.onPrecisionProgress();
+        }
+    }
 }

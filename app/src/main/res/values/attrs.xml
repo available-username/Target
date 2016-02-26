@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="TargetView">
-
+    <declare-styleable name="GraphView">
+        <attr name="bar_style" format="enum">
+            <enum name="lines" value="0"/>
+            <enum name="bars" value="1"/>
+            <enum name="sparse_bars" value="2"/>
+        </attr>
     </declare-styleable>
 </resources>

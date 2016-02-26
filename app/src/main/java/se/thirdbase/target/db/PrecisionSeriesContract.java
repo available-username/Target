@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import se.thirdbase.target.model.BulletHole;
+import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 import se.thirdbase.target.util.SQLUtil;
 
@@ -107,6 +108,31 @@ public final class PrecisionSeriesContract {
         }
 
         return new PrecisionSeries(bulletHoles, calendar);
+    }
+
+    public static List<PrecisionSeries> retrieveAllPrecisionSeries(SQLiteDatabase db) {
+        String[] columns = { PrecisionSeriesEntry._ID };
+
+        Cursor cursor = db.query(PrecisionSeriesContract.TABLE_NAME, columns, null, null, null, null, null);
+
+        List<PrecisionSeries> precisionSeries = new ArrayList<>();
+
+        if (cursor != null && cursor.moveToFirst()) {
+
+            try {
+                while (!cursor.isAfterLast()) {
+                    int seriesId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesEntry._ID));
+                    PrecisionSeries series = retrievePrecisionSeries(db, seriesId);
+
+                    precisionSeries.add(series);
+                    cursor.moveToNext();
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return precisionSeries;
     }
 
     public static long storePrecisionSeries(SQLiteDatabase db, PrecisionSeries precisionSeries) {

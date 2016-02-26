@@ -8,4 +8,6 @@ public interface StatisticsStateListener {
     void onOverview();
 
     void onPrecision();
+
+    void onPrecisionProgress();
 }

@@ -1,12 +1,15 @@
 package se.thirdbase.target.view;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.util.Pair;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -21,6 +24,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import se.thirdbase.target.R;
 import se.thirdbase.target.util.ViewMath;
 
 /**
@@ -93,10 +97,14 @@ public class GraphView extends View {
         super(context, attrs);
         setSaveEnabled(true);
 
+        TypedArray attrsArray = context.obtainStyledAttributes(attrs, R.styleable.GraphView, 0, 0);
+        int style = attrsArray.getInt(R.styleable.GraphView_bar_style, 0);
+        mStyle = Style.values()[style];
+
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
 
-        //createSampleData2();
+        createSampleData2();
     }
 
     public GraphView(Context context) {
@@ -171,6 +179,67 @@ public class GraphView extends View {
         Log.d(TAG, "Normalized data set size: " + mNormalizedDataMap.size());
     }
 
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        Log.d(TAG, String.format("onSizeChanged(%d, %d, %d, %d)", w, h, oldw, oldh));
+        mRect = new Rect(0, 0, w, h);
+
+        VIRTUAL_HEIGHT = (VIRTUAL_WIDTH / w) * h;
+
+        Log.d(TAG, String.format("VIRTUAL WIDTH/HEIGHT: %.2f / %.2f", VIRTUAL_WIDTH, VIRTUAL_HEIGHT));
+        mViewMath = new ViewMath(w, h, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, MAX_ZOOM_FACTOR);
+
+        invalidate();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        View parent = (View)getParent();
+
+        int wMode = MeasureSpec.getMode(widthMeasureSpec);
+        int wSize = MeasureSpec.getSize(widthMeasureSpec);
+        int parentWidth = parent.getWidth();
+        int width;
+
+        switch (wMode) {
+            case MeasureSpec.EXACTLY: width = wSize; break;
+            case MeasureSpec.AT_MOST: width = Math.min(wSize, parentWidth); break;
+            default: width = parentWidth;
+        }
+
+        int hMode = MeasureSpec.getMode(heightMeasureSpec);
+        int hSize = MeasureSpec.getSize(heightMeasureSpec);
+        int parentHeight = parent.getHeight();
+        int height;
+
+        switch (hMode) {
+            case MeasureSpec.EXACTLY: height = hSize; break;
+            case MeasureSpec.AT_MOST: height = Math.min(hSize, parentHeight); break;
+            default: height = parentHeight;
+        }
+
+        Log.d(TAG, String.format("setMeasuredDimension(%d, %d)", width, height));
+        super.setMeasuredDimension(width, height);
+    }
+
+    /*
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("bajs", super.onSaveInstanceState());
+
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        super.onRestoreInstanceState(state);
+    }
+    */
+
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -199,9 +268,17 @@ public class GraphView extends View {
         for (Integer key : mNormalizedDataMap.keySet()) {
             List<Pair<Float, Float>> data = mNormalizedDataMap.get(key);
 
-            //drawData(canvas, data, paint);
-            //drawThickBars(canvas, data, fill, stroke);
-            drawSparseBars(canvas, data, fill, stroke);
+            switch (mStyle) {
+                case LINES:
+                    drawLine(canvas, data, paint);
+                    break;
+                case THICK_BARS:
+                    drawThickBars(canvas, data, fill, stroke);
+                    break;
+                case SPARSE_BARS:
+                    drawSparseBars(canvas, data, fill, stroke);
+                    break;
+            }
         }
 
         // Draw axis
@@ -232,10 +309,10 @@ public class GraphView extends View {
         drawLine(canvas, XMARGIN, YMARGIN, XMARGIN, VIRTUAL_HEIGHT - YMARGIN, paint);
     }
 
-    private void drawData(Canvas canvas, List<Pair<Float, Float>> data, Paint paint) {
+    private void drawLine(Canvas canvas, List<Pair<Float, Float>> data, Paint paint) {
         Path path = new Path();
 
-        Log.d(TAG, "drawData()");
+        Log.d(TAG, "drawLine()");
 
         int size = data.size();
         Pair<Float, Float> pair = data.get(0);
@@ -325,51 +402,6 @@ public class GraphView extends View {
         point.y = (VIRTUAL_HEIGHT - y) * pixelsPerCm - rect.top;
 
         return point;
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        Log.d(TAG, String.format("onSizeChanged(%d, %d, %d, %d)", w, h, oldw, oldh));
-        mRect = new Rect(0, 0, w, h);
-
-        VIRTUAL_HEIGHT = (VIRTUAL_WIDTH / w) * h;
-
-        Log.d(TAG, String.format("VIRTUAL WIDTH/HEIGHT: %.2f / %.2f", VIRTUAL_WIDTH, VIRTUAL_HEIGHT));
-        mViewMath = new ViewMath(w, h, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, MAX_ZOOM_FACTOR);
-
-        invalidate();
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        View parent = (View)getParent();
-
-        int wMode = MeasureSpec.getMode(widthMeasureSpec);
-        int wSize = MeasureSpec.getSize(widthMeasureSpec);
-        int parentWidth = parent.getWidth();
-        int width;
-
-        switch (wMode) {
-            case MeasureSpec.EXACTLY: width = wSize; break;
-            case MeasureSpec.AT_MOST: width = Math.min(wSize, parentWidth); break;
-            default: width = parentWidth;
-        }
-
-        int hMode = MeasureSpec.getMode(heightMeasureSpec);
-        int hSize = MeasureSpec.getSize(heightMeasureSpec);
-        int parentHeight = parent.getHeight();
-        int height;
-
-        switch (hMode) {
-            case MeasureSpec.EXACTLY: height = hSize; break;
-            case MeasureSpec.AT_MOST: height = Math.min(hSize, parentHeight); break;
-            default: height = parentHeight;
-        }
-
-        Log.d(TAG, String.format("setMeasuredDimension(%d, %d)", width, height));
-        super.setMeasuredDimension(width, height);
     }
 
     public int addDataPoints(List<Pair<Float, Float>> dataPoints) {

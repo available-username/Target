@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:custom="https://schemas.android.com/apk/res-auto">
 
     <se.thirdbase.target.view.GraphView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        custom:bar_style="lines"
         android:id="@+id/precision_point_distribution_graph"/>
 
 </LinearLayout>

@@ -137,17 +137,20 @@ public final class PrecisionRoundContract {
 
         List<PrecisionRound> precisionRounds = new ArrayList<>();
 
-        cursor.moveToFirst();
+        if (cursor != null && cursor.moveToFirst()) {
 
-        while (!cursor.isAfterLast()) {
-            int roundId = cursor.getInt(cursor.getColumnIndex(PrecisionRoundEntry._ID));
-            PrecisionRound round = PrecisionRoundContract.retrievePrecisionRound(db, roundId);
+            try {
+                while (!cursor.isAfterLast()) {
+                    int roundId = cursor.getInt(cursor.getColumnIndex(PrecisionRoundEntry._ID));
+                    PrecisionRound round = PrecisionRoundContract.retrievePrecisionRound(db, roundId);
 
-            precisionRounds.add(round);
-            cursor.moveToNext();
+                    precisionRounds.add(round);
+                    cursor.moveToNext();
+                }
+            } finally {
+                cursor.close();
+            }
         }
-
-        cursor.close();
 
         return precisionRounds;
     }
