@@ -15,8 +15,4 @@ public interface PrecisionStateListener {
     void onPrecisionSeriesComplete(PrecisionSeries precisionSeries);
 
     void onPrecisionRoundComplete(PrecisionRound precisionRound);
-
-    void onPrecisionRoundPointsDistribution(PrecisionRound precisionRound);
-
-    void onPrecisionRoundHitsDistribution(PrecisionRound precisionRound);
 }

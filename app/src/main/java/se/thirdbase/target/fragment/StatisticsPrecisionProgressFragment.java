@@ -37,6 +37,10 @@ public class StatisticsPrecisionProgressFragment extends Fragment {
     private GraphView mGraphView;
     private List<PrecisionSeries> mPrecisionSeries;
 
+    public static StatisticsPrecisionProgressFragment newInstance() {
+        return new StatisticsPrecisionProgressFragment();
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

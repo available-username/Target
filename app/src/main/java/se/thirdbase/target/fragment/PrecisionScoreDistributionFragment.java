@@ -2,10 +2,8 @@ package se.thirdbase.target.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,17 +24,17 @@ import se.thirdbase.target.model.PrecisionTarget;
 /**
  * Created by alexp on 2/25/16.
  */
-public class PrecisionPointDistributionFragment extends Fragment {
+public class PrecisionScoreDistributionFragment extends Fragment {
 
     private static final String BUNDLE_TAG_PRECISION_SERIES = "BUNDLE_TAG_PRECISION_SERIES";
 
     private BarGraphSeries<DataPoint> mBarGraphSeries;
 
-    public static PrecisionPointDistributionFragment newInstance(PrecisionRound precisionRound) {
+    public static PrecisionScoreDistributionFragment newInstance(PrecisionRound precisionRound) {
         return newInstance(precisionRound.getPrecisionSeries());
     }
 
-    public static PrecisionPointDistributionFragment newInstance(List<PrecisionSeries> precisionSeriesList) {
+    public static PrecisionScoreDistributionFragment newInstance(List<PrecisionSeries> precisionSeriesList) {
         int size = precisionSeriesList.size();
         PrecisionSeries[] precisionSeriesArray = new PrecisionSeries[size];
 
@@ -45,7 +43,7 @@ public class PrecisionPointDistributionFragment extends Fragment {
         Bundle arguments = new Bundle();
         arguments.putParcelableArray(BUNDLE_TAG_PRECISION_SERIES, precisionSeriesArray);
 
-        PrecisionPointDistributionFragment fragment = new PrecisionPointDistributionFragment();
+        PrecisionScoreDistributionFragment fragment = new PrecisionScoreDistributionFragment();
         fragment.setArguments(arguments);
 
         return fragment;

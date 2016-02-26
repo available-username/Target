@@ -1,29 +1,21 @@
 package se.thirdbase.target;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
-import java.util.Calendar;
-
 import se.thirdbase.target.db.PrecisionDBHelper;
-import se.thirdbase.target.db.PrecisionRoundContract;
 import se.thirdbase.target.fragment.PrecisionHitDistributionFragment;
-import se.thirdbase.target.fragment.PrecisionPointDistributionFragment;
+import se.thirdbase.target.fragment.PrecisionRoundSummaryListener;
+import se.thirdbase.target.fragment.PrecisionScoreDistributionFragment;
 import se.thirdbase.target.fragment.PrecisionRoundFragment;
 import se.thirdbase.target.fragment.PrecisionRoundSummaryFragment;
 import se.thirdbase.target.fragment.PrecisionTargetFragment;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 
-public class PrecisionActivity extends BaseActivity implements PrecisionStateListener{
+public class PrecisionActivity extends BaseActivity implements PrecisionStateListener, PrecisionRoundSummaryListener{
 
     private static final String TAG = PrecisionActivity.class.getSimpleName();
 
@@ -41,15 +33,15 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_precision);
 
+        /*
         Fragment roundFragment = PrecisionRoundFragment.newInstance(mPrecisionRound);
         displayFragment(roundFragment, false, BACK_STACK_TAG_PRECISION_ROUND);
 
         Fragment seriesFragment = PrecisionTargetFragment.newInstance();
         displayFragment(seriesFragment, true, BACK_STACK_TAG_PRECISION_SERIES);
-        /*
-        Fragment fragment = PrecisionRoundSummaryFragment.newInstance(mPrecisionRound);
-        displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SUMMARY);
         */
+        Fragment seriesFragment = PrecisionTargetFragment.newInstance();
+        displayFragment(seriesFragment, false, BACK_STACK_TAG_PRECISION_SERIES);
 
         PrecisionDBHelper dbHelper = PrecisionDBHelper.getInstance(this);
         mSQLiteDatabase = dbHelper.getWritableDatabase();
@@ -96,7 +88,13 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
 
         mPrecisionRound.addPrecisionSeries(precisionSeries);
 
-        if (mPrecisionRound.getNbrSeries() == PrecisionRound.MAX_NBR_SERIES) {
+        int nbrSeries = mPrecisionRound.getNbrSeries();
+
+        if (nbrSeries == 1) {
+            //onPrecisionRoundComplete(mPrecisionRound);
+            Fragment fragment = PrecisionRoundFragment.newInstance(mPrecisionRound);
+            displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_ROUND);
+        } else if (mPrecisionRound.getNbrSeries() == PrecisionRound.MAX_NBR_SERIES) {
             onPrecisionRoundComplete(mPrecisionRound);
         } else {
             popBackStack();
@@ -116,16 +114,16 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     }
 
     @Override
-    public void onPrecisionRoundPointsDistribution(PrecisionRound precisionRound) {
-        Log.d(TAG, "onPrecisionRoundPointsDistribution()");
+    public void onPrecisionRoundScoreDistribution(PrecisionRound precisionRound) {
+        Log.d(TAG, "onPrecisionRoundScoreDistribution()");
 
-        Fragment fragment = PrecisionPointDistributionFragment.newInstance(precisionRound);
+        Fragment fragment = PrecisionScoreDistributionFragment.newInstance(precisionRound);
         displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_POINT_DISTRIBUTION);
     }
 
     @Override
-    public void onPrecisionRoundHitsDistribution(PrecisionRound precisionRound) {
-        Log.d(TAG, "onPrecisionRoundHitsDistribution()");
+    public void onPrecisionRoundHitDistribution(PrecisionRound precisionRound) {
+        Log.d(TAG, "onPrecisionRoundHitDistribution()");
 
         Fragment fragment = PrecisionHitDistributionFragment.newInstance(precisionRound);
         displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_HIT_DISTRIBUTION);

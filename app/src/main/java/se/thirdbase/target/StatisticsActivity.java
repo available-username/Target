@@ -3,16 +3,24 @@ package se.thirdbase.target;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import se.thirdbase.target.fragment.PrecisionHitDistributionFragment;
+import se.thirdbase.target.fragment.PrecisionRoundSummaryFragment;
+import se.thirdbase.target.fragment.PrecisionRoundSummaryListener;
+import se.thirdbase.target.fragment.PrecisionScoreDistributionFragment;
 import se.thirdbase.target.fragment.StatisticsPrecisionFragment;
 import se.thirdbase.target.fragment.StatisticsPrecisionProgressFragment;
+import se.thirdbase.target.model.PrecisionRound;
 
 /**
  * Created by alexp on 2/24/16.
  */
-public class StatisticsActivity extends BaseActivity implements StatisticsStateListener {
+public class StatisticsActivity extends BaseActivity implements StatisticsStateListener, PrecisionRoundSummaryListener {
 
     private static final String BACK_STACK_TAG_PRECISION_FRAGMENT = "BACK_STACK_TAG_PRECISION_FRAGMENT";
     private static final String BACK_STACK_TAG_PRECISION_PROGRESS_FRAGMENT = "BACK_STACK_TAG_PRECISION_PROGRESS_FRAGMENT";
+    private static final String BACK_STACK_TAG_PRECISION_ROUND_SUMMARY_FRAGMENT = "BACK_STACK_TAG_PRECISION_ROUND_SUMMARY_FRAGMENT";
+    private static final String BACK_STACK_TAG_PRECISION_ROUND_SCORE_DISTRIBUTION = "BACK_STACK_TAG_PRECISION_ROUND_SCORE_DISTRIBUTION";
+    private static final String BACK_STACK_TAG_PRECISION_ROUND_HIT_DISTRIBUTION = "BACK_STACK_TAG_PRECISION_ROUND_HIT_DISTRIBUTION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +48,25 @@ public class StatisticsActivity extends BaseActivity implements StatisticsStateL
 
     @Override
     public void onPrecisionProgress() {
-        Fragment fragment = new StatisticsPrecisionProgressFragment();
+        Fragment fragment = StatisticsPrecisionProgressFragment.newInstance();
         displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_PROGRESS_FRAGMENT);
+    }
+
+    @Override
+    public void onPrecisionRoundSummary(PrecisionRound precisionRound) {
+        Fragment fragment = PrecisionRoundSummaryFragment.newInstance(precisionRound);
+        displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_ROUND_SUMMARY_FRAGMENT);
+    }
+
+    @Override
+    public void onPrecisionRoundScoreDistribution(PrecisionRound precisionRound) {
+        Fragment fragment = PrecisionScoreDistributionFragment.newInstance(precisionRound);
+        displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_ROUND_SCORE_DISTRIBUTION);
+    }
+
+    @Override
+    public void onPrecisionRoundHitDistribution(PrecisionRound precisionRound) {
+        Fragment fragment = PrecisionHitDistributionFragment.newInstance(precisionRound);
+        displayFragment(fragment, true, BACK_STACK_TAG_PRECISION_ROUND_HIT_DISTRIBUTION);
     }
 }

@@ -12,50 +12,55 @@ import se.thirdbase.target.model.PrecisionSeries;
  */
 public class PrecisionBaseFragment extends Fragment {
 
-    private PrecisionStateListener mListener;
+    private PrecisionStateListener mPrecisionStateListener;
+    private PrecisionRoundSummaryListener mPrecisionRoundSummaryListener;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         if (context instanceof PrecisionStateListener) {
-            mListener = (PrecisionStateListener)context;
+            mPrecisionStateListener = (PrecisionStateListener) context;
+        }
+
+        if (context instanceof PrecisionRoundSummaryListener) {
+            mPrecisionRoundSummaryListener = (PrecisionRoundSummaryListener) context;
         }
     }
 
     protected void onUpdatePrecisionSeries(PrecisionSeries precisionSeries) {
-        if (mListener != null) {
-            mListener.onUpdatePrecisionSeries(precisionSeries);
+        if (mPrecisionStateListener != null) {
+            mPrecisionStateListener.onUpdatePrecisionSeries(precisionSeries);
         }
     }
 
     protected void onPrecisionSeriesUpdated(PrecisionSeries precisionSeries) {
-        if (mListener != null) {
-            mListener.onPrecisionSeriesUpdated(precisionSeries);
+        if (mPrecisionStateListener != null) {
+            mPrecisionStateListener.onPrecisionSeriesUpdated(precisionSeries);
         }
     }
 
     protected void onPrecisionSeriesComplete(PrecisionSeries precisionSeries) {
-        if (mListener != null) {
-            mListener.onPrecisionSeriesComplete(precisionSeries);
+        if (mPrecisionStateListener != null) {
+            mPrecisionStateListener.onPrecisionSeriesComplete(precisionSeries);
         }
     }
 
     protected void onPrecisionRoundComplete(PrecisionRound precisionRound) {
-        if (mListener != null) {
-            mListener.onPrecisionRoundComplete(precisionRound);
+        if (mPrecisionStateListener != null) {
+            mPrecisionStateListener.onPrecisionRoundComplete(precisionRound);
         }
     }
 
     protected void onPrecisionRoundPointsDistribution(PrecisionRound precisionRound) {
-        if (mListener != null) {
-            mListener.onPrecisionRoundPointsDistribution(precisionRound);
+        if (mPrecisionRoundSummaryListener != null) {
+            mPrecisionRoundSummaryListener.onPrecisionRoundScoreDistribution(precisionRound);
         }
     }
 
     protected void onPrecisionRoundHitsDistribution(PrecisionRound precisionRound) {
-        if (mListener != null) {
-            mListener.onPrecisionRoundHitsDistribution(precisionRound);
+        if (mPrecisionRoundSummaryListener != null) {
+            mPrecisionRoundSummaryListener.onPrecisionRoundHitDistribution(precisionRound);
         }
     }
 }

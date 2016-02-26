@@ -5,9 +5,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -34,6 +36,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
     private Button mRoundsProgressButton;
     private ListView mRoundsListView;
 
+    private PrecisionRound[] mPrecisionRounds;
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -61,14 +64,16 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
 
         List<PrecisionRound> precisionRounds = getPrecisionRounds();
 
-        PrecisionRound[] precisionRoundsArray = new PrecisionRound[precisionRounds.size()];
-        precisionRounds.toArray(precisionRoundsArray);
+        mPrecisionRounds = new PrecisionRound[precisionRounds.size()];
+        precisionRounds.toArray(mPrecisionRounds);
 
         mRoundsListView = (ListView) view.findViewById(R.id.statistics_precision_layout_rounds_list);
 
-        StatisticsPrecisionRoundListAdapter adapter = new StatisticsPrecisionRoundListAdapter(getContext(), R.layout.statistics_precision_list_row, precisionRoundsArray);
+        StatisticsPrecisionRoundListAdapter adapter = new StatisticsPrecisionRoundListAdapter(getContext(), R.layout.statistics_precision_list_row, mPrecisionRounds);
 
         mRoundsListView.setAdapter(adapter);
+
+        mRoundsListView.setOnItemClickListener(mPrecisionRoundSelectedListener);
 
         return view;
     }
@@ -127,4 +132,12 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
 
         return precisionRounds;
     }
+
+    AdapterView.OnItemClickListener mPrecisionRoundSelectedListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Log.d(TAG, String.format("onItemClick: %d", position));
+            onPrecisionRoundSummary(mPrecisionRounds[position]);
+        }
+    };
 }
