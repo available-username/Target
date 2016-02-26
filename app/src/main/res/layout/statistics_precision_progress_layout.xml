@@ -3,12 +3,6 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--se.thirdbase.target.view.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:id="@+id/statistics_precision_progress_layout_graph"/ -->
-
     <com.jjoe64.graphview.GraphView
         android:layout_width="match_parent"
         android:layout_height="400dp"

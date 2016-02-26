@@ -2,6 +2,7 @@ package se.thirdbase.target.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
@@ -9,7 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
+
 import java.util.List;
 
 import se.thirdbase.target.R;
@@ -17,7 +22,6 @@ import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 import se.thirdbase.target.model.PrecisionTarget;
-import se.thirdbase.target.view.GraphView;
 
 /**
  * Created by alexp on 2/25/16.
@@ -25,6 +29,8 @@ import se.thirdbase.target.view.GraphView;
 public class PrecisionPointDistributionFragment extends Fragment {
 
     private static final String BUNDLE_TAG_PRECISION_SERIES = "BUNDLE_TAG_PRECISION_SERIES";
+
+    private BarGraphSeries<DataPoint> mBarGraphSeries;
 
     public static PrecisionPointDistributionFragment newInstance(PrecisionRound precisionRound) {
         return newInstance(precisionRound.getPrecisionSeries());
@@ -45,8 +51,6 @@ public class PrecisionPointDistributionFragment extends Fragment {
         return fragment;
     }
 
-    private List<Pair<Float, Float>> mScoreDistribution = new ArrayList<>();
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -54,7 +58,10 @@ public class PrecisionPointDistributionFragment extends Fragment {
         Bundle arguments = getArguments();
         PrecisionSeries[] precisionSeries = (PrecisionSeries[]) arguments.getParcelableArray(BUNDLE_TAG_PRECISION_SERIES);
 
-        mScoreDistribution = calculatePointsDistribution(precisionSeries);
+        DataPoint[] data = calculatePointsDistribution(precisionSeries);
+        mBarGraphSeries = new BarGraphSeries<>(data);
+        mBarGraphSeries.setSpacing(10);
+        mBarGraphSeries.setDrawValuesOnTop(true);
     }
 
     @Nullable
@@ -62,8 +69,15 @@ public class PrecisionPointDistributionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.precision_point_distribution_layout, container, false);
 
-        GraphView mGraph = (GraphView) view.findViewById(R.id.precision_point_distribution_graph);
-        mGraph.addDataPoints(mScoreDistribution);
+        GraphView graphView = (GraphView) view.findViewById(R.id.precision_point_distribution_graph);
+
+        Viewport viewport = graphView.getViewport();
+        viewport.setMinX(1);
+        viewport.setMaxX(10);
+        viewport.setXAxisBoundsManual(true);
+
+
+        graphView.addSeries(mBarGraphSeries);
 
         return view;
     }
@@ -73,7 +87,7 @@ public class PrecisionPointDistributionFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
-    private List<Pair<Float, Float>> calculatePointsDistribution(PrecisionSeries[] precisionSeries) {
+    private DataPoint[] calculatePointsDistribution(PrecisionSeries[] precisionSeries) {
         int[] distribution = new int[10];
 
         for (PrecisionSeries series : precisionSeries) {
@@ -87,11 +101,10 @@ public class PrecisionPointDistributionFragment extends Fragment {
             }
         }
 
-        List<Pair<Float, Float>> data = new ArrayList<>();
+        DataPoint[] data = new DataPoint[distribution.length];
 
         for (int i = 0; i < distribution.length; i++) {
-            Pair<Float, Float> pair = new Pair<>((float)(i + 1), (float)(distribution[i]));
-            data.add(pair);
+            data[i] = new DataPoint(i + 1 ,distribution[i]);
         }
 
         return data;
