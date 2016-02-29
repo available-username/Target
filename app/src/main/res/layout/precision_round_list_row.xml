@@ -2,14 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
+    android:padding="10dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
@@ -19,7 +18,7 @@
             android:gravity="center"
             android:layout_gravity="center_vertical"
             android:id="@+id/precision_round_list_row_series"
-            style="@style/TargetFontLarge"
+            style="@style/TargetFontMedium"
             android:background="@drawable/number_text_view_background"
             tools:text="1"/>
 
@@ -28,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:id="@+id/precision_round_list_row_score"
-            style="@style/TargetFontLarge"
-            tools:text="testing"/>
+            style="@style/TargetFontMedium"
+            tools:text="47p"/>
     </LinearLayout>
 </LinearLayout>

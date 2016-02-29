@@ -3,56 +3,49 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Manufacturer -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:id="@+id/weapon_list_row_manufacturer"
-        style="@style/TargetFontLarge"
+        style="@style/TargetFontMedium"
         tools:text="Feinwerkbau"/>
 
     <!-- Model -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
         android:layout_below="@id/weapon_list_row_manufacturer"
         android:id="@+id/weapon_list_row_model"
-        style="@style/TargetFontMedium"
+        style="@style/TargetFontSmall"
         tools:text="AW93 Light"/>
 
     <!-- Caliber -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
-        android:layout_marginEnd="10dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:id="@+id/weapon_list_row_caliber"
-        style="@style/TargetFontMedium"
+        style="@style/TargetFontSmall"
         tools:text="22LR"/>
 
     <!-- Type -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
-        android:layout_marginEnd="10dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_below="@id/weapon_list_row_caliber"
         android:id="@+id/weapons_list_row_type"
-        style="@style/TargetFontMedium"
+        style="@style/TargetFontSmall"
         tools:text="Pistol"/>
 
 </RelativeLayout>

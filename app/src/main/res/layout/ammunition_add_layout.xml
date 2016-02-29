@@ -22,7 +22,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/ammunition_manufacturer"/>
 
             <EditText
@@ -37,7 +37,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/ammunition_name"/>
 
             <EditText
@@ -51,7 +51,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/ammunition_caliber"/>
 
             <Spinner
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/ammunition_type"/>
 
             <Spinner
@@ -75,7 +75,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/ammunition_velocity"/>
 
             <EditText
@@ -89,7 +89,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/ammunition_grains"/>
 
             <EditText

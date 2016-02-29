@@ -20,7 +20,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/weapon_manufacturer"/>
 
             <EditText
@@ -35,7 +35,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/weapon_model"/>
 
             <EditText
@@ -49,7 +49,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/weapon_caliber"/>
 
             <Spinner
@@ -59,13 +59,13 @@
 
             <!-- Type -->
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TargetFontMedium"
+                style="@style/TargetFontSmall"
                 android:text="@string/weapon_type"/>
 
             <Spinner
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/weapons_add_layout_type"/>
         </LinearLayout>
