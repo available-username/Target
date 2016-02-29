@@ -19,8 +19,8 @@ import java.util.Random;
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
-import se.thirdbase.target.model.PrecisionSeries;
-import se.thirdbase.target.model.PrecisionTarget;
+import se.thirdbase.target.model.precision.PrecisionSeries;
+import se.thirdbase.target.model.precision.PrecisionTarget;
 import se.thirdbase.target.view.TargetView;
 
 /**

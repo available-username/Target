@@ -17,9 +17,9 @@ import java.util.List;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.BulletHole;
-import se.thirdbase.target.model.PrecisionRound;
-import se.thirdbase.target.model.PrecisionSeries;
-import se.thirdbase.target.model.PrecisionTarget;
+import se.thirdbase.target.model.precision.PrecisionRound;
+import se.thirdbase.target.model.precision.PrecisionSeries;
+import se.thirdbase.target.model.precision.PrecisionTarget;
 
 /**
  * Created by alexp on 2/25/16.

@@ -1,17 +1,16 @@
-package se.thirdbase.target.model;
+package se.thirdbase.target.model.precision;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import se.thirdbase.target.db.BulletHoleContract;
 import se.thirdbase.target.db.PrecisionSeriesContract;
+import se.thirdbase.target.model.BulletHole;
 
 /**
  * Created by alexp on 2/17/16.

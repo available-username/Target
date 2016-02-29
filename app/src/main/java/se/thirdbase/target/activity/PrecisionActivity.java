@@ -13,8 +13,8 @@ import se.thirdbase.target.fragment.precision.PrecisionScoreDistributionFragment
 import se.thirdbase.target.fragment.precision.PrecisionRoundFragment;
 import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryFragment;
 import se.thirdbase.target.fragment.precision.PrecisionTargetFragment;
-import se.thirdbase.target.model.PrecisionRound;
-import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.precision.PrecisionRound;
+import se.thirdbase.target.model.precision.PrecisionSeries;
 
 public class PrecisionActivity extends BaseActivity implements PrecisionStateListener, PrecisionRoundSummaryListener{
 

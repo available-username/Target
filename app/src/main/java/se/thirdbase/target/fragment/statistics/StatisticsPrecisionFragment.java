@@ -18,7 +18,7 @@ import se.thirdbase.target.R;
 import se.thirdbase.target.adapter.StatisticsPrecisionRoundListAdapter;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.db.PrecisionRoundContract;
-import se.thirdbase.target.model.PrecisionRound;
+import se.thirdbase.target.model.precision.PrecisionRound;
 
 /**
  * Created by alexp on 2/24/16.

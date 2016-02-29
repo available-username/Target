@@ -4,8 +4,8 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 
 import se.thirdbase.target.activity.PrecisionStateListener;
-import se.thirdbase.target.model.PrecisionRound;
-import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.precision.PrecisionRound;
+import se.thirdbase.target.model.precision.PrecisionSeries;
 
 /**
  * Created by alexp on 2/19/16.

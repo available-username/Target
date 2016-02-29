@@ -1,6 +1,6 @@
-package se.thirdbase.target.model;
+package se.thirdbase.target.model.precision;
 
-import android.util.Log;
+import se.thirdbase.target.model.BulletHole;
 
 /**
  * Created by alexp on 2/23/16.

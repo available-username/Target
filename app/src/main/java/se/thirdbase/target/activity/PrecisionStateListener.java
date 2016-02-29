@@ -1,7 +1,7 @@
 package se.thirdbase.target.activity;
 
-import se.thirdbase.target.model.PrecisionRound;
-import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.precision.PrecisionRound;
+import se.thirdbase.target.model.precision.PrecisionSeries;
 
 /**
  * Created by alexp on 2/19/16.

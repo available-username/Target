@@ -21,7 +21,7 @@ import java.util.List;
 import se.thirdbase.target.R;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.db.PrecisionSeriesContract;
-import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.precision.PrecisionSeries;
 
 /**
  * Created by alexp on 2/25/16.

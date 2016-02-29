@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import se.thirdbase.target.R;
-import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.precision.PrecisionSeries;
 
 /**
  * Created by alexp on 2/24/16.

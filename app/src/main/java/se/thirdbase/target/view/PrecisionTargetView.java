@@ -6,10 +6,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import se.thirdbase.target.model.BulletHole;
-import se.thirdbase.target.model.PrecisionTarget;
+import se.thirdbase.target.model.precision.PrecisionTarget;
 
 /**
  * Created by alexp on 2/19/16.

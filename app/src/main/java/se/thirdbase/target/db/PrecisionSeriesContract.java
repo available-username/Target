@@ -1,19 +1,6 @@
 package se.thirdbase.target.db;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
-import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
-import se.thirdbase.target.model.BulletHole;
-import se.thirdbase.target.model.PrecisionRound;
-import se.thirdbase.target.model.PrecisionSeries;
-import se.thirdbase.target.util.SQLUtil;
 
 /**
  * Created by alexp on 2/18/16.

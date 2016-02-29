@@ -10,7 +10,7 @@ import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryListener;
 import se.thirdbase.target.fragment.precision.PrecisionScoreDistributionFragment;
 import se.thirdbase.target.fragment.statistics.StatisticsPrecisionFragment;
 import se.thirdbase.target.fragment.statistics.StatisticsPrecisionProgressFragment;
-import se.thirdbase.target.model.PrecisionRound;
+import se.thirdbase.target.model.precision.PrecisionRound;
 
 /**
  * Created by alexp on 2/24/16.

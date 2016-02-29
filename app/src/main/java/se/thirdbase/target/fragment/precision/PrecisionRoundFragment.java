@@ -15,8 +15,8 @@ import java.util.List;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.adapter.PrecisionRoundListAdapter;
-import se.thirdbase.target.model.PrecisionRound;
-import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.precision.PrecisionRound;
+import se.thirdbase.target.model.precision.PrecisionSeries;
 
 /**
  * Created by alexp on 2/17/16.
