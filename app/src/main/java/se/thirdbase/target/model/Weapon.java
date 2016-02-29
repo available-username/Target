@@ -6,7 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import se.thirdbase.target.db.BulletHoleContract;
+import java.util.ArrayList;
+import java.util.List;
+
+import se.thirdbase.target.db.PrecisionSeriesContract;
 import se.thirdbase.target.db.WeaponContract;
 
 /**
@@ -151,5 +154,36 @@ public class Weapon implements Parcelable {
         }
 
         return weapon;
+    }
+
+    public static List<Weapon> fetchAll(SQLiteDatabase db, String orderBy) {
+        String[] columns = { WeaponContract.WeaponEntry._ID };
+
+        Cursor cursor = db.query(WeaponContract.TABLE_NAME,
+                columns,
+                null, // selection
+                null, // selectionArgs
+                null, // groupBy
+                null, // having
+                orderBy);
+
+        List<Weapon> weapons = new ArrayList<>();
+
+        if (cursor != null && cursor.moveToFirst()) {
+
+            try {
+                while (!cursor.isAfterLast()) {
+                    int weaponId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry._ID));
+                    Weapon weapon = Weapon.fetch(db, weaponId);
+
+                    weapons.add(weapon);
+                    cursor.moveToNext();
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return weapons;
     }
 }

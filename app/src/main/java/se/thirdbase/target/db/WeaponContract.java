@@ -23,11 +23,11 @@ public class WeaponContract {
 
     public static final String SQL_CREATE_WEAPON =
             String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
-                    "%s INTEGER" + //DATE_TIME
-                    "%s VARCHAR(32)" + // TYPE
-                    "%s VARCHAR(64)" + // MANUFACTURER
-                    "%s VARCHAR(64)" + // MODEL
-                    "%s VARCHAR(32);", // CALIBER
+                    "%s INTEGER," + //DATE_TIME
+                    "%s INTEGER," + // TYPE
+                    "%s VARCHAR(64)," + // MANUFACTURER
+                    "%s VARCHAR(64)," + // MODEL
+                    "%s INTEGER);", // CALIBER
                     TABLE_NAME, WeaponEntry._ID,
                     WeaponEntry.COLUMN_NAME_DATE_TIME,
                     WeaponEntry.COLUMN_NAME_TYPE,
@@ -35,7 +35,7 @@ public class WeaponContract {
                     WeaponEntry.COLUMN_NAME_MODEL,
                     WeaponEntry.COLUMN_NAME_CALIBER);
 
-    public static String SQL_DROP_WEAPON = String.format("DROP TABLE IF EXITS %s;", TABLE_NAME);
+    public static String SQL_DROP_WEAPON = String.format("DROP TABLE IF EXISTS %s;", TABLE_NAME);
 
     public static void retrieveWeapon(SQLiteDatabase db, int id) {
         Log.d(TAG, String.format("retrieveWeapon(%d", id));
