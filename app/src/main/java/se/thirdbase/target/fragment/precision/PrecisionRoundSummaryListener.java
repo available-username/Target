@@ -1,4 +1,4 @@
-package se.thirdbase.target.fragment;
+package se.thirdbase.target.fragment.precision;
 
 import se.thirdbase.target.model.PrecisionRound;
 

@@ -3,12 +3,12 @@ package se.thirdbase.target;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
-import se.thirdbase.target.fragment.PrecisionHitDistributionFragment;
-import se.thirdbase.target.fragment.PrecisionRoundSummaryFragment;
-import se.thirdbase.target.fragment.PrecisionRoundSummaryListener;
-import se.thirdbase.target.fragment.PrecisionScoreDistributionFragment;
-import se.thirdbase.target.fragment.StatisticsPrecisionFragment;
-import se.thirdbase.target.fragment.StatisticsPrecisionProgressFragment;
+import se.thirdbase.target.fragment.precision.PrecisionHitDistributionFragment;
+import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryFragment;
+import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryListener;
+import se.thirdbase.target.fragment.precision.PrecisionScoreDistributionFragment;
+import se.thirdbase.target.fragment.statistics.StatisticsPrecisionFragment;
+import se.thirdbase.target.fragment.statistics.StatisticsPrecisionProgressFragment;
 import se.thirdbase.target.model.PrecisionRound;
 
 /**

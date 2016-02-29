@@ -1,15 +1,13 @@
 package se.thirdbase.target;
 
-import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import se.thirdbase.target.db.TargetDBHelper;
-import se.thirdbase.target.db.WeaponContract;
-import se.thirdbase.target.fragment.WeaponsAddFragment;
-import se.thirdbase.target.fragment.WeaponsFragment;
+import se.thirdbase.target.fragment.weapon.WeaponsAddFragment;
+import se.thirdbase.target.fragment.weapon.WeaponsFragment;
 import se.thirdbase.target.model.Weapon;
 
 /**

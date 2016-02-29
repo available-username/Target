@@ -1,4 +1,4 @@
-package se.thirdbase.target.fragment;
+package se.thirdbase.target.fragment.statistics;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

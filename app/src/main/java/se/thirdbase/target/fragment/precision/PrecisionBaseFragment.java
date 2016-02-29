@@ -1,4 +1,4 @@
-package se.thirdbase.target.fragment;
+package se.thirdbase.target.fragment.precision;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
