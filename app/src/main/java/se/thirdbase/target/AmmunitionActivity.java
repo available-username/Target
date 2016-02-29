@@ -71,6 +71,6 @@ public class AmmunitionActivity extends BaseActivity implements AmmunitionStateL
 
         ammunition.store(mSQLiteDatabase);
 
-        onOverview();
+        popBackStack();
     }
 }

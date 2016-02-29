@@ -69,6 +69,6 @@ public class WeaponsActivity extends BaseActivity implements WeaponsStateListene
 
         weapon.store(mSQLiteDatabase);
 
-        onOverview();
+        popBackStack();
     }
 }

@@ -1,104 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
-        <!-- Manufacturer -->
-        <TextView
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/TargetFontLarge"
-            android:text="@string/ammunition_manufacturer"/>
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:id="@+id/ammunition_add_layout_fields">
 
-        <EditText
-            android:layout_width="match_parent"
+            <!-- Manufacturer -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TargetFontMedium"
+                android:text="@string/ammunition_manufacturer"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:id="@+id/ammunition_add_layout_manufacturer"
+                tools:text="Magtech"/>
+
+
+            <!-- Model -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TargetFontMedium"
+                android:text="@string/ammunition_name"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:id="@+id/ammunition_add_layout_name"
+                tools:text="Premium"/>
+
+            <!-- Caliber -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TargetFontMedium"
+                android:text="@string/ammunition_caliber"/>
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/ammunition_add_layout_caliber"/>
+
+            <!-- Type -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TargetFontMedium"
+                android:text="@string/ammunition_type"/>
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/ammunition_add_layout_type"/>
+
+            <!-- Velocity -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TargetFontMedium"
+                android:text="@string/ammunition_velocity"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:id="@+id/ammunition_add_layout_velocity"
+                android:numeric="integer" />
+
+            <!-- Grains -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TargetFontMedium"
+                android:text="@string/ammunition_grains"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:id="@+id/ammunition_add_layout_grains"
+                android:numeric="decimal" />
+        </LinearLayout>
+
+        <Button
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:id="@+id/ammunition_add_layout_manufacturer"
-            tools:text="Magtech"/>
-
-
-        <!-- Model -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/TargetFontLarge"
-            android:text="@string/ammunition_name"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:id="@+id/ammunition_add_layout_name"
-            tools:text="Premium"/>
-
-        <!-- Caliber -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/TargetFontLarge"
-            android:text="@string/ammunition_caliber"/>
-
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/ammunition_add_layout_caliber"/>
-
-        <!-- Type -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/TargetFontLarge"
-            android:text="@string/ammunition_type"/>
-
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/ammunition_add_layout_type"/>
-
-        <!-- Velocity -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/TargetFontLarge"
-            android:text="@string/ammunition_velocity"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:id="@+id/ammunition_add_layout_velocity"
-            android:numeric="integer" />
-
-        <!-- Grains -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/TargetFontLarge"
-            android:text="@string/ammunition_grains"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
-            android:id="@+id/ammunition_add_layout_grains"
-            android:numeric="decimal" />
-    </LinearLayout>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/ammunition_add_layout_save"
-        android:text="@string/save"/>
-</RelativeLayout>
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/ammunition_add_layout_fields"
+            android:id="@+id/ammunition_add_layout_save"
+            android:text="@string/save"/>
+    </RelativeLayout>
+</ScrollView>
