@@ -1,8 +1,9 @@
-package se.thirdbase.target;
+package se.thirdbase.target.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import se.thirdbase.target.R;
 import se.thirdbase.target.fragment.precision.PrecisionHitDistributionFragment;
 import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryFragment;
 import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryListener;

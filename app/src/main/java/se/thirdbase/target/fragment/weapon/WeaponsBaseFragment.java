@@ -3,7 +3,7 @@ package se.thirdbase.target.fragment.weapon;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 
-import se.thirdbase.target.WeaponsStateListener;
+import se.thirdbase.target.activity.WeaponsStateListener;
 import se.thirdbase.target.model.Weapon;
 
 /**

@@ -3,7 +3,7 @@ package se.thirdbase.target.fragment.statistics;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 
-import se.thirdbase.target.StatisticsStateListener;
+import se.thirdbase.target.activity.StatisticsStateListener;
 import se.thirdbase.target.model.PrecisionRound;
 
 /**

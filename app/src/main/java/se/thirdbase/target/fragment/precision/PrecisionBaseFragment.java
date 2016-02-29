@@ -3,7 +3,7 @@ package se.thirdbase.target.fragment.precision;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 
-import se.thirdbase.target.PrecisionStateListener;
+import se.thirdbase.target.activity.PrecisionStateListener;
 import se.thirdbase.target.model.PrecisionRound;
 import se.thirdbase.target.model.PrecisionSeries;
 

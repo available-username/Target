@@ -1,4 +1,4 @@
-package se.thirdbase.target;
+package se.thirdbase.target.activity;
 
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -8,6 +8,7 @@ import android.util.Log;
 
 import java.util.List;
 
+import se.thirdbase.target.R;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.StartupFragment;
 import se.thirdbase.target.model.BulletHole;

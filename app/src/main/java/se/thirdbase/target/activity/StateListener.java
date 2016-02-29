@@ -1,4 +1,4 @@
-package se.thirdbase.target;
+package se.thirdbase.target.activity;
 
 /**
  * Created by alexp on 2/12/16.

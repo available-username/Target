@@ -3,9 +3,7 @@ package se.thirdbase.target.fragment;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 
-import se.thirdbase.target.StateListener;
-import se.thirdbase.target.model.PrecisionRound;
-import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.activity.StateListener;
 
 /**
  * Created by alexp on 2/12/16.

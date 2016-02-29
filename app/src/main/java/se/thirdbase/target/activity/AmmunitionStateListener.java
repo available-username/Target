@@ -1,4 +1,4 @@
-package se.thirdbase.target;
+package se.thirdbase.target.activity;
 
 import se.thirdbase.target.model.Ammunition;
 import se.thirdbase.target.model.Weapon;

@@ -1,10 +1,11 @@
-package se.thirdbase.target;
+package se.thirdbase.target.activity;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import se.thirdbase.target.R;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.ammunition.AmmunitionAddFragment;
 import se.thirdbase.target.fragment.ammunition.AmmunitionFragment;

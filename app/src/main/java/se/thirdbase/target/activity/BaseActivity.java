@@ -1,4 +1,4 @@
-package se.thirdbase.target;
+package se.thirdbase.target.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

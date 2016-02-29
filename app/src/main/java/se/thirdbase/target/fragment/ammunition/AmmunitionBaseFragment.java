@@ -3,7 +3,7 @@ package se.thirdbase.target.fragment.ammunition;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 
-import se.thirdbase.target.AmmunitionStateListener;
+import se.thirdbase.target.activity.AmmunitionStateListener;
 import se.thirdbase.target.model.Ammunition;
 
 /**
