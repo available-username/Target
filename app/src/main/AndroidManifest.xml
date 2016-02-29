@@ -15,8 +15,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PrecisionActivity"></activity>
-        <activity android:name=".StatisticsActivity"></activity>
+        <activity android:name=".PrecisionActivity"/>
+        <activity android:name=".WeaponsActivity"/>
+        <activity android:name=".StatisticsActivity"/>
+
     </application>
 
 </manifest>

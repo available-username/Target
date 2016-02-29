@@ -46,9 +46,12 @@ public class StartupFragment extends BaseFragment {
                         onPrecision();
                         break;
                     case 1:
-                        onStatistics();
+                        onWeapons();
                         break;
                     case 2:
+                        onStatistics();
+                        break;
+                    case 3:
                     default:
                         onStatistics();
                         break;

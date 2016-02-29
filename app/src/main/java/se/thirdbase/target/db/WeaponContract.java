@@ -22,7 +22,7 @@ public class WeaponContract {
     }
 
     public static final String SQL_CREATE_WEAPON =
-            String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
+            String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                     "%s INTEGER," + //DATE_TIME
                     "%s INTEGER," + // TYPE
                     "%s VARCHAR(64)," + // MANUFACTURER

@@ -1,7 +1,6 @@
 package se.thirdbase.target.fragment;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,12 +12,11 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.adapter.StatisticsPrecisionRoundListAdapter;
-import se.thirdbase.target.db.PrecisionDBHelper;
+import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.db.PrecisionRoundContract;
 import se.thirdbase.target.model.PrecisionRound;
 
@@ -37,6 +35,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
     private ListView mRoundsListView;
 
     private PrecisionRound[] mPrecisionRounds;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -94,7 +93,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
     }
 
     private List<PrecisionRound> getPrecisionRounds() {
-        PrecisionDBHelper helper = PrecisionDBHelper.getInstance(getContext());
+        TargetDBHelper helper = TargetDBHelper.getInstance(getContext());
         SQLiteDatabase db = helper.getReadableDatabase();
 
         String orderBy = String.format("%s DESC", PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME);
@@ -104,7 +103,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
 
     /*
     private List<PrecisionRound> getPrecisionRounds() {
-        PrecisionDBHelper helper = PrecisionDBHelper.getInstance(getContext());
+        TargetDBHelper helper = TargetDBHelper.getInstance(getContext());
         SQLiteDatabase db = helper.getReadableDatabase();
 
 

@@ -5,7 +5,5 @@ package se.thirdbase.target.model;
  */
 public enum WeaponType {
     REVOLVER,
-    PISTOL,
-    SHOTGUN,
-    RIFLE
+    PISTOL
 }

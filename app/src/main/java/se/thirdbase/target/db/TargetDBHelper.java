@@ -3,35 +3,34 @@ package se.thirdbase.target.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.util.Log;
 
-import se.thirdbase.target.model.PrecisionSeries;
+import se.thirdbase.target.model.Ammunition;
 
 /**
  * Created by alexp on 2/17/16.
  */
-public class PrecisionDBHelper extends SQLiteOpenHelper {
+public class TargetDBHelper extends SQLiteOpenHelper {
 
-    private static final String TAG = PrecisionDBHelper.class.getSimpleName();
+    private static final String TAG = TargetDBHelper.class.getSimpleName();
 
     public static final String DATABASE_NAME = "precision.db";
     public static final int DATABASE_VERSION = 1;
 
-    private static PrecisionDBHelper mInstance;
+    private static TargetDBHelper mInstance;
 
-    public static PrecisionDBHelper getInstance(Context context) {
+    public static TargetDBHelper getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new PrecisionDBHelper(context);
+            mInstance = new TargetDBHelper(context);
         }
 
         return mInstance;
     }
 
-    private PrecisionDBHelper(Context context) {
+    private TargetDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
-        Log.d(TAG, "PrecisionDBHelper()");
+        Log.d(TAG, "TargetDBHelper()");
     }
 
     @Override
@@ -40,6 +39,8 @@ public class PrecisionDBHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             db.execSQL(BulletHoleContract.SQL_CREATE_BULLET_HOLE);
+            db.execSQL(WeaponContract.SQL_CREATE_WEAPON);
+            db.execSQL(AmmunitionContract.SQL_CREATE_AMMUNITION);
             db.execSQL(PrecisionSeriesContract.SQL_CREATE_SERIES);
             db.execSQL(PrecisionRoundContract.SQL_CREATE_PRECISION);
             db.setTransactionSuccessful();

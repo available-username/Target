@@ -9,5 +9,7 @@ public interface StateListener {
 
     void onPrecision();
 
+    void onWeapons();
+
     void onStatistics();
 }

@@ -8,8 +8,7 @@ import android.util.Log;
 
 import java.util.List;
 
-import se.thirdbase.target.db.PrecisionDBHelper;
-import se.thirdbase.target.db.PrecisionRoundContract;
+import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.StartupFragment;
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.PrecisionRound;
@@ -54,6 +53,14 @@ public class MainActivity extends BaseActivity implements StateListener {
     }
 
     @Override
+    public void onWeapons() {
+        Log.d(TAG, "onWeapons()");
+
+        Intent intent = new Intent(this, WeaponsActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
     public void onStatistics() {
         Log.d(TAG, "onStatistics()");
 
@@ -62,7 +69,7 @@ public class MainActivity extends BaseActivity implements StateListener {
     }
 
     private void dumpDB() {
-        PrecisionDBHelper helper = PrecisionDBHelper.getInstance(this);
+        TargetDBHelper helper = TargetDBHelper.getInstance(this);
         SQLiteDatabase db = helper.getReadableDatabase();
 
         List<PrecisionRound> precisionRoundList = PrecisionRound.fetchAll(db, null);

@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 
-import se.thirdbase.target.db.PrecisionDBHelper;
+import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.PrecisionHitDistributionFragment;
 import se.thirdbase.target.fragment.PrecisionRoundSummaryListener;
 import se.thirdbase.target.fragment.PrecisionScoreDistributionFragment;
@@ -43,7 +43,7 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         Fragment seriesFragment = PrecisionTargetFragment.newInstance();
         displayFragment(seriesFragment, false, BACK_STACK_TAG_PRECISION_SERIES);
 
-        PrecisionDBHelper dbHelper = PrecisionDBHelper.getInstance(this);
+        TargetDBHelper dbHelper = TargetDBHelper.getInstance(this);
         mSQLiteDatabase = dbHelper.getWritableDatabase();
     }
 

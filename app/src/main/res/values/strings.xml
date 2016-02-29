@@ -8,10 +8,10 @@
 
     <string-array name="startup_options">
         <item>Precision</item>
+        <item>Vapen</item>
         <item>Statistik</item>
         <item>Inställningar</item>
     </string-array>
-
 
     <!-- Target view strings -->
     <string name="number_of_bullets">Antal kulor: %1$d</string>
@@ -33,4 +33,19 @@
     <!-- GraphView strings -->
     <string name="legend_score">Poäng</string>
     <string name="legend_average_score">Medel</string>
+
+    <!-- Weapon types, must match the order of the items in
+         WeaponType -->
+    <string-array name="weapon_type">
+        <item>Pistol</item>
+        <item>Revolver</item>
+    </string-array>
+
+    <!-- Add weapon strings -->
+    <string name="weapon_manufacturer">Tillverkare</string>
+    <string name="weapon_manufacturer_error">Tillverkare måste anges</string>
+    <string name="weapon_model">Modellbeteckning</string>
+    <string name="weapon_model_error">Modellbeteckning måste anges</string>
+    <string name="weapon_type">Typ</string>
+    <string name="weapon_caliber">Kaliber</string>
 </resources>

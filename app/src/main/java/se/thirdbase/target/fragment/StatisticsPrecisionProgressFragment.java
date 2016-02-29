@@ -12,16 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import se.thirdbase.target.R;
-import se.thirdbase.target.db.PrecisionDBHelper;
+import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.db.PrecisionSeriesContract;
 import se.thirdbase.target.model.PrecisionSeries;
 
@@ -45,7 +43,7 @@ public class StatisticsPrecisionProgressFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        PrecisionDBHelper helper = PrecisionDBHelper.getInstance(context);
+        TargetDBHelper helper = TargetDBHelper.getInstance(context);
         SQLiteDatabase db = helper.getReadableDatabase();
 
         mPrecisionSeries = getAllPrecisionSeries(db);
