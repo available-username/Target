@@ -9,6 +9,7 @@
     <string-array name="startup_options">
         <item>Precision</item>
         <item>Vapen</item>
+        <item>Ammunition</item>
         <item>Statistik</item>
         <item>Inställningar</item>
     </string-array>
@@ -48,4 +49,16 @@
     <string name="weapon_model_error">Modellbeteckning måste anges</string>
     <string name="weapon_type">Typ</string>
     <string name="weapon_caliber">Kaliber</string>
+
+    <!-- Add ammunition strings -->
+    <string name="ammunition_manufacturer">Tillverkare</string>
+    <string name="ammunition_manufacturer_error">Tillverkare måste anges</string>
+    <string name="ammunition_name">Produktnamn</string>
+    <string name="ammunition_name_error">Produktnamn måste anges</string>
+    <string name="ammunition_type">Typ</string>
+    <string name="ammunition_caliber">Kaliber</string>
+    <string name="ammunition_velocity">Utgångshastighet (m/s)</string>
+    <string name="ammunition_velocity_error">Utgångshastighet måste anges</string>
+    <string name="ammunition_grains">Projektilvikt (g)</string>
+    <string name="ammunition_grains_error">Projektilvikt måste</string>
 </resources>

@@ -32,21 +32,6 @@ public class WeaponsFragment extends WeaponsBaseFragment {
         return new WeaponsFragment();
     }
 
-    @Override
-    public void onOverview() {
-        super.onOverview();
-    }
-
-    @Override
-    public void onAdd() {
-        super.onAdd();
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

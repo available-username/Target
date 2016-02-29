@@ -41,6 +41,12 @@ abstract class BaseFragment extends Fragment {
         }
     }
 
+    protected void onAmmunition() {
+        if (mListener != null) {
+            mListener.onAmmunition();
+        }
+    }
+
     protected void onStatistics() {
         if (mListener != null) {
             mListener.onStatistics();

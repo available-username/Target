@@ -22,11 +22,11 @@ public class Ammunition implements Parcelable {
     private String mName;
     private BulletCaliber mCaliber;
     private double mGrains;
-    private double mMuzzleVelocity;
+    private int mMuzzleVelocity;
     private long mDBHandle = Long.MIN_VALUE;
 
     public Ammunition(AmmunitionType type, String manufacturer, String name, BulletCaliber caliber,
-                      double grains, double muzzleVelocity) {
+                      double grains, int muzzleVelocity) {
         mType = type;
         mManufacturer = manufacturer;
         mName = name;
@@ -39,7 +39,7 @@ public class Ammunition implements Parcelable {
         mManufacturer = in.readString();
         mName = in.readString();
         mGrains = in.readDouble();
-        mMuzzleVelocity = in.readDouble();
+        mMuzzleVelocity = in.readInt();
         mCaliber = (BulletCaliber)in.readSerializable();
         mType = (AmmunitionType)in.readSerializable();
     }
@@ -60,48 +60,48 @@ public class Ammunition implements Parcelable {
         return mType;
     }
 
-    public void setType(AmmunitionType mType) {
-        this.mType = mType;
+    public void setType(AmmunitionType type) {
+        mType = type;
     }
 
     public String getManufacturer() {
         return mManufacturer;
     }
 
-    public void setManufacturer(String mManufacturer) {
-        this.mManufacturer = mManufacturer;
+    public void setManufacturer(String manufacturer) {
+        mManufacturer = manufacturer;
     }
 
     public String getName() {
         return mName;
     }
 
-    public void setName(String mName) {
-        this.mName = mName;
+    public void setName(String name) {
+        mName = name;
     }
 
     public BulletCaliber getCaliber() {
         return mCaliber;
     }
 
-    public void setCaliber(BulletCaliber mCaliber) {
-        this.mCaliber = mCaliber;
+    public void setCaliber(BulletCaliber caliber) {
+        mCaliber = caliber;
     }
 
     public double getGrains() {
         return mGrains;
     }
 
-    public void setGrains(double mGrains) {
-        this.mGrains = mGrains;
+    public void setGrains(double grains) {
+        mGrains = grains;
     }
 
-    public double getMuzzleVelocity() {
+    public int getMuzzleVelocity() {
         return mMuzzleVelocity;
     }
 
-    public void setMuzzleVelocity(double mMuzzleVelocity) {
-        this.mMuzzleVelocity = mMuzzleVelocity;
+    public void setMuzzleVelocity(int muzzleVelocity) {
+        mMuzzleVelocity = muzzleVelocity;
     }
 
     @Override
@@ -114,7 +114,7 @@ public class Ammunition implements Parcelable {
         dest.writeString(mManufacturer);
         dest.writeString(mName);
         dest.writeDouble(mGrains);
-        dest.writeDouble(mMuzzleVelocity);
+        dest.writeInt(mMuzzleVelocity);
         dest.writeSerializable(mCaliber);
         dest.writeSerializable(mType);
     }
@@ -172,7 +172,7 @@ public class Ammunition implements Parcelable {
                 String manufacturer = cursor.getString(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MANUFACTURER));
                 String name = cursor.getString(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_NAME));
                 double grains = cursor.getDouble(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_GRAINS));
-                double muzzleVelocity = cursor.getDouble(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MUZZLE_VELOCITY));
+                int muzzleVelocity = cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MUZZLE_VELOCITY));
 
                 ammunition = new Ammunition(type, manufacturer, name, caliber, grains, muzzleVelocity);
                 ammunition.mDBHandle = id;

@@ -11,5 +11,7 @@ public interface StateListener {
 
     void onWeapons();
 
+    void onAmmunition();
+
     void onStatistics();
 }

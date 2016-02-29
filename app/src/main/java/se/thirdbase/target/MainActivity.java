@@ -61,6 +61,14 @@ public class MainActivity extends BaseActivity implements StateListener {
     }
 
     @Override
+    public void onAmmunition() {
+        Log.d(TAG, "onAmmunition()");
+
+        Intent intent = new Intent(this, AmmunitionActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
     public void onStatistics() {
         Log.d(TAG, "onStatistics()");
 

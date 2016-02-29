@@ -103,7 +103,7 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
 
     /*
     private List<PrecisionRound> getPrecisionRounds() {
-        TargetDBHelper helper = TargetDBHelper.getInstance(getContext());
+        TargetDBHelper helper = TargetDBHelper.newInstance(getContext());
         SQLiteDatabase db = helper.getReadableDatabase();
 
 

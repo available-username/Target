@@ -17,6 +17,7 @@
         </activity>
         <activity android:name=".PrecisionActivity"/>
         <activity android:name=".WeaponsActivity"/>
+        <activity android:name=".AmmunitionActivity"/>
         <activity android:name=".StatisticsActivity"/>
 
     </application>
