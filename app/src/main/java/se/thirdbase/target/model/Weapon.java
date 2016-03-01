@@ -140,7 +140,6 @@ public class Weapon implements Parcelable {
 
         if (cursor != null && cursor.moveToFirst()) {
             try {
-
                 BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER))];
                 WeaponType type = WeaponType.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_TYPE))];
                 String manufacturer = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER));

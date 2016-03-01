@@ -61,4 +61,10 @@
     <string name="ammunition_velocity_error">Utgångshastighet måste anges</string>
     <string name="ammunition_grains">Projektilvikt (g)</string>
     <string name="ammunition_grains_error">Projektilvikt måste</string>
+
+    <!-- Principles -->
+    <string-array name="principles">
+        <item>Precision</item>
+        <item>Duell</item>
+    </string-array>
 </resources>
