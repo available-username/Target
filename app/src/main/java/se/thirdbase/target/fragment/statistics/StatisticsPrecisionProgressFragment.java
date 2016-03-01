@@ -11,28 +11,33 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import se.thirdbase.target.R;
-import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.db.PrecisionSeriesContract;
+import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.model.precision.PrecisionSeries;
 
 /**
- * Created by alexp on 2/25/16.
+ * Created by alexp on 3/1/16.
  */
 public class StatisticsPrecisionProgressFragment extends Fragment {
+
 
     private static final String TAG = StatisticsPrecisionProgressFragment.class.getSimpleName();
 
     private static final String BUNDLE_TAG_PRECISION_SERIES = "BUNDLE_TAG_PRECISION_SERIES";
 
-    private GraphView mGraphView;
+    private LineChart mLineChart;
     private List<PrecisionSeries> mPrecisionSeries;
 
     public static StatisticsPrecisionProgressFragment newInstance() {
@@ -49,10 +54,10 @@ public class StatisticsPrecisionProgressFragment extends Fragment {
         mPrecisionSeries = getAllPrecisionSeries(db);
     }
 
-    private LineGraphSeries<DataPoint> calculateProgressiveAverages(List<PrecisionSeries> precisionSeries) {
+    private LineDataSet calculateProgressiveAverages(List<PrecisionSeries> precisionSeries) {
 
+        List<Entry> entries = new ArrayList<>();
         int size = precisionSeries.size();
-        DataPoint[] data = new DataPoint[size];
 
         float totalScore = 0;
 
@@ -61,32 +66,40 @@ public class StatisticsPrecisionProgressFragment extends Fragment {
 
             totalScore += series.getScore();
 
-            Date date = new Date(series.getTimestamp());
-
-            //data[i] = new DataPoint(date, totalScore / (i + 1));
-            data[i] = new DataPoint(i, totalScore / (i + 1));
+            Entry entry = new Entry(totalScore / (i + 1), i);
+            entries.add(entry);
         }
 
-        return new LineGraphSeries<>(data);
+        return new LineDataSet(entries, "Medel");
     }
 
-    private LineGraphSeries<DataPoint> getScores(List<PrecisionSeries> precisionSeries) {
+    private LineDataSet getScores(List<PrecisionSeries> precisionSeries) {
 
+        List<Entry> entries = new ArrayList<>();
         int size = precisionSeries.size();
-        DataPoint[] data = new DataPoint[size];
 
         for (int i = 0; i < size; i++) {
             PrecisionSeries series = precisionSeries.get(i);
 
             float score = series.getScore();
 
-            Date date = new Date(series.getTimestamp());
-
-            //data[i] = new DataPoint(date, score);
-            data[i] = new DataPoint(i, score);
+            Entry entry = new Entry(score, i);
+            entries.add(entry);
         }
 
-        return new LineGraphSeries<>(data);
+        return new LineDataSet(entries, "Poäng");
+    }
+
+    private List<String> getXAxisLabels(List<PrecisionSeries> precisionSeries) {
+        List<String> dates = new ArrayList<>();
+
+        for (PrecisionSeries series : precisionSeries) {
+            Date date = new Date(series.getTimestamp());
+
+            dates.add(date.toString());
+        }
+
+        return dates;
     }
 
     @Nullable
@@ -94,22 +107,28 @@ public class StatisticsPrecisionProgressFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.statistics_precision_progress_layout, container, false);
 
-        mGraphView = (GraphView) view.findViewById(R.id.statistics_precision_progress_layout_graph);
+        mLineChart = (LineChart) view.findViewById(R.id.statistics_precision_progress_layout_graph);
 
-        LineGraphSeries<DataPoint> scores = getScores(mPrecisionSeries);
-        scores.setTitle(getContext().getResources().getString(R.string.legend_score));
-        scores.setColor(Color.RED);
-        scores.setDrawDataPoints(true);
+        LineDataSet scoreSet = getScores(mPrecisionSeries);
+        scoreSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        scoreSet.setColor(Color.RED);
 
-        mGraphView.addSeries(scores);
 
-        LineGraphSeries<DataPoint> averages = calculateProgressiveAverages(mPrecisionSeries);
-        averages.setTitle(getContext().getResources().getString(R.string.legend_average_score));
-        averages.setColor(Color.BLUE);
+        LineDataSet avgSet = calculateProgressiveAverages(mPrecisionSeries);
+        avgSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        avgSet.setDrawCubic(true);
+        avgSet.setDrawCircles(false);
+        avgSet.setColor(Color.BLUE);
 
-        mGraphView.addSeries(averages);
+        List<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(scoreSet);
+        dataSets.add(avgSet);
 
-        mGraphView.getLegendRenderer().setVisible(true);
+        List<String> axisLabels = getXAxisLabels(mPrecisionSeries);
+
+        LineData data = new LineData(axisLabels, dataSets);
+        mLineChart.setData(data);
+        mLineChart.invalidate();
 
         Log.d(TAG, "onCreateView exiting");
 

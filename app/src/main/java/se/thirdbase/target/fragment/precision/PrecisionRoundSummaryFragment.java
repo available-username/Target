@@ -1,6 +1,7 @@
 package se.thirdbase.target.fragment.precision;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -31,14 +32,15 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
     private TextView mScoreText;
     private TextView mMaxSpreadText;
     private TextView mAvgSpreadText;
+    private TextView mOffsetText;
     private Button mPointsDistributionButton;
     private Button mHitsDistributionButton;
 
     private PrecisionRound mPrecisionRound;
     private int mScore = 0;
-    private int mNbrBullets = 0;
     private float mMaxSpread = 0;
     private float mAvgSpread = 0;
+    private PointF mBulletOffset;
     private List<Pair<Float, Float>> mScoreDistribution = new ArrayList<>();
 
     public static PrecisionRoundSummaryFragment newInstance(PrecisionRound precisionRound) {
@@ -67,6 +69,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mAvgSpread = calculateAverageSpread(precisionSeries);
         mScore = calculateScore(precisionSeries);
         mScoreDistribution = calculateDistribution(precisionSeries);
+        mBulletOffset = calculateBulletOffset(precisionSeries);
     }
 
     private float calculateMaxSpread(List<PrecisionSeries> precisionSeries) {
@@ -158,6 +161,27 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         return data;
     }
 
+    private PointF calculateBulletOffset(List<PrecisionSeries> precisionSeries) {
+        PointF point = new PointF(0, 0);
+        int nBulletHoles = 0;
+
+        for (PrecisionSeries series : precisionSeries) {
+            for (BulletHole bulletHole : series.getBulletHoles()) {
+                PointF currentPoint = bulletHole.toCartesianCoordinates();
+                point.x += currentPoint.x;
+                point.y += currentPoint.y;
+
+                nBulletHoles += 1;
+            }
+        }
+
+        point.x /= nBulletHoles;
+        point.y /= nBulletHoles;
+
+        return point;
+    }
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -168,20 +192,9 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         }
 
         mScoreText = (TextView) view.findViewById(R.id.precision_round_summary_layout_score);
-        mScoreText.setText("" + mScore);
-
         mMaxSpreadText = (TextView) view.findViewById(R.id.precision_round_summary_layout_max_spread);
-        mMaxSpreadText.setText(String.format("%.2fcm", mMaxSpread));
-
         mAvgSpreadText = (TextView) view.findViewById(R.id.precision_round_summary_layout_avg_spread);
-        mAvgSpreadText.setText(String.format("%.2fcm", mAvgSpread));
-
-        /*
-        mDistributionGraphView = (GraphView) view.findViewById(R.id.precision_round_summary_layout_graph_view);
-        mDistributionGraphView.addDataPoints(mScoreDistribution);
-
-        mPrecisionTargetView = (PrecisionTargetHeatMapView) view.findViewById(R.id.precision_round_summary_layout_target_view);
-        */
+        mOffsetText = (TextView) view.findViewById(R.id.precision_round_summary_layout_offset);
 
         mPointsDistributionButton = (Button) view.findViewById(R.id.precision_round_summary_layout_points_distribution_button);
 
@@ -210,21 +223,25 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mScoreText.setText(getResources().getString(R.string.points, mScore));
         mMaxSpreadText.setText(getResources().getString(R.string.max_spread, mMaxSpread));
         mAvgSpreadText.setText(getResources().getString(R.string.mean_spread, mAvgSpread));
-    }
 
-    private void addBulletsToView() {
-        List<BulletHole> allHoles = new ArrayList<>();
-
-        for (PrecisionSeries series : mPrecisionRound.getPrecisionSeries()) {
-            List<BulletHole> holes = series.getBulletHoles();
-            allHoles.addAll(holes);
+        String formatString;
+        if (mBulletOffset.x < 0 && mBulletOffset.y < 0) {
+            formatString = getResources().getString(R.string.down_left_offset);
+        } else if (mBulletOffset.x < 0 && mBulletOffset.y > 0) {
+            formatString = getResources().getString(R.string.up_left_offset);
+        } else if (mBulletOffset.x > 0 && mBulletOffset.y > 0) {
+            formatString = getResources().getString(R.string.up_right_offset);
+        } else /* if (mBulletOffset.x > 0 && mBulletOffset.y < 0) */ {
+            formatString = getResources().getString(R.string.down_right_offset);
         }
 
-        //mPrecisionTargetView.setBulletHoles(allHoles);
+        float xOffset = Math.abs(mBulletOffset.x);
+        float yOffset = Math.abs(mBulletOffset.y);
+        mOffsetText.setText(String.format(formatString, xOffset, yOffset));
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState (Bundle outState) {
         super.onSaveInstanceState(outState);
     }
 

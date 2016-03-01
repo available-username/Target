@@ -3,9 +3,9 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.jjoe64.graphview.GraphView
+    <com.github.mikephil.charting.charts.BarChart
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/precision_point_distribution_graph"/>
+        android:id="@+id/precision_point_distribution_graph" />
 
 </LinearLayout>

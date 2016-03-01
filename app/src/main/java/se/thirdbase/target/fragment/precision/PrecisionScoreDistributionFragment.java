@@ -8,11 +8,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.Viewport;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import se.thirdbase.target.R;
@@ -22,13 +26,15 @@ import se.thirdbase.target.model.precision.PrecisionSeries;
 import se.thirdbase.target.model.precision.PrecisionTarget;
 
 /**
- * Created by alexp on 2/25/16.
+ * Created by alexp on 3/1/16.
  */
 public class PrecisionScoreDistributionFragment extends Fragment {
 
     private static final String BUNDLE_TAG_PRECISION_SERIES = "BUNDLE_TAG_PRECISION_SERIES";
 
     private BarGraphSeries<DataPoint> mBarGraphSeries;
+
+    private PrecisionSeries[] mPrecisionSeries;
 
     public static PrecisionScoreDistributionFragment newInstance(PrecisionRound precisionRound) {
         return newInstance(precisionRound.getPrecisionSeries());
@@ -54,12 +60,7 @@ public class PrecisionScoreDistributionFragment extends Fragment {
         super.onAttach(context);
 
         Bundle arguments = getArguments();
-        PrecisionSeries[] precisionSeries = (PrecisionSeries[]) arguments.getParcelableArray(BUNDLE_TAG_PRECISION_SERIES);
-
-        DataPoint[] data = calculatePointsDistribution(precisionSeries);
-        mBarGraphSeries = new BarGraphSeries<>(data);
-        mBarGraphSeries.setSpacing(10);
-        mBarGraphSeries.setDrawValuesOnTop(true);
+        mPrecisionSeries = (PrecisionSeries[]) arguments.getParcelableArray(BUNDLE_TAG_PRECISION_SERIES);
     }
 
     @Nullable
@@ -67,15 +68,17 @@ public class PrecisionScoreDistributionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.precision_point_distribution_layout, container, false);
 
-        GraphView graphView = (GraphView) view.findViewById(R.id.precision_point_distribution_graph);
+        BarChart barChart = (BarChart)view.findViewById(R.id.precision_point_distribution_graph);
 
-        Viewport viewport = graphView.getViewport();
-        viewport.setMinX(1);
-        viewport.setMaxX(10);
-        viewport.setXAxisBoundsManual(true);
+        BarDataSet scoreDistribution = calculatePointsDistribution(mPrecisionSeries);
+        List<String> axis = getXAxisLabels();
 
+        List<IBarDataSet> dataSets = new ArrayList<>();
+        dataSets.add(scoreDistribution);
 
-        graphView.addSeries(mBarGraphSeries);
+        BarData data = new BarData(axis, dataSets);
+        barChart.setData(data);
+        barChart.invalidate();
 
         return view;
     }
@@ -85,7 +88,17 @@ public class PrecisionScoreDistributionFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
-    private DataPoint[] calculatePointsDistribution(PrecisionSeries[] precisionSeries) {
+    private List<String> getXAxisLabels() {
+        List<String> axis = new ArrayList<>();
+
+        for (int i = 1; i <= 10; i++) {
+            axis.add("" + i);
+        }
+
+        return axis;
+    }
+
+    private BarDataSet calculatePointsDistribution(PrecisionSeries[] precisionSeries) {
         int[] distribution = new int[10];
 
         for (PrecisionSeries series : precisionSeries) {
@@ -99,12 +112,13 @@ public class PrecisionScoreDistributionFragment extends Fragment {
             }
         }
 
-        DataPoint[] data = new DataPoint[distribution.length];
+        List<BarEntry> entires = new ArrayList<>();
 
         for (int i = 0; i < distribution.length; i++) {
-            data[i] = new DataPoint(i + 1 ,distribution[i]);
+            BarEntry entry = new BarEntry(distribution[i], i);
+            entires.add(entry);
         }
 
-        return data;
+        return new BarDataSet(entires, "Poäng");
     }
 }

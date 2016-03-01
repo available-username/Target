@@ -26,6 +26,13 @@
         style="@style/TargetFontSmall"
         android:text="@string/mean_spread"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/precision_round_summary_layout_offset"
+        style="@style/TargetFontSmall"
+        android:text="@string/mean_spread"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

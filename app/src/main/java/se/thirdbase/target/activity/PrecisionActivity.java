@@ -12,9 +12,9 @@ import se.thirdbase.target.fragment.loadout.LoadOutFragment;
 import se.thirdbase.target.fragment.loadout.LoadOutListener;
 import se.thirdbase.target.fragment.precision.PrecisionHitDistributionFragment;
 import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryListener;
-import se.thirdbase.target.fragment.precision.PrecisionScoreDistributionFragment;
 import se.thirdbase.target.fragment.precision.PrecisionRoundFragment;
 import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryFragment;
+import se.thirdbase.target.fragment.precision.PrecisionScoreDistributionFragment;
 import se.thirdbase.target.fragment.precision.PrecisionTargetFragment;
 import se.thirdbase.target.model.Ammunition;
 import se.thirdbase.target.model.Principle;
@@ -45,11 +45,6 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_precision);
-
-        /*
-        Fragment seriesFragment = PrecisionTargetFragment.newInstance();
-        displayFragment(seriesFragment, false, BACK_STACK_TAG_PRECISION_SERIES);
-        */
 
         TargetDBHelper dbHelper = TargetDBHelper.getInstance(this);
         mSQLiteDatabase = dbHelper.getWritableDatabase();
@@ -141,7 +136,6 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         int nbrSeries = mPrecisionRound.getNbrSeries();
 
         if (nbrSeries == 1) {
-            //onPrecisionRoundComplete(mPrecisionRound);
             Fragment fragment = PrecisionRoundFragment.newInstance(mPrecisionRound);
             displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_ROUND);
         } else if (mPrecisionRound.getNbrSeries() == PrecisionRound.MAX_NBR_SERIES) {

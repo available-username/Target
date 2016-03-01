@@ -11,20 +11,26 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/target_layout_nbr_bullets"
-            style="@style/TargetFontLarge"
-            android:text="@string/number_of_bullets"/>
+            android:orientation="vertical"
+            android:padding="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/target_layout_nbr_bullets"
+                style="@style/TargetFontSmall"
+                android:text="@string/number_of_bullets"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/target_layout_nbr_bullets"
-            android:id="@+id/target_layout_score"
-            style="@style/TargetFontLarge"
-            android:text="@string/points"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/target_layout_nbr_bullets"
+                android:id="@+id/target_layout_score"
+                style="@style/TargetFontSmall"
+                android:text="@string/points"/>
+        </LinearLayout>
 
         <Button
             android:layout_width="wrap_content"

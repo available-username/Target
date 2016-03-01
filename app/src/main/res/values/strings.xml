@@ -21,18 +21,22 @@
     </string-array>
 
     <!-- Target view strings -->
-    <string name="number_of_bullets">Antal kulor: %1$d</string>
+    <string name="number_of_bullets">Kulor: %1$d</string>
     <string name="points">Poäng: %1$d</string>
     <string name="points_short">%dp</string>
     <string name="save">Spara</string>
     <string name="max_bullets_reached">Kan inte lägga till fler kulor</string>
 
-    <!-- Round summary strings -->
+    <!-- Precision round summary strings -->
     <string name="point_distribution">Poängdistribution</string>
     <string name="hit_distribution">Träffbild</string>
     <string name="hit_center_of_mass">Träfftyngdpunkt</string>
     <string name="max_spread">Max spridning: %1$.2fcm</string>
     <string name="mean_spread">Medelspridning: %1$.2fcm</string>
+    <string name="up_left_offset">Tyngdpunkt: %1$.2fcm över och %2$.2fcm till vänster om centrum.</string>
+    <string name="up_right_offset">Tyngdpunkt: %1$.2fcm över och %2$.2fcm till höger om centrum.</string>
+    <string name="down_left_offset">Tyngdpunkt: %1$.2fcm under och %2$.2fcm till vänster om centrum.</string>
+    <string name="down_right_offset">Tyngdpunkt: %1$.2fcm under och %2$.2fcm till höger om centrum.</string>
 
     <!-- Statistics strings -->
     <string name="progress">Utveckling</string>

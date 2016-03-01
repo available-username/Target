@@ -3,9 +3,8 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.jjoe64.graphview.GraphView
+    <com.github.mikephil.charting.charts.LineChart
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:id="@+id/statistics_precision_progress_layout_graph" />
-
+        android:layout_height="match_parent"
+        android:id="@+id/statistics_precision_progress_layout_graph"/>
 </LinearLayout>
