@@ -62,6 +62,13 @@ public abstract class TargetView extends View {
         ZOOM
     }
 
+    private static final String BUNDLE_TAG_SUPER_PARCEL = "BUNDLE_TAG_SUPER_PARCEL";
+    private static final String BUNDLE_TAG_ACTION_STATE = "BUNDLE_TAG_ACTION_STATE";
+    private static final String BUNDLE_TAG_VIEW_STATE = "BUNDLE_TAG_VIEW_STATE";
+    private static final String BUNDLE_TAG_BULLET_HOLES = "BUNDLE_TAG_BULLET_HOLES";
+    private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE = "BUNDLE_TAG_ACTIVE_BULLET_HOLE";
+    private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX = "BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX";
+
     private static final float MIN_ZOOM_FACTOR = 1.0f;
     private static final float MAX_ZOOM_FACTOR = 5.0f;
 
@@ -77,6 +84,8 @@ public abstract class TargetView extends View {
 
     private ZoomChangeListener mZoomChangeListener;
     private ActionListener mActionListener;
+
+    private BulletCaliber mBulletCaliber;
 
     public TargetView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -100,17 +109,9 @@ public abstract class TargetView extends View {
         mActionListener = listener;
     }
 
-    private static final String BUNDLE_TAG_SUPER_PARCEL = "BUNDLE_TAG_SUPER_PARCEL";
-    private static final String BUNDLE_TAG_PIXELS_PER_CM = "BUNDLE_TAG_PIXELS_PER_CM";
-    private static final String BUNDLE_TAG_ZOOM_LEVEL = "BUNDLE_TAG_ZOOM_LEVEL";
-    private static final String BUNDLE_TAG_SRC_RECT = "BUNDLE_TAG_SRC_RECT";
-    private static final String BUNDLE_TAG_DST_RECT = "BUNDLE_TAG_DST_RECT";
-    private static final String BUNDLE_TAG_SCALED_RECT = "BUNDLE_TAG_SCALED_RECT";
-    private static final String BUNDLE_TAG_ACTION_STATE = "BUNDLE_TAG_ACTION_STATE";
-    private static final String BUNDLE_TAG_VIEW_STATE = "BUNDLE_TAG_VIEW_STATE";
-    private static final String BUNDLE_TAG_BULLET_HOLES = "BUNDLE_TAG_BULLET_HOLES";
-    private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE = "BUNDLE_TAG_ACTIVE_BULLET_HOLE";
-    private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX = "BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX";
+    public void setBulletCaliber(BulletCaliber bulletCaliber) {
+        mBulletCaliber = bulletCaliber;
+    }
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -266,7 +267,7 @@ public abstract class TargetView extends View {
 
         Log.d(TAG, String.format("Radius: %.2f Angle: %.2f", radius, angle));
 
-        mActiveBulletHole =  new BulletHole(BulletCaliber.CAL_22, radius, angle);
+        mActiveBulletHole =  new BulletHole(mBulletCaliber, radius, angle);
 
         invalidate();
         onAdd();

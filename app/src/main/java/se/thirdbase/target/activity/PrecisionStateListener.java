@@ -8,7 +8,7 @@ import se.thirdbase.target.model.precision.PrecisionSeries;
  */
 public interface PrecisionStateListener {
 
-    void onUpdatePrecisionSeries(PrecisionSeries precisionSeries);
+    void onPrecisionSeriesUpdate(PrecisionSeries precisionSeries);
 
     void onPrecisionSeriesUpdated(PrecisionSeries precisionSeries);
 

@@ -19,7 +19,7 @@ public final class PrecisionSeriesContract {
         String COLUMN_NAME_BULLET_4   = "bullet4";
         String COLUMN_NAME_BULLET_5   = "bullet5";
         String COLUMN_NAME_WEAPON     = "weapon";
-        String COLUMN_NAME_AMMUNITION = "ammunution";
+        String COLUMN_NAME_AMMUNITION = "ammunition";
         String COLUMN_NAME_SCORE      = "score";
     }
 

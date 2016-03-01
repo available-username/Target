@@ -93,7 +93,7 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
     private View.OnClickListener mAddButtonClicked = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            onUpdatePrecisionSeries(null);
+            onPrecisionSeriesUpdate(null);
         }
     };
 
@@ -107,7 +107,7 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
             //PrecisionSeries series = position == precisionSeries.size() ? null : precisionSeries.get(position);
             PrecisionSeries series = precisionSeries.get(position);
 
-            onUpdatePrecisionSeries(series);
+            onPrecisionSeriesUpdate(series);
         }
     };
 }

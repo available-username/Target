@@ -186,7 +186,7 @@ public class PrecisionRound implements Parcelable {
         values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES, getNotes());
         values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
-        db.update(PrecisionRoundContract.TABLE_NAME, values, PrecisionRoundContract.PrecisionRoundEntry._ID, new String[]{"" + mDBHandle  });
+        db.update(PrecisionRoundContract.TABLE_NAME, values, PrecisionRoundContract.PrecisionRoundEntry._ID + "=?", new String[]{"" + mDBHandle  });
     }
 
     public static PrecisionRound fetch(SQLiteDatabase db, int id) {

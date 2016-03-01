@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.thirdbase.target.db.PrecisionSeriesContract;
+import se.thirdbase.target.model.Ammunition;
 import se.thirdbase.target.model.BulletHole;
+import se.thirdbase.target.model.Weapon;
 
 /**
  * Created by alexp on 2/17/16.
@@ -20,19 +22,28 @@ public class PrecisionSeries implements Parcelable {
     private List<BulletHole> mBulletHoles;
     private int mScore;
     private long mTimestamp;
+    private Weapon mWeapon;
+    private Ammunition mAmmunition;
     private long mDBHandle = Long.MIN_VALUE;
 
     public PrecisionSeries() {
         mBulletHoles = new ArrayList<>();
     }
 
-    public PrecisionSeries(List<BulletHole> bulletHoles) {
+    public PrecisionSeries(Weapon weapon, Ammunition ammunition) {
+        mWeapon = weapon;
+        mAmmunition = ammunition;
+        mBulletHoles = new ArrayList<>();
+    }
+
+    public PrecisionSeries(Weapon weapon, Ammunition ammunition, List<BulletHole> bulletHoles) {
+        this(weapon, ammunition);
         mBulletHoles = bulletHoles;
         mScore = calculateScore(bulletHoles);
     }
 
-    public PrecisionSeries(List<BulletHole> bulletHoles, long timestamp) {
-        this(bulletHoles);
+    public PrecisionSeries(Weapon weapon, Ammunition ammunition, List<BulletHole> bulletHoles, long timestamp) {
+        this(weapon, ammunition, bulletHoles);
         mTimestamp = timestamp;
     }
 
@@ -40,6 +51,8 @@ public class PrecisionSeries implements Parcelable {
         mBulletHoles = in.createTypedArrayList(BulletHole.CREATOR);
         mScore = in.readInt();
         mTimestamp = in.readLong();
+        mWeapon = in.readParcelable(Weapon.class.getClassLoader());
+        mAmmunition = in.readParcelable(Ammunition.class.getClassLoader());
     }
 
     public static final Creator<PrecisionSeries> CREATOR = new Creator<PrecisionSeries>() {
@@ -91,6 +104,14 @@ public class PrecisionSeries implements Parcelable {
         return mTimestamp;
     }
 
+    public Weapon getWeapon() {
+        return mWeapon;
+    }
+
+    public Ammunition getAmmunition() {
+        return mAmmunition;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -101,6 +122,8 @@ public class PrecisionSeries implements Parcelable {
         dest.writeTypedList(mBulletHoles);
         dest.writeInt(mScore);
         dest.writeLong(mTimestamp);
+        dest.writeParcelable(mWeapon, flags);
+        dest.writeParcelable(mAmmunition, flags);
     }
 
     public String toString() {
@@ -134,7 +157,9 @@ public class PrecisionSeries implements Parcelable {
                     PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
                     PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
                     PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
-                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5
+                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5,
+                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON,
+                    PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_AMMUNITION
             };
 
             int size = mBulletHoles.size();
@@ -144,6 +169,8 @@ public class PrecisionSeries implements Parcelable {
 
             values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_SCORE, getScore());
             values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
+            values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON, mWeapon.getDBHandle());
+            values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_AMMUNITION, mAmmunition.getDBHandle());
 
             mDBHandle = db.insert(PrecisionSeriesContract.TABLE_NAME, null, values);
         } else {
@@ -159,7 +186,7 @@ public class PrecisionSeries implements Parcelable {
         values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_SCORE, getScore());
         values.put(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
-        db.update(PrecisionSeriesContract.TABLE_NAME, values, PrecisionSeriesContract.PrecisionSeriesEntry._ID, new String[]{"" + mDBHandle});
+        db.update(PrecisionSeriesContract.TABLE_NAME, values, PrecisionSeriesContract.PrecisionSeriesEntry._ID + "=?", new String[]{"" + mDBHandle});
     }
 
     public static PrecisionSeries fetch(SQLiteDatabase db, int id) {
@@ -169,6 +196,8 @@ public class PrecisionSeries implements Parcelable {
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_4,
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5,
+                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON,
+                PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_AMMUNITION,
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME,
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_SCORE
         };
@@ -189,16 +218,35 @@ public class PrecisionSeries implements Parcelable {
             try {
                 List<BulletHole> bulletHoles = new ArrayList<>();
 
-                for (int i = 0; i < columns.length - 2; i++) {
+                int bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_1));
+                BulletHole bulletHole = BulletHole.fetch(db, bulletHoleId);
+                bulletHoles.add(bulletHole);
 
-                    int bulletHoleId = cursor.getInt(cursor.getColumnIndex(columns[i]));
-                    BulletHole bulletHole = BulletHole.fetch(db, bulletHoleId);
-                    bulletHoles.add(bulletHole);
-                }
+                bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_2));
+                bulletHole = BulletHole.fetch(db, bulletHoleId);
+                bulletHoles.add(bulletHole);
+
+                bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3));
+                bulletHole = BulletHole.fetch(db, bulletHoleId);
+                bulletHoles.add(bulletHole);
+
+                bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_4));
+                bulletHole = BulletHole.fetch(db, bulletHoleId);
+                bulletHoles.add(bulletHole);
+
+                bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5));
+                bulletHole = BulletHole.fetch(db, bulletHoleId);
+                bulletHoles.add(bulletHole);
 
                 long timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME));
 
-                precisionSeries = new PrecisionSeries(bulletHoles, timestamp);
+                int weaponId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON));
+                Weapon weapon = Weapon.fetch(db, weaponId);
+
+                int ammunitionId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_AMMUNITION));
+                Ammunition ammunition = Ammunition.fetch(db, ammunitionId);
+
+                precisionSeries = new PrecisionSeries(weapon, ammunition, bulletHoles, timestamp);
                 precisionSeries.mDBHandle = id;
             } finally {
                 cursor.close();

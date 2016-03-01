@@ -9,39 +9,21 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:id="@+id/precision_round_summary_layout_score"
-        style="@style/TargetFontLarge"
+        style="@style/TargetFontMedium"
         android:text="@string/points"/>
-
-    <!--TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/TargetFontLarge"
-        android:text="@string/point_distribution"/-->
-
-    <!--se.thirdbase.target.view.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_weight="1"
-        android:id="@+id/precision_round_summary_layout_graph_view"/>
-
-    <se.thirdbase.target.view.PrecisionTargetHeatMapView
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_weight="1"
-        android:id="@+id/precision_round_summary_layout_target_view" /-->
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/precision_round_summary_layout_max_spread"
-        style="@style/TargetFontMedium"
+        style="@style/TargetFontSmall"
         android:text="@string/max_spread"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/precision_round_summary_layout_avg_spread"
-        style="@style/TargetFontMedium"
+        style="@style/TargetFontSmall"
         android:text="@string/mean_spread"/>
 
     <Button

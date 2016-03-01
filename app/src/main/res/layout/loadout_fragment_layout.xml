@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        style="@style/TargetFontMedium"
+        android:background="@color/header_background"
+        android:id="@+id/load_out_fragment_layout_weapon_title"
+        android:text="@string/weapon"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:id="@+id/load_out_fragment_layout_weapon"
+        android:choiceMode="singleChoice"
+        android:listSelector="@color/item_selected"
+        tools:listitem="@layout/weapons_list_row"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        style="@style/TargetFontMedium"
+        android:background="@color/header_background"
+        android:id="@+id/load_out_fragment_layout_ammunition_title"
+        android:text="@string/ammunition"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:id="@+id/load_out_fragment_layout_ammunition"
+        android:choiceMode="singleChoice"
+        android:listSelector="@color/item_selected"
+        tools:listitem="@layout/ammunition_list_row"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:id="@+id/load_out_fragment_layout_save"
+        android:text="@string/save"/>
+</LinearLayout>

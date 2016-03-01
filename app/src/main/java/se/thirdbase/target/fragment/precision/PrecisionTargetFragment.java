@@ -17,8 +17,10 @@ import java.util.List;
 import java.util.Random;
 
 import se.thirdbase.target.R;
+import se.thirdbase.target.model.Ammunition;
 import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
+import se.thirdbase.target.model.Weapon;
 import se.thirdbase.target.model.precision.PrecisionSeries;
 import se.thirdbase.target.model.precision.PrecisionTarget;
 import se.thirdbase.target.view.TargetView;
@@ -51,6 +53,8 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
     private static final int BUTTON_EDIT_BULLET3 = 4;
     private static final int BUTTON_EDIT_BULLET4 = 5;
 
+    private static final String BUNDLE_TAG_WEAPON = "BUNDLE_TAG_WEAPON";
+    private static final String BUNDLE_TAG_AMMUNITION = "BUNDLE_TAG_AMMUNITION";
     private static final String BUNDLE_TAG_STATE = "BUNDLE_TAG_STATE";
     private static final String BUNDLE_TAG_PRECISION_SERIES = "BUNDLE_TAG_PRECISION_SERIES";
 
@@ -75,24 +79,28 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
     private State mState = State.OVERVIEW;
     private PrecisionSeries mPrecisionSeries;
 
+    private Weapon mWeapon;
+    private Ammunition mAmmunition;
 
-    public static PrecisionTargetFragment newInstance() {
-        return newInstance(null);
+    public static PrecisionTargetFragment newInstance(Weapon weapon, Ammunition ammunition) {
+
+        PrecisionTargetFragment fragment = new PrecisionTargetFragment();
+
+        Bundle arguments = new Bundle();
+        arguments.putParcelable(BUNDLE_TAG_WEAPON, weapon);
+        arguments.putParcelable(BUNDLE_TAG_AMMUNITION, ammunition);
+        fragment.setArguments(arguments);
+
+        return fragment;
     }
 
     public static PrecisionTargetFragment newInstance(PrecisionSeries precisionSeries) {
 
         PrecisionTargetFragment fragment = new PrecisionTargetFragment();
 
-        if (precisionSeries != null) {
-            Bundle arguments = new Bundle();
-            arguments.putParcelable(BUNDLE_TAG_PRECISION_SERIES, precisionSeries);
-
-            Log.d(TAG, "New instance with arguments");
-            fragment.setArguments(arguments);
-        } else {
-            Log.d(TAG, "Regular instance");
-        }
+        Bundle arguments = new Bundle();
+        arguments.putParcelable(BUNDLE_TAG_PRECISION_SERIES, precisionSeries);
+        fragment.setArguments(arguments);
 
         return fragment;
     }
@@ -105,6 +113,14 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
 
         if (arguments != null) {
             mPrecisionSeries = arguments.getParcelable(BUNDLE_TAG_PRECISION_SERIES);
+
+            if (mPrecisionSeries == null) {
+                mWeapon = arguments.getParcelable(BUNDLE_TAG_WEAPON);
+                mAmmunition = arguments.getParcelable(BUNDLE_TAG_AMMUNITION);
+            } else {
+                mWeapon = mPrecisionSeries.getWeapon();
+                mAmmunition = mPrecisionSeries.getAmmunition();
+            }
         }
     }
 
@@ -118,11 +134,6 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
 
         mTargetView = (TargetView)view.findViewById(R.id.target_layout_target_view);
         mTargetView.setActionListener(mActionListener);
-
-        if(mPrecisionSeries != null) {
-            List<BulletHole> bulletHoles = mPrecisionSeries.getBulletHoles();
-            mTargetView.setBulletHoles(bulletHoles);
-        }
 
         mSaveButton = (Button)view.findViewById(R.id.target_layout_save_button);
         mSaveButton.setOnClickListener(mOnSaveClickedListener);
@@ -155,9 +166,18 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
             onRestoreInstanceState(savedInstanceState);
         }
 
+        if (mPrecisionSeries != null) {
+            List<BulletHole> bulletHoles = mPrecisionSeries.getBulletHoles();
+            mTargetView.setBulletHoles(bulletHoles);
+            mWeapon = mPrecisionSeries.getWeapon();
+            mAmmunition = mPrecisionSeries.getAmmunition();
+        } else if (mWeapon != null){
+            mTargetView.setBulletCaliber(mWeapon.getCaliber());
+        }
+
         onEnterOverview();
 
-        populateWithTestData();
+        //populateWithTestData();
 
         updateTextFields();
 
@@ -169,14 +189,15 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
         String scoreText = getResources().getString(R.string.points, mTargetView.getTotalScore());
         mCountText.setText(countText);
         mScoreText.setText(scoreText);
-
     }
 
     private void populateWithTestData() {
         List<BulletHole> holes = new ArrayList<>();
         Random random = new Random();
+        BulletCaliber caliber = mAmmunition.getCaliber();
+
         for (int i = 0; i < PrecisionTarget.MAX_NBR_BULLETS; i++) {
-            BulletHole hole = new BulletHole(BulletCaliber.CAL_22, random.nextFloat() * 10f, (float)(random.nextFloat() * Math.PI * 2));
+            BulletHole hole = new BulletHole(caliber, random.nextFloat() * 10f, (float)(random.nextFloat() * Math.PI * 2));
             holes.add(hole);
         }
         mTargetView.setBulletHoles(holes);
@@ -418,7 +439,7 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
             List<BulletHole> bulletHoleList = mTargetView.getBulletHoles();
 
             if (mPrecisionSeries == null) {
-                PrecisionSeries precisionSeries = new PrecisionSeries(bulletHoleList);
+                PrecisionSeries precisionSeries = new PrecisionSeries(mWeapon, mAmmunition, bulletHoleList);
 
                 onPrecisionSeriesComplete(precisionSeries);
             } else {
