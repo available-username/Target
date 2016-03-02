@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
@@ -72,9 +73,16 @@ public class WeaponsDisplayFragment extends WeaponsBaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.weapons_display_layout, container, false);
 
+        TextView titleText = (TextView) view.findViewById(R.id.weapon_display_layout_weapon_title);
+        String title = String.format("%s %s", mWeapon.getManufacturer(), mWeapon.getModel());
+        titleText.setText(title);
+
+        PieChart principleChart = (PieChart)view.findViewById(R.id.weapon_display_layout_principle_chart);
+        PieData principleData = getPrincipleDistribution();
+        principleChart.setData(principleData);
+
         PieChart ammoChart = (PieChart)view.findViewById(R.id.weapon_display_layout_ammunition_chart);
         PieData ammoData = getAmmunitionDistribution();
-
         ammoChart.setData(ammoData);
 
         return view;
@@ -129,7 +137,34 @@ public class WeaponsDisplayFragment extends WeaponsBaseFragment {
         return new PieData(labels, dataSet);
     }
 
-    private PieDataSet getPrincipleDistribution() {
-        return null;
+    private PieData getPrincipleDistribution() {
+
+        Map<String, Integer> map = new HashMap<>();
+
+        /* Fetch PrecisionSeries produced with this weapon */
+        String principle = getResources().getString(R.string.principle_precision);
+        String selection = PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON + "=?";
+        String[] args = { String.format("%d", mWeapon.getDBHandle()) };
+        List<PrecisionSeries> precisionSeries = PrecisionSeries.fetchSelection(mSQLiteDatabase,
+                selection, args, null, null, null, null);
+
+
+        map.put(principle, precisionSeries.size());
+
+        int idx = 0;
+        List<Entry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+
+        for (String label : map.keySet()) {
+            Entry entry = new Entry(map.get(label).intValue(), idx++);
+            entries.add(entry);
+            labels.add(label);
+        }
+
+        String principles = getResources().getString(R.string.principle_principles);
+        PieDataSet dataSet = new PieDataSet(entries, principles);
+        dataSet.setColors(PaletteGenerator.generate(Color.CYAN, entries.size()));
+
+        return new PieData(labels, dataSet);
     }
 }

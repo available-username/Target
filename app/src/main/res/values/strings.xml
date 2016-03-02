@@ -19,6 +19,9 @@
         <item>Precision</item>
         <item>Duell</item>
     </string-array>
+    <string name="principle_principles">Moment</string>
+    <string name="principle_precision">Precision</string>
+    <string name="principle_duell">Duell</string>
 
     <!-- Target view strings -->
     <string name="number_of_bullets">Kulor: %1$d</string>

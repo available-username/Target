@@ -7,10 +7,12 @@ import java.util.Random;
  */
 public final class PaletteGenerator {
 
-    private static Random random = new Random(0xdeadbeef);
+    private static Random random = new Random();
 
     public static int[] generate(int base, int size) {
         int[] palette = new int[size];
+
+        random.setSeed(0xdeadbeef);
 
         for (int i = 0; i < size; i++) {
             int r = random.nextInt(256);
