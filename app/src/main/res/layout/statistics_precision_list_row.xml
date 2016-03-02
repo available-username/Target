@@ -18,8 +18,19 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/statistics_precision_list_item_score"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:id="@+id/statistics_precision_list_item_date"
+        style="@style/TargetFontSmall"
+        tools:text="2013/02/28"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/statistics_precision_list_item_date"
+        android:id="@+id/statistics_precision_list_item_since"
         style="@style/TargetFontSmall"
         tools:text="Two weeks ago"/>
 
