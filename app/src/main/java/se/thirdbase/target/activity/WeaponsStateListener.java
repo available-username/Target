@@ -12,4 +12,6 @@ public interface WeaponsStateListener {
     void onAdd();
 
     void onAdded(Weapon weapon);
+
+    void onDisplay(Weapon weapon);
 }

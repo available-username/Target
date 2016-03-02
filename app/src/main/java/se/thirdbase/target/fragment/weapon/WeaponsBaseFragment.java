@@ -39,4 +39,10 @@ public class WeaponsBaseFragment extends Fragment {
             mListener.onAdded(weapon);
         }
     }
+
+    public void onDisplay(Weapon weapon) {
+        if (mListener != null) {
+            mListener.onDisplay(weapon);
+        }
+    }
 }

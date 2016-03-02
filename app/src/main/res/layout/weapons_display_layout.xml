@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="@color/header_background"
+        android:id="@+id/weapon_display_layout_weapon_title"
+        style="@style/TargetFontMedium"
+        tools:text="Sig-Sauer X-five"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/weapon_display_layout_weapon_title"
+        android:id="@+id/weapon_display_layout_charts">
+
+        <!--com.github.mikephil.charting.charts.PieChart
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/weapon_display_layout_principle_chart"/-->
+
+        <com.github.mikephil.charting.charts.PieChart
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/weapon_display_layout_ammunition_chart"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/weapon_display_layout_charts"
+        android:id="@+id/weapon_display_layout_bullets"
+        tools:text="Avfyrade patroner: 2309"/>
+</RelativeLayout>

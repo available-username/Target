@@ -8,6 +8,7 @@ import android.util.Log;
 import se.thirdbase.target.R;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.weapon.WeaponsAddFragment;
+import se.thirdbase.target.fragment.weapon.WeaponsDisplayFragment;
 import se.thirdbase.target.fragment.weapon.WeaponsFragment;
 import se.thirdbase.target.model.Weapon;
 
@@ -20,6 +21,7 @@ public class WeaponsActivity extends BaseActivity implements WeaponsStateListene
 
     private static final String BACK_STACK_TAG_WEAPONS_FRAGMENT = "BACK_STACK_TAG_WEAPONS_FRAGMENT";
     private static final String BACK_STACK_TAG_WEAPONS_ADD_FRAGMENT = "BACK_STACK_TAG_WEAPONS_ADD_FRAGMENT";
+    private static final String BACK_STACK_TAG_WEAPONS_DISPLAY_FRAGMENT = "BACK_STACK_TAG_WEAPONS_DISPLAY_FRAGMENT";
 
     private SQLiteDatabase mSQLiteDatabase;
 
@@ -71,5 +73,13 @@ public class WeaponsActivity extends BaseActivity implements WeaponsStateListene
         weapon.store(mSQLiteDatabase);
 
         popBackStack();
+    }
+
+    @Override
+    public void onDisplay(Weapon weapon) {
+        Log.d(TAG, "onDisplay()");
+
+        Fragment fragment = WeaponsDisplayFragment.newInstance(weapon);
+        displayFragment(fragment, true, BACK_STACK_TAG_WEAPONS_DISPLAY_FRAGMENT);
     }
 }
