@@ -10,4 +10,8 @@
     <color name="header_background">#999999</color>
 
     <color name="item_selected">#AAAAAA</color>
+
+    <!-- TargetView colors -->
+    <color name="target_view_bullet">#8888FF</color>
+    <color name="target_view_bullet_selected">#FF8888</color>
 </resources>

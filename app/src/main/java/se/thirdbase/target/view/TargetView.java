@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import se.thirdbase.target.R;
 import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.util.ViewMath;
@@ -72,6 +74,9 @@ public abstract class TargetView extends View {
     private static final float MIN_ZOOM_FACTOR = 1.0f;
     private static final float MAX_ZOOM_FACTOR = 5.0f;
 
+    private int mBulletColor;
+    private int mBulletSelectedColor;
+
     protected ViewMath mViewMath;
 
     private ActionState mActionState = ActionState.IDLE;
@@ -89,6 +94,14 @@ public abstract class TargetView extends View {
 
     public TargetView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mBulletColor = getResources().getColor(R.color.target_view_bullet, null);
+            mBulletSelectedColor = getResources().getColor(R.color.target_view_bullet_selected, null);
+        } else {
+            mBulletColor = getResources().getColor(R.color.target_view_bullet);
+            mBulletSelectedColor = getResources().getColor(R.color.target_view_bullet_selected);
+        }
 
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
@@ -385,7 +398,7 @@ public abstract class TargetView extends View {
     protected void drawActiveBullet(Canvas canvas) {
         if (mActiveBulletHole != null) {
             Paint paint = new Paint();
-            paint.setColor(Color.RED);
+            paint.setColor(mBulletSelectedColor);
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
             drawBullet(canvas, paint, mActiveBulletHole);
         }
@@ -395,7 +408,7 @@ public abstract class TargetView extends View {
         Log.d(TAG, "drawBullets()");
 
         Paint paint = new Paint();
-        paint.setColor(Color.GRAY);
+        paint.setColor(mBulletColor);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         int size = mBulletHoles.size();
