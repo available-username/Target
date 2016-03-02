@@ -27,8 +27,6 @@ public class MainActivity extends BaseActivity implements StateListener {
 
         if (savedInstanceState == null) {
             onStartup();
-
-            dumpDB();
         }
     }
 

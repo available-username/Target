@@ -99,14 +99,29 @@ public class LoadOutFragment extends Fragment {
             }
         });
 
+        if (savedInstanceState != null) {
+            onRestoreInstanceState(savedInstanceState);
+        }
+
         toggleSaveButton();
 
         return view;
     }
 
+    private static final String BUNDLE_TAG_WEAPON = "BUNDLE_TAG_WEAPON";
+    private static final String BUNDLE_TAG_AMMUNITION = "BUNDLE_TAG_AMMUNITION";
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        outState.putParcelable(BUNDLE_TAG_WEAPON, mWeapon);
+        outState.putParcelable(BUNDLE_TAG_AMMUNITION, mAmmunition);
+    }
+
+    private void onRestoreInstanceState(Bundle bundle) {
+        mWeapon = bundle.getParcelable(BUNDLE_TAG_WEAPON);
+        mAmmunition = bundle.getParcelable(BUNDLE_TAG_AMMUNITION);
     }
 
     @Override

@@ -31,7 +31,9 @@ public class AmmunitionActivity extends BaseActivity implements AmmunitionStateL
         TargetDBHelper dbHelper = TargetDBHelper.getInstance(this);
         mSQLiteDatabase = dbHelper.getWritableDatabase();
 
-        onOverview();
+        if (savedInstanceState == null) {
+            onOverview();
+        }
     }
 
 

@@ -26,6 +26,7 @@ import se.thirdbase.target.R;
 import se.thirdbase.target.db.PrecisionSeriesContract;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.model.precision.PrecisionSeries;
+import se.thirdbase.target.util.PaletteGenerator;
 
 /**
  * Created by alexp on 3/1/16.
@@ -73,6 +74,41 @@ public class StatisticsPrecisionProgressFragment extends Fragment {
         return new LineDataSet(entries, "Medel");
     }
 
+    /*
+    private LineDataSet calculateWindowedAverages(List<PrecisionSeries> precisionSeries, int windowSize) {
+        int size = precisionSeries.size();
+        double[] scores = new double[size];
+        List<Entry> entries = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            scores[i] = precisionSeries.get(i).getScore();
+        }
+
+        for (int i = 0; i < size; i++) {
+            float sum = 0;
+            int dividend;
+
+            if (i < windowSize) {
+                dividend = i;
+            } else if (size - windowSize - 1 < i) {
+                dividend = size - i;
+            } else {
+                dividend = windowSize;
+            }
+
+            Log.d(TAG, String.format("Dividend: %d", dividend));
+
+            for (int j = 0; j < Math.min(dividend, windowSize); j++) {
+                sum += scores[i] / (dividend + 1);
+            }
+
+            entries.add(new Entry(sum, i));
+        }
+
+        return new LineDataSet(entries, "Glidande medel");
+    }
+    */
+
     private LineDataSet getScores(List<PrecisionSeries> precisionSeries) {
 
         List<Entry> entries = new ArrayList<>();
@@ -113,12 +149,12 @@ public class StatisticsPrecisionProgressFragment extends Fragment {
         scoreSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         scoreSet.setColor(Color.RED);
 
-
         LineDataSet avgSet = calculateProgressiveAverages(mPrecisionSeries);
         avgSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         avgSet.setDrawCubic(true);
         avgSet.setDrawCircles(false);
         avgSet.setColor(Color.BLUE);
+
 
         List<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(scoreSet);

@@ -33,7 +33,9 @@ public class WeaponsActivity extends BaseActivity implements WeaponsStateListene
         TargetDBHelper dbHelper = TargetDBHelper.getInstance(this);
         mSQLiteDatabase = dbHelper.getWritableDatabase();
 
-        onOverview();
+        if (savedInstanceState == null) {
+            onOverview();
+        }
     }
 
     @Override

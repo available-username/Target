@@ -28,8 +28,9 @@ public class StatisticsActivity extends BaseActivity implements StatisticsStateL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
 
-        Fragment fragment = StatisticsPrecisionFragment.newInstance();
-        displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_FRAGMENT);
+        if (savedInstanceState == null) {
+            onOverview();
+        }
     }
 
     @Override
@@ -39,7 +40,8 @@ public class StatisticsActivity extends BaseActivity implements StatisticsStateL
 
     @Override
     public void onOverview() {
-
+        Fragment fragment = StatisticsPrecisionFragment.newInstance();
+        displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_FRAGMENT);
     }
 
     @Override

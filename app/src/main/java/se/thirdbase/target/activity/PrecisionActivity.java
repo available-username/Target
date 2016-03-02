@@ -50,23 +50,47 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         mSQLiteDatabase = dbHelper.getWritableDatabase();
         Log.d(TAG, "DATABASE OPENED");
 
-        Intent intent = getIntent();
-        long setupId = intent.getLongExtra(INTENT_SETUP_ID, Long.MIN_VALUE);
+        if (savedInstanceState == null) {
+            Intent intent = getIntent();
+            long setupId = intent.getLongExtra(INTENT_SETUP_ID, Long.MIN_VALUE);
 
-        if (setupId == Long.MIN_VALUE) {
-            onSelectLoadOut();
-        } else {
-            Setup setup = Setup.fetch(mSQLiteDatabase, setupId);
+            if (setupId == Long.MIN_VALUE) {
+                onSelectLoadOut();
+            } else {
+                Setup setup = Setup.fetch(mSQLiteDatabase, setupId);
 
-            if (setup.getPrinciple() != Principle.PRECISION) {
-                throw new IllegalArgumentException("Supplied setup does not exist or is not a precision setup");
+                if (setup.getPrinciple() != Principle.PRECISION) {
+                    throw new IllegalArgumentException("Supplied setup does not exist or is not a precision setup");
+                }
+
+                mWeapon = setup.getWeapon();
+                mAmmunition = setup.getAmmunition();
+
+                onPrecisionRoundBegin();
             }
-
-            mWeapon = setup.getWeapon();
-            mAmmunition = setup.getAmmunition();
-
-            onPrecisionRoundBegin();
         }
+    }
+
+    private static final String BUNDLE_TAG_PRECISION_ROUND = "BUNDLE_TAG_PRECISION_ROUND";
+    private static final String BUNDLE_TAG_WEAPON = "BUNDLE_TAG_WEAPON";
+    private static final String BUNDLE_TAG_AMMUNITION = "BUNDLE_TAG_AMMUNITION";
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(BUNDLE_TAG_PRECISION_ROUND, mPrecisionRound);
+        outState.putParcelable(BUNDLE_TAG_WEAPON, mWeapon);
+        outState.putParcelable(BUNDLE_TAG_AMMUNITION, mAmmunition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mPrecisionRound = savedInstanceState.getParcelable(BUNDLE_TAG_PRECISION_ROUND);
+        mWeapon = savedInstanceState.getParcelable(BUNDLE_TAG_WEAPON);
+        mAmmunition = savedInstanceState.getParcelable(BUNDLE_TAG_AMMUNITION);
     }
 
     @Override

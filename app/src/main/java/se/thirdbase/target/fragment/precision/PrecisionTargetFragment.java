@@ -53,11 +53,6 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
     private static final int BUTTON_EDIT_BULLET3 = 4;
     private static final int BUTTON_EDIT_BULLET4 = 5;
 
-    private static final String BUNDLE_TAG_WEAPON = "BUNDLE_TAG_WEAPON";
-    private static final String BUNDLE_TAG_AMMUNITION = "BUNDLE_TAG_AMMUNITION";
-    private static final String BUNDLE_TAG_STATE = "BUNDLE_TAG_STATE";
-    private static final String BUNDLE_TAG_PRECISION_SERIES = "BUNDLE_TAG_PRECISION_SERIES";
-
     private TextView mCountText;
     private TextView mScoreText;
     private Button mSaveButton;
@@ -212,15 +207,26 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
     private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE = "BUNDLE_TAG_ACTIVE_BULLET_HOLE";
     private static final String BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX = "BUNDLE_TAG_ACTIVE_BULLET_HOLE_IDX";
 
+    private static final String BUNDLE_TAG_STATE = "BUNDLE_TAG_STATE";
+    private static final String BUNDLE_TAG_WEAPON = "BUNDLE_TAG_WEAPON";
+    private static final String BUNDLE_TAG_AMMUNITION = "BUNDLE_TAG_AMMUNITION";
+    private static final String BUNDLE_TAG_PRECISION_SERIES = "BUNDLE_TAG_PRECISION_SERIES";
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putSerializable(BUNDLE_TAG_STATE, mState);
+        outState.putParcelable(BUNDLE_TAG_WEAPON, mWeapon);
+        outState.putParcelable(BUNDLE_TAG_AMMUNITION, mAmmunition);
+        outState.putParcelable(BUNDLE_TAG_PRECISION_SERIES, mPrecisionSeries);
     }
 
     private void onRestoreInstanceState(Bundle bundle) {
         mState = (State)bundle.getSerializable(BUNDLE_TAG_STATE);
+        mWeapon = bundle.getParcelable(BUNDLE_TAG_WEAPON);
+        mAmmunition = bundle.getParcelable(BUNDLE_TAG_AMMUNITION);
+        mPrecisionSeries = bundle.getParcelable(BUNDLE_TAG_PRECISION_SERIES);
     }
 
     private void testTransition(State nextState) {
