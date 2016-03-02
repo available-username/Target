@@ -189,8 +189,22 @@ public class PrecisionSeries implements Parcelable {
         db.update(PrecisionSeriesContract.TABLE_NAME, values, PrecisionSeriesContract.PrecisionSeriesEntry._ID + "=?", new String[]{"" + mDBHandle});
     }
 
-    public static PrecisionSeries fetch(SQLiteDatabase db, int id) {
+    public static PrecisionSeries fetch(SQLiteDatabase db, long id) {
+        String selection = PrecisionSeriesContract.PrecisionSeriesEntry._ID + "=?";
+        String[] args = new String[]{"" + id};
+        List<PrecisionSeries> precisionSeries = PrecisionSeries.fetchSelection(db, selection, args, null, null, null, null);
+
+        return precisionSeries.size() == 1 ? precisionSeries.get(0) : null;
+    }
+
+    public static List<PrecisionSeries> fetchAll(SQLiteDatabase db, String orderBy) {
+        return fetchSelection(db, null, null, null, null, orderBy, null);
+    }
+
+    public static List<PrecisionSeries> fetchSelection(SQLiteDatabase db, String selection, String[] selectionArgs,
+                                                       String groupBy, String having, String orderBy, String limit) {
         String[] columns = {
+                PrecisionSeriesContract.PrecisionSeriesEntry._ID,
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_1,
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_2,
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3,
@@ -202,52 +216,25 @@ public class PrecisionSeries implements Parcelable {
                 PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_SCORE
         };
 
-        Cursor cursor = db.query(
-                PrecisionSeriesContract.TABLE_NAME,
+        Cursor cursor = db.query(PrecisionSeriesContract.TABLE_NAME,
                 columns,
-                PrecisionSeriesContract.PrecisionSeriesEntry._ID + "=?",
-                new String[]{"" + id},
-                null,  // groupBy
-                null,  // having
-                null,  // orderBy
-                null); // limit
+                selection,
+                selectionArgs,
+                groupBy,
+                having,
+                orderBy,
+                limit);
 
-        PrecisionSeries precisionSeries = null;
+        List<PrecisionSeries> precisionSeries = new ArrayList<>();
 
         if (cursor != null && cursor.moveToFirst()) {
+
             try {
-                List<BulletHole> bulletHoles = new ArrayList<>();
-
-                int bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_1));
-                BulletHole bulletHole = BulletHole.fetch(db, bulletHoleId);
-                bulletHoles.add(bulletHole);
-
-                bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_2));
-                bulletHole = BulletHole.fetch(db, bulletHoleId);
-                bulletHoles.add(bulletHole);
-
-                bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3));
-                bulletHole = BulletHole.fetch(db, bulletHoleId);
-                bulletHoles.add(bulletHole);
-
-                bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_4));
-                bulletHole = BulletHole.fetch(db, bulletHoleId);
-                bulletHoles.add(bulletHole);
-
-                bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5));
-                bulletHole = BulletHole.fetch(db, bulletHoleId);
-                bulletHoles.add(bulletHole);
-
-                long timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME));
-
-                int weaponId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON));
-                Weapon weapon = Weapon.fetch(db, weaponId);
-
-                int ammunitionId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_AMMUNITION));
-                Ammunition ammunition = Ammunition.fetch(db, ammunitionId);
-
-                precisionSeries = new PrecisionSeries(weapon, ammunition, bulletHoles, timestamp);
-                precisionSeries.mDBHandle = id;
+                while (!cursor.isAfterLast()) {
+                    PrecisionSeries series = PrecisionSeries.fromCursor(db, cursor);
+                    precisionSeries.add(series);
+                    cursor.moveToNext();
+                }
             } finally {
                 cursor.close();
             }
@@ -256,33 +243,41 @@ public class PrecisionSeries implements Parcelable {
         return precisionSeries;
     }
 
-    public static List<PrecisionSeries> fetchAll(SQLiteDatabase db, String orderBy) {
-        String[] columns = { PrecisionSeriesContract.PrecisionSeriesEntry._ID };
+    private static PrecisionSeries fromCursor(SQLiteDatabase db, Cursor cursor) {
+        List<BulletHole> bulletHoles = new ArrayList<>();
 
-        Cursor cursor = db.query(PrecisionSeriesContract.TABLE_NAME,
-                columns,
-                null, // selection
-                null, // selectionArgs
-                null, // groupBy
-                null, // having
-                orderBy);
+        long id = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry._ID));
 
-        List<PrecisionSeries> precisionSeries = new ArrayList<>();
+        long bulletHoleId = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_1));
+        BulletHole bulletHole = BulletHole.fetch(db, bulletHoleId);
+        bulletHoles.add(bulletHole);
 
-        if (cursor != null && cursor.moveToFirst()) {
+        bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_2));
+        bulletHole = BulletHole.fetch(db, bulletHoleId);
+        bulletHoles.add(bulletHole);
 
-            try {
-                while (!cursor.isAfterLast()) {
-                    int seriesId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry._ID));
-                    PrecisionSeries series = PrecisionSeries.fetch(db, seriesId);
+        bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_3));
+        bulletHole = BulletHole.fetch(db, bulletHoleId);
+        bulletHoles.add(bulletHole);
 
-                    precisionSeries.add(series);
-                    cursor.moveToNext();
-                }
-            } finally {
-                cursor.close();
-            }
-        }
+        bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_4));
+        bulletHole = BulletHole.fetch(db, bulletHoleId);
+        bulletHoles.add(bulletHole);
+
+        bulletHoleId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_BULLET_5));
+        bulletHole = BulletHole.fetch(db, bulletHoleId);
+        bulletHoles.add(bulletHole);
+
+        long timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_DATE_TIME));
+
+        Long weaponId = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON));
+        Weapon weapon = Weapon.fetch(db, weaponId);
+
+        long ammunitionId = cursor.getLong(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_AMMUNITION));
+        Ammunition ammunition = Ammunition.fetch(db, ammunitionId);
+
+        PrecisionSeries precisionSeries = new PrecisionSeries(weapon, ammunition, bulletHoles, timestamp);
+        precisionSeries.mDBHandle = id;
 
         return precisionSeries;
     }

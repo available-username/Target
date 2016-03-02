@@ -119,7 +119,21 @@ public class Weapon implements Parcelable {
     }
 
     public static Weapon fetch(SQLiteDatabase db, long id) {
+        String selection = WeaponContract.WeaponEntry._ID + "=?";
+        String[] args = { String.format("%d", id) };
+        List<Weapon> weapons = fetchSelection(db, selection, args, null, null, null, null);
+
+        return weapons.size() == 1 ? weapons.get(0) : null;
+    }
+
+    public static List<Weapon> fetchAll(SQLiteDatabase db, String orderBy) {
+        return fetchSelection(db, null, null, null, null, orderBy, null);
+    }
+
+    public static List<Weapon> fetchSelection(SQLiteDatabase db, String selection, String[] selectionArgs,
+                                              String groupBy, String having, String orderBy, String limit) {
         String[] columns = {
+                WeaponContract.WeaponEntry._ID,
                 WeaponContract.WeaponEntry.COLUMN_NAME_DATE_TIME,
                 WeaponContract.WeaponEntry.COLUMN_NAME_TYPE,
                 WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER,
@@ -129,42 +143,12 @@ public class Weapon implements Parcelable {
 
         Cursor cursor = db.query(WeaponContract.TABLE_NAME,
                 columns,
-                WeaponContract.WeaponEntry._ID + "=?",
-                new String[] {"" + id},
-                null,
-                null,
-                null,
-                null);
-
-        Weapon weapon = null;
-
-        if (cursor != null && cursor.moveToFirst()) {
-            try {
-                BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER))];
-                WeaponType type = WeaponType.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_TYPE))];
-                String manufacturer = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER));
-                String model = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MODEL));
-
-                weapon = new Weapon(type, manufacturer, model, caliber);
-                weapon.mDBHandle = id;
-            } finally {
-                cursor.close();
-            }
-        }
-
-        return weapon;
-    }
-
-    public static List<Weapon> fetchAll(SQLiteDatabase db, String orderBy) {
-        String[] columns = { WeaponContract.WeaponEntry._ID };
-
-        Cursor cursor = db.query(WeaponContract.TABLE_NAME,
-                columns,
-                null, // selection
-                null, // selectionArgs
-                null, // groupBy
-                null, // having
-                orderBy);
+                selection,
+                selectionArgs,
+                groupBy,
+                having,
+                orderBy,
+                limit);
 
         List<Weapon> weapons = new ArrayList<>();
 
@@ -172,9 +156,7 @@ public class Weapon implements Parcelable {
 
             try {
                 while (!cursor.isAfterLast()) {
-                    int weaponId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry._ID));
-                    Weapon weapon = Weapon.fetch(db, weaponId);
-
+                    Weapon weapon = Weapon.fromCursor(db, cursor);
                     weapons.add(weapon);
                     cursor.moveToNext();
                 }
@@ -184,5 +166,18 @@ public class Weapon implements Parcelable {
         }
 
         return weapons;
+    }
+
+    private static Weapon fromCursor(SQLiteDatabase db, Cursor cursor) {
+        long id = cursor.getLong(cursor.getColumnIndex(WeaponContract.WeaponEntry._ID));
+        BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER))];
+        WeaponType type = WeaponType.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_TYPE))];
+        String manufacturer = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER));
+        String model = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MODEL));
+
+        Weapon weapon = new Weapon(type, manufacturer, model, caliber);
+        weapon.mDBHandle = id;
+
+        return weapon;
     }
 }

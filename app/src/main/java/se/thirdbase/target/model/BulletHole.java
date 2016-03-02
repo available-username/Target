@@ -129,6 +129,7 @@ public class BulletHole implements Parcelable {
 
     public static BulletHole fetch(SQLiteDatabase db, long id) {
         String[] columns = {
+                BulletHoleContract.BulletHoleEntry._ID,
                 BulletHoleContract.BulletHoleEntry.COLUMN_NAME_CALIBER,
                 BulletHoleContract.BulletHoleEntry.COLUMN_NAME_ANGLE,
                 BulletHoleContract.BulletHoleEntry.COLUMN_NAME_RADIUS
@@ -147,17 +148,24 @@ public class BulletHole implements Parcelable {
 
         if (cursor != null && cursor.moveToFirst()) {
             try {
-                BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_CALIBER))];
-                float angle = cursor.getFloat(cursor.getColumnIndex(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_ANGLE));
-                float radius = cursor.getFloat(cursor.getColumnIndex(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_RADIUS));
-
-                hole = new BulletHole(caliber, radius, angle);
-                hole.mDBHandle = id;
+                hole = fromCursor(db, cursor);
             } finally {
                 cursor.close();
             }
         }
 
         return hole;
+    }
+
+    private static BulletHole fromCursor(SQLiteDatabase db, Cursor cursor) {
+        long id = cursor.getLong(cursor.getColumnIndex(BulletHoleContract.BulletHoleEntry._ID));
+        BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_CALIBER))];
+        float angle = cursor.getFloat(cursor.getColumnIndex(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_ANGLE));
+        float radius = cursor.getFloat(cursor.getColumnIndex(BulletHoleContract.BulletHoleEntry.COLUMN_NAME_RADIUS));
+
+        BulletHole bulletHole = new BulletHole(caliber, radius, angle);
+        bulletHole.mDBHandle = id;
+
+        return bulletHole;
     }
 }

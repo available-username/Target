@@ -101,48 +101,6 @@ public class StatisticsPrecisionFragment extends StatisticsBaseFragment {
         return PrecisionRound.fetchAll(db, orderBy);
     }
 
-    /*
-    private List<PrecisionRound> getPrecisionRounds() {
-        TargetDBHelper helper = TargetDBHelper.newInstance(getContext());
-        SQLiteDatabase db = helper.getReadableDatabase();
-
-
-        String[] columns = {
-                PrecisionRoundContract.PrecisionRoundEntry._ID,
-                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME
-        };
-
-        Cursor cursor = db.query(PrecisionRoundContract.TABLE_NAME,
-                columns, //columns *
-                null, //selection *
-                null, //selectionArgs
-                null, //groupBy
-                null, //having
-                String.format("%s DESC", PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME), //orderBy,
-                "10");
-
-        List<PrecisionRound> precisionRounds = new ArrayList<>();
-
-        if (cursor != null && cursor.moveToFirst()) {
-            try {
-                while (!cursor.isAfterLast()) {
-                    int id = cursor.getInt(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry._ID));
-
-                    PrecisionRound precisionRound = PrecisionRound.fetchAll(db, id);
-
-                    precisionRounds.add(precisionRound);
-
-                    cursor.moveToNext();
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-
-        return precisionRounds;
-    }
-    */
-
     AdapterView.OnItemClickListener mPrecisionRoundSelectedListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

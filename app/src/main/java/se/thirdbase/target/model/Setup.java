@@ -91,7 +91,21 @@ public class Setup implements Parcelable {
     }
 
     public static Setup fetch(SQLiteDatabase db, long id) {
+        String selection = SetupContract.SetupEntry._ID + "=?";
+        String[] args = { String.format("%d", id) };
+        List<Setup> setup = fetchSelection(db, selection, args, null, null, null, null);
+
+        return setup.size() == 1 ? setup.get(0) : null;
+    }
+
+    public static List<Setup> fetchAll(SQLiteDatabase db, String orderBy) {
+        return Setup.fetchSelection(db, null, null, null, null, orderBy, null);
+    }
+
+    public static List<Setup> fetchSelection(SQLiteDatabase db, String selection, String[] selectionArgs,
+                                       String groupBy, String having, String orderBy, String limit) {
         String[] columns = {
+                SetupContract.SetupEntry._ID,
                 SetupContract.SetupEntry.COLUMN_NAME_PRINCIPLE,
                 SetupContract.SetupEntry.COLUMN_NAME_AMMUNITION,
                 SetupContract.SetupEntry.COLUMN_NAME_DATE_TIME,
@@ -100,54 +114,19 @@ public class Setup implements Parcelable {
 
         Cursor cursor = db.query(SetupContract.TABLE_NAME,
                 columns,
-                SetupContract.SetupEntry._ID + "?=",
-                new String[] {"" + id},
-                null,
-                null,
-                null,
-                null);
-
-        Setup setup = null;
-
-        if (cursor != null && cursor.moveToFirst()) {
-            try {
-                Principle principle = Principle.values()[cursor.getInt(cursor.getColumnIndex(SetupContract.SetupEntry.COLUMN_NAME_PRINCIPLE))];
-
-                int weaponId = cursor.getInt(cursor.getColumnIndex(SetupContract.SetupEntry.COLUMN_NAME_WEAPON));
-                Weapon weapon = Weapon.fetch(db, weaponId);
-
-                int ammoId = cursor.getInt(cursor.getColumnIndex(SetupContract.SetupEntry.COLUMN_NAME_WEAPON));
-                Ammunition ammunition = Ammunition.fetch(db, ammoId);
-
-                setup = new Setup(principle, weapon, ammunition);
-                setup.mDBHandle = id;
-            } finally {
-                cursor.close();
-            }
-        }
-
-        return setup;
-    }
-
-    public static List<Setup> fetchAll(SQLiteDatabase db, String orderBy) {
-        String[] columns = { SetupContract.SetupEntry._ID };
-
-        Cursor cursor = db.query(SetupContract.TABLE_NAME,
-                columns,
-                null, // selection
-                null, // selectionArgs
-                null, // groupBy
-                null, // having
-                orderBy);
+                selection,
+                selectionArgs,
+                groupBy,
+                having,
+                orderBy,
+                limit);
 
         List<Setup> setups = new ArrayList<>();
 
         if (cursor != null && cursor.moveToFirst()) {
             try {
                 while (!cursor.isAfterLast()) {
-                    int setupId = cursor.getInt(cursor.getColumnIndex(SetupContract.SetupEntry._ID));
-                    Setup setup = Setup.fetch(db, setupId);
-
+                    Setup setup = Setup.fromCursor(db, cursor);
                     setups.add(setup);
                     cursor.moveToNext();
                 }
@@ -157,5 +136,22 @@ public class Setup implements Parcelable {
         }
 
         return setups;
+    }
+
+    private static Setup fromCursor(SQLiteDatabase db, Cursor cursor) {
+        long id = cursor.getLong(cursor.getColumnIndex(SetupContract.SetupEntry._ID));
+
+        Principle principle = Principle.values()[cursor.getInt(cursor.getColumnIndex(SetupContract.SetupEntry.COLUMN_NAME_PRINCIPLE))];
+
+        long weaponId = cursor.getLong(cursor.getColumnIndex(SetupContract.SetupEntry.COLUMN_NAME_WEAPON));
+        Weapon weapon = Weapon.fetch(db, weaponId);
+
+        long ammoId = cursor.getLong(cursor.getColumnIndex(SetupContract.SetupEntry.COLUMN_NAME_WEAPON));
+        Ammunition ammunition = Ammunition.fetch(db, ammoId);
+
+        Setup setup = new Setup(principle, weapon, ammunition);
+        setup.mDBHandle = id;
+
+        return setup;
     }
 }

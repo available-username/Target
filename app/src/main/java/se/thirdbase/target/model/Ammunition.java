@@ -144,7 +144,21 @@ public class Ammunition implements Parcelable {
     }
 
     public static Ammunition fetch(SQLiteDatabase db, long id) {
+        String selection = AmmunitionContract.AmmunitionEntry._ID + "=?";
+        String[] args = { String.format("%d", id) };
+        List<Ammunition> ammunition = fetchSelection(db, selection, args, null, null, null, null);
+
+        return ammunition.size() == 1 ? ammunition.get(0) : null;
+    }
+
+    public static List<Ammunition> fetchAll(SQLiteDatabase db, String orderBy) {
+        return fetchSelection(db, null, null, null, null, orderBy, null);
+    }
+
+    public static List<Ammunition> fetchSelection(SQLiteDatabase db, String selection, String[] selectionArgs,
+                                                  String groupBy, String having, String orderBy, String limit) {
         String[] columns = {
+                AmmunitionContract.AmmunitionEntry._ID,
                 AmmunitionContract.AmmunitionEntry.COLUMN_NAME_TYPE,
                 AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MANUFACTURER,
                 AmmunitionContract.AmmunitionEntry.COLUMN_NAME_NAME,
@@ -155,45 +169,12 @@ public class Ammunition implements Parcelable {
 
         Cursor cursor = db.query(AmmunitionContract.TABLE_NAME,
                 columns,
-                AmmunitionContract.AmmunitionEntry._ID + "=?",
-                new String[] {"" + id},
-                null,
-                null,
-                null,
-                null);
-
-        Ammunition ammunition = null;
-
-        if (cursor != null && cursor.moveToFirst()) {
-            try {
-
-                BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_CALIBER))];
-                AmmunitionType type = AmmunitionType.values()[cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_TYPE))];
-                String manufacturer = cursor.getString(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MANUFACTURER));
-                String name = cursor.getString(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_NAME));
-                double grains = cursor.getDouble(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_GRAINS));
-                int muzzleVelocity = cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MUZZLE_VELOCITY));
-
-                ammunition = new Ammunition(type, manufacturer, name, caliber, grains, muzzleVelocity);
-                ammunition.mDBHandle = id;
-            } finally {
-                cursor.close();
-            }
-        }
-
-        return ammunition;
-    }
-
-    public static List<Ammunition> fetchAll(SQLiteDatabase db, String orderBy) {
-        String[] columns = { AmmunitionContract.AmmunitionEntry._ID };
-
-        Cursor cursor = db.query(AmmunitionContract.TABLE_NAME,
-                columns,
-                null, // selection
-                null, // selectionArgs
-                null, // groupBy
-                null, // having
-                orderBy);
+                selection,
+                selectionArgs,
+                groupBy,
+                having,
+                orderBy,
+                limit);
 
         List<Ammunition> ammunitionList = new ArrayList<>();
 
@@ -201,9 +182,7 @@ public class Ammunition implements Parcelable {
 
             try {
                 while (!cursor.isAfterLast()) {
-                    int weaponId = cursor.getInt(cursor.getColumnIndex(PrecisionSeriesContract.PrecisionSeriesEntry._ID));
-                    Ammunition ammunition = Ammunition.fetch(db, weaponId);
-
+                    Ammunition ammunition = fromCursor(db, cursor);
                     ammunitionList.add(ammunition);
                     cursor.moveToNext();
                 }
@@ -213,5 +192,21 @@ public class Ammunition implements Parcelable {
         }
 
         return ammunitionList;
+    }
+
+    private static Ammunition fromCursor(SQLiteDatabase db, Cursor cursor) {
+
+        long id = cursor.getLong(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry._ID));
+        BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_CALIBER))];
+        AmmunitionType type = AmmunitionType.values()[cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_TYPE))];
+        String manufacturer = cursor.getString(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MANUFACTURER));
+        String name = cursor.getString(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_NAME));
+        double grains = cursor.getDouble(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_GRAINS));
+        int muzzleVelocity = cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MUZZLE_VELOCITY));
+
+        Ammunition ammunition = new Ammunition(type, manufacturer, name, caliber, grains, muzzleVelocity);
+        ammunition.mDBHandle = id;
+
+        return ammunition;
     }
 }
