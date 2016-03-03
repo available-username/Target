@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -201,7 +204,14 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mPointsDistributionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPrecisionRoundPointsDistribution(mPrecisionRound);
+                //onPrecisionRoundPointsDistribution(mPrecisionRound);
+
+                Fragment fragment = PrecisionScoreDistributionFragment.newInstance(mPrecisionRound);
+
+                FragmentManager fragmentManager = getChildFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.precision_round_summary_layout_graph_container, fragment, null);
+                transaction.commit();
             }
         });
 
@@ -210,7 +220,13 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mHitsDistributionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPrecisionRoundHitsDistribution(mPrecisionRound);
+                //onPrecisionRoundHitsDistribution(mPrecisionRound);
+                Fragment fragment = PrecisionHitDistributionFragment.newInstance(mPrecisionRound);
+
+                FragmentManager fragmentManager = getChildFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.precision_round_summary_layout_graph_container, fragment, null);
+                transaction.commit();
             }
         });
 

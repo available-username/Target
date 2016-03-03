@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        style="@style/TargetFontMedium"
+        style="@style/TargetFontSmall"
         android:background="@color/header_background"
         android:id="@+id/load_out_fragment_layout_weapon_title"
         android:text="@string/weapon"/>
@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        style="@style/TargetFontMedium"
+        style="@style/TargetFontSmall"
         android:background="@color/header_background"
         android:id="@+id/load_out_fragment_layout_ammunition_title"
         android:text="@string/ammunition"/>

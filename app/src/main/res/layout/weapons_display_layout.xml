@@ -14,7 +14,7 @@
         style="@style/TargetFontMedium"
         tools:text="Sig-Sauer X-five"/>
 
-    <LinearLayout
+    <!--LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -32,7 +32,30 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:id="@+id/weapon_display_layout_ammunition_chart"/>
+    </LinearLayout-->
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/weapon_display_layout_principle"
+            android:text="@string/weapon_display_principle_button"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/weapon_display_layout_ammunition"
+            android:text="@string/weapon_display_ammunition_button"/>
     </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:id="@+id/weapon_display_layout_charts" />
 
     <TextView
         android:layout_width="match_parent"

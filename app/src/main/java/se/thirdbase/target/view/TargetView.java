@@ -6,11 +6,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -76,6 +78,7 @@ public abstract class TargetView extends View {
 
     private int mBulletColor;
     private int mBulletSelectedColor;
+    private int mBackgroundColor;
 
     protected ViewMath mViewMath;
 
@@ -105,6 +108,17 @@ public abstract class TargetView extends View {
 
         mGestureDetector = new GestureDetector(context, mSimpleGestureDetector);
         setOnTouchListener(mOnTouchListener);
+
+        TypedValue a = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.windowBackground, a, true);
+        if (a.type >= TypedValue.TYPE_FIRST_COLOR_INT && a.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+            // windowBackground is a color
+            Log.d(TAG, "Using fetched color");
+            mBackgroundColor = a.data;
+        } else {
+            Log.d(TAG, "Using white backghround");
+            mBackgroundColor = 0xffffffff; //white
+        }
 
         setSaveEnabled(true);
     }
@@ -159,6 +173,8 @@ public abstract class TargetView extends View {
 
     @Override
     public void onDraw(Canvas canvas) {
+        canvas.drawColor(mBackgroundColor);
+
         drawTarget(canvas);
         drawBullets(canvas);
         drawActiveBullet(canvas);

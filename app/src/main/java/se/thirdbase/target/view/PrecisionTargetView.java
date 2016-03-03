@@ -90,9 +90,7 @@ public class PrecisionTargetView extends TargetView {
         PointF center = mViewMath.getCenterPixelCoordinate();
 
         Paint paint = new Paint();
-        paint.setColor(Color.GREEN);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        canvas.drawColor(Color.WHITE);
 
         paint.setAntiAlias(true);
         paint.setStrokeWidth(2);

@@ -5,10 +5,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
@@ -73,17 +77,39 @@ public class WeaponsDisplayFragment extends WeaponsBaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.weapons_display_layout, container, false);
 
+        if (savedInstanceState != null) {
+            onRestoreInstanceState(savedInstanceState);
+        }
+
         TextView titleText = (TextView) view.findViewById(R.id.weapon_display_layout_weapon_title);
         String title = String.format("%s %s", mWeapon.getManufacturer(), mWeapon.getModel());
         titleText.setText(title);
 
-        PieChart principleChart = (PieChart)view.findViewById(R.id.weapon_display_layout_principle_chart);
-        PieData principleData = getPrincipleDistribution();
-        principleChart.setData(principleData);
+        Button principleButton = (Button)view.findViewById(R.id.weapon_display_layout_principle);
+        principleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment fragment = WeaponDisplayPrincipleDistributionFragment.newInstance(mWeapon);
 
-        PieChart ammoChart = (PieChart)view.findViewById(R.id.weapon_display_layout_ammunition_chart);
-        PieData ammoData = getAmmunitionDistribution();
-        ammoChart.setData(ammoData);
+                FragmentManager fragmentManager = getChildFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.weapon_display_layout_charts, fragment);
+                transaction.commit();
+            }
+        });
+
+        Button weaponButton = (Button)view.findViewById(R.id.weapon_display_layout_ammunition);
+        weaponButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment fragment = WeaponDisplayAmmunitionDistributionFragment.newInstance(mWeapon);
+
+                FragmentManager fragmentManager = getChildFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.weapon_display_layout_charts, fragment);
+                transaction.commit();
+            }
+        });
 
         return view;
     }
@@ -96,75 +122,10 @@ public class WeaponsDisplayFragment extends WeaponsBaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putParcelable(BUNDLE_TAG_WEAPON, mWeapon);
     }
 
-    private PieData getAmmunitionDistribution() {
-
-        /* Fetch PrecisionSeries produced with this weapon */
-        String selection = PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON + "=?";
-        String[] args = { String.format("%d", mWeapon.getDBHandle()) };
-        List<PrecisionSeries> precisionSeries = PrecisionSeries.fetchSelection(mSQLiteDatabase,
-            selection, args, null, null, null, null);
-
-        Map<String, Integer> map = new HashMap<>();
-
-        for (PrecisionSeries series : precisionSeries) {
-            Ammunition ammo = series.getAmmunition();
-            String label = String.format("%s %s", ammo.getManufacturer(), ammo.getName());
-            int bulletCount = series.getBulletHoles().size();
-
-            if (map.containsKey(label)) {
-                bulletCount +=  map.get(label);
-            }
-
-            map.put(label, bulletCount);
-        }
-
-        int idx = 0;
-        List<Entry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-
-        for (String label : map.keySet()) {
-            Entry entry = new Entry(map.get(label).intValue(), idx++);
-            entries.add(entry);
-            labels.add(label);
-        }
-
-        String ammoString = getResources().getString(R.string.ammunition);
-        PieDataSet dataSet = new PieDataSet(entries, ammoString);
-        dataSet.setColors(PaletteGenerator.generate(Color.MAGENTA, entries.size()));
-
-        return new PieData(labels, dataSet);
-    }
-
-    private PieData getPrincipleDistribution() {
-
-        Map<String, Integer> map = new HashMap<>();
-
-        /* Fetch PrecisionSeries produced with this weapon */
-        String principle = getResources().getString(R.string.principle_precision);
-        String selection = PrecisionSeriesContract.PrecisionSeriesEntry.COLUMN_NAME_WEAPON + "=?";
-        String[] args = { String.format("%d", mWeapon.getDBHandle()) };
-        List<PrecisionSeries> precisionSeries = PrecisionSeries.fetchSelection(mSQLiteDatabase,
-                selection, args, null, null, null, null);
-
-
-        map.put(principle, precisionSeries.size());
-
-        int idx = 0;
-        List<Entry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-
-        for (String label : map.keySet()) {
-            Entry entry = new Entry(map.get(label).intValue(), idx++);
-            entries.add(entry);
-            labels.add(label);
-        }
-
-        String principles = getResources().getString(R.string.principle_principles);
-        PieDataSet dataSet = new PieDataSet(entries, principles);
-        dataSet.setColors(PaletteGenerator.generate(Color.CYAN, entries.size()));
-
-        return new PieData(labels, dataSet);
+    private void onRestoreInstanceState(Bundle bundle) {
+        mWeapon = bundle.getParcelable(BUNDLE_TAG_WEAPON);
     }
 }

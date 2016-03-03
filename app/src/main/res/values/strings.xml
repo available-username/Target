@@ -78,4 +78,8 @@
     <!-- Load out strings -->
     <string name="weapon">Vapen</string>
     <string name="ammunition">Ammunition</string>
+
+    <!-- Weapon display strings -->
+    <string name="weapon_display_principle_button">Moment</string>
+    <string name="weapon_display_ammunition_button">Ammunition</string>
 </resources>
