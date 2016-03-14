@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import java.util.List;
+
 import se.thirdbase.target.R;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.ammunition.AmmunitionAddFragment;
@@ -32,7 +34,14 @@ public class AmmunitionActivity extends BaseActivity implements AmmunitionStateL
         mSQLiteDatabase = dbHelper.getWritableDatabase();
 
         if (savedInstanceState == null) {
+            SQLiteDatabase sqlReader = dbHelper.getReadableDatabase();
+            List<Ammunition> allAmmunition = Ammunition.fetchAll(sqlReader, null);
+
             onOverview();
+
+            if (allAmmunition.size() == 0) {
+                onAdd();
+            }
         }
     }
 

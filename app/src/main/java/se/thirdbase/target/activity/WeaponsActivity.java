@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import java.util.List;
+
 import se.thirdbase.target.R;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.weapon.WeaponsAddFragment;
@@ -34,7 +36,14 @@ public class WeaponsActivity extends BaseActivity implements WeaponsStateListene
         mSQLiteDatabase = dbHelper.getWritableDatabase();
 
         if (savedInstanceState == null) {
+            SQLiteDatabase sqlReader = dbHelper.getReadableDatabase();
+            List<Weapon> allWeapons = Weapon.fetchAll(sqlReader, null);
+
             onOverview();
+
+            if (allWeapons.size() == 0) {
+                onAdd();
+            }
         }
     }
 
