@@ -2,40 +2,20 @@ package se.thirdbase.target.fragment.weapon;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.interfaces.datasets.IPieDataSet;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import se.thirdbase.target.R;
-import se.thirdbase.target.db.AmmunitionContract;
-import se.thirdbase.target.db.PrecisionSeriesContract;
 import se.thirdbase.target.db.TargetDBHelper;
-import se.thirdbase.target.model.Ammunition;
 import se.thirdbase.target.model.Weapon;
-import se.thirdbase.target.model.precision.PrecisionSeries;
-import se.thirdbase.target.util.PaletteGenerator;
 
 /**
  * Created by alexp on 3/1/16.
@@ -91,10 +71,7 @@ public class WeaponsDisplayFragment extends WeaponsBaseFragment {
             public void onClick(View v) {
                 Fragment fragment = WeaponDisplayPrincipleDistributionFragment.newInstance(mWeapon);
 
-                FragmentManager fragmentManager = getChildFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.weapon_display_layout_charts, fragment);
-                transaction.commit();
+                display(fragment);
             }
         });
 
@@ -104,12 +81,12 @@ public class WeaponsDisplayFragment extends WeaponsBaseFragment {
             public void onClick(View v) {
                 Fragment fragment = WeaponDisplayAmmunitionDistributionFragment.newInstance(mWeapon);
 
-                FragmentManager fragmentManager = getChildFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.weapon_display_layout_charts, fragment);
-                transaction.commit();
+                display(fragment);
             }
         });
+
+        Fragment fragment = WeaponDisplayPrincipleDistributionFragment.newInstance(mWeapon);
+        display(fragment);
 
         return view;
     }
@@ -127,5 +104,12 @@ public class WeaponsDisplayFragment extends WeaponsBaseFragment {
 
     private void onRestoreInstanceState(Bundle bundle) {
         mWeapon = bundle.getParcelable(BUNDLE_TAG_WEAPON);
+    }
+
+    private void display(Fragment fragment) {
+        FragmentManager fragmentManager = getChildFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.weapon_display_layout_charts, fragment);
+        transaction.commit();
     }
 }

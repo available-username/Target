@@ -35,6 +35,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
     private TextView mScoreText;
     private TextView mMaxSpreadText;
     private TextView mAvgSpreadText;
+    private TextView mStdSpreadText;
     private TextView mOffsetText;
     private Button mPointsDistributionButton;
     private Button mHitsDistributionButton;
@@ -43,6 +44,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
     private int mScore = 0;
     private float mMaxSpread = 0;
     private float mAvgSpread = 0;
+    private float mStdSpread = 0;
     private PointF mBulletOffset;
     private List<Pair<Float, Float>> mScoreDistribution = new ArrayList<>();
 
@@ -70,6 +72,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
 
         mMaxSpread = calculateMaxSpread(precisionSeries);
         mAvgSpread = calculateAverageSpread(precisionSeries);
+        mStdSpread = calculateAverageSpread(precisionSeries);
         mScore = calculateScore(precisionSeries);
         mScoreDistribution = calculateDistribution(precisionSeries);
         mBulletOffset = calculateBulletOffset(precisionSeries);
@@ -197,6 +200,7 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mScoreText = (TextView) view.findViewById(R.id.precision_round_summary_layout_score);
         mMaxSpreadText = (TextView) view.findViewById(R.id.precision_round_summary_layout_max_spread);
         mAvgSpreadText = (TextView) view.findViewById(R.id.precision_round_summary_layout_avg_spread);
+        mStdSpreadText = (TextView) view.findViewById(R.id.precision_round_summary_layout_std_spread);
         mOffsetText = (TextView) view.findViewById(R.id.precision_round_summary_layout_offset);
 
         mPointsDistributionButton = (Button) view.findViewById(R.id.precision_round_summary_layout_points_distribution_button);
@@ -204,14 +208,8 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mPointsDistributionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //onPrecisionRoundPointsDistribution(mPrecisionRound);
-
                 Fragment fragment = PrecisionScoreDistributionFragment.newInstance(mPrecisionRound);
-
-                FragmentManager fragmentManager = getChildFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.precision_round_summary_layout_graph_container, fragment, null);
-                transaction.commit();
+                display(fragment);
             }
         });
 
@@ -220,17 +218,15 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mHitsDistributionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //onPrecisionRoundHitsDistribution(mPrecisionRound);
                 Fragment fragment = PrecisionHitDistributionFragment.newInstance(mPrecisionRound);
-
-                FragmentManager fragmentManager = getChildFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.precision_round_summary_layout_graph_container, fragment, null);
-                transaction.commit();
+                display(fragment);
             }
         });
 
         updateTextFields();
+
+        Fragment fragment = PrecisionHitDistributionFragment.newInstance(mPrecisionRound);
+        display(fragment);
 
         return view;
     }
@@ -281,5 +277,12 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         float tmp = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
 
         return (float)Math.sqrt(tmp) + (d1 + d2) / 2;
+    }
+
+    private void display(Fragment fragment) {
+        FragmentManager fragmentManager = getChildFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.precision_round_summary_layout_graph_container, fragment, null);
+        transaction.commit();
     }
 }

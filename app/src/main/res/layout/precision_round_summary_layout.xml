@@ -30,9 +30,16 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/precision_round_summary_layout_std_spread"
+        style="@style/TargetFontSmall"
+        android:text="@string/standard_deviation"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/precision_round_summary_layout_offset"
         style="@style/TargetFontSmall"
-        android:text="@string/mean_spread"/>
+        tools:text="Tyngdpunkt: 4cm över och 2.34cm under"/>
 
     <LinearLayout
         android:layout_width="wrap_content"

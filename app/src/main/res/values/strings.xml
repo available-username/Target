@@ -40,6 +40,7 @@
     <string name="up_right_offset">Tyngdpunkt: %1$.2fcm över och %2$.2fcm till höger om centrum.</string>
     <string name="down_left_offset">Tyngdpunkt: %1$.2fcm under och %2$.2fcm till vänster om centrum.</string>
     <string name="down_right_offset">Tyngdpunkt: %1$.2fcm under och %2$.2fcm till höger om centrum.</string>
+    <string name="standard_deviation">Standardavvikelse: %1$.2fcm</string>
 
     <!-- Statistics strings -->
     <string name="progress">Utveckling</string>
