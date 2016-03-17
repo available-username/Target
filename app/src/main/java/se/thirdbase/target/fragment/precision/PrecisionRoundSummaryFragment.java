@@ -22,6 +22,7 @@ import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.precision.PrecisionRound;
 import se.thirdbase.target.model.precision.PrecisionSeries;
 import se.thirdbase.target.model.precision.PrecisionTarget;
+import se.thirdbase.target.util.PrecisionMath;
 
 /**
  * Created by alexp on 2/19/16.
@@ -42,10 +43,10 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
 
     private PrecisionRound mPrecisionRound;
     private int mScore = 0;
-    private float mMaxSpread = 0;
-    private float mAvgSpread = 0;
-    private float mStdSpread = 0;
-    private PointF mBulletOffset;
+    private double mMaxSpread;
+    private double mAvgSpread;
+    private PointF mHitStd;
+    private PointF mHitMean;
     private List<Pair<Float, Float>> mScoreDistribution = new ArrayList<>();
 
     public static PrecisionRoundSummaryFragment newInstance(PrecisionRound precisionRound) {
@@ -68,125 +69,15 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
 
         mPrecisionRound = arguments.getParcelable(BUNDLE_TAG_PRECISION_ROUND);
 
-        List<PrecisionSeries> precisionSeries = mPrecisionRound.getPrecisionSeries();
+        PrecisionMath math = new PrecisionMath(mPrecisionRound);
 
-        mMaxSpread = calculateMaxSpread(precisionSeries);
-        mAvgSpread = calculateAverageSpread(precisionSeries);
-        mStdSpread = calculateAverageSpread(precisionSeries);
-        mScore = calculateScore(precisionSeries);
-        mScoreDistribution = calculateDistribution(precisionSeries);
-        mBulletOffset = calculateBulletOffset(precisionSeries);
+        mMaxSpread = math.getMaxSpread();
+        mAvgSpread = math.getAverageSpread();
+        mHitMean = math.getHitMean();
+        mHitStd = math.getHitStd();
+        mScore = math.getScore();
+        mScoreDistribution = math.getScoreDistribution();
     }
-
-    private float calculateMaxSpread(List<PrecisionSeries> precisionSeries) {
-        float maxSpread = 0;
-
-        int nbrSeries = precisionSeries.size();
-
-        for (int i = 0; i < nbrSeries; i++) {
-            PrecisionSeries series = precisionSeries.get(i);
-
-            List<BulletHole> bulletHoles = series.getBulletHoles();
-            int nbrBullets = bulletHoles.size();
-
-            for (int j = 0; j < nbrBullets - 1; j++) {
-                for (int k = j + 1; k < nbrBullets; k++) {
-
-                    float distance = getSpread(bulletHoles.get(j), bulletHoles.get(k));
-
-                    if (distance > maxSpread) {
-                        maxSpread = distance;
-                    }
-                }
-            }
-        }
-
-        return maxSpread;
-    }
-
-    private float calculateAverageSpread(List<PrecisionSeries> precisionSeries) {
-        float avgSpread = 0;
-
-        int nbrSeries = precisionSeries.size();
-        int nbrDistances = 0;
-
-        for (int i = 0; i < nbrSeries; i++) {
-            PrecisionSeries series = precisionSeries.get(i);
-
-            List<BulletHole> bulletHoles = series.getBulletHoles();
-            int nbrBullets = bulletHoles.size();
-
-            for (int j = 0; j < nbrBullets - 1; j++) {
-                for (int k = j + 1; k < nbrBullets; k++) {
-
-                    float distance = getSpread(bulletHoles.get(j), bulletHoles.get(k));
-
-                    avgSpread += distance;
-                    nbrDistances += 1;
-                }
-            }
-        }
-
-        // Let avgSpread be zero if there's only one bullet
-        return nbrDistances > 0 ? avgSpread / nbrDistances : 0;
-    }
-
-    private int calculateScore(List<PrecisionSeries> precisionSeries) {
-        int score = 0;
-        int nbrSeries = precisionSeries.size();
-
-        for (int i = 0; i < nbrSeries; i++) {
-            PrecisionSeries series = precisionSeries.get(i);
-            score += series.getScore();
-        }
-
-        return score;
-    }
-
-    private List<Pair<Float, Float>> calculateDistribution(List<PrecisionSeries> precisionSeries) {
-        int[] distribution = new int[10];
-
-        for (PrecisionSeries series : precisionSeries) {
-            for (BulletHole bulletHole : series.getBulletHoles()) {
-                int score = PrecisionTarget.getBulletScore(bulletHole) - 1;
-
-                if (score >= 0) {
-                    int count = distribution[score] + 1;
-                    distribution[score] = count;
-                }
-            }
-        }
-
-        List<Pair<Float, Float>> data = new ArrayList<>();
-
-        for (int i = 0; i < distribution.length; i++) {
-            Pair<Float, Float> pair = new Pair<>((float)(i + 1), (float)(distribution[i]));
-            data.add(pair);
-        }
-
-        return data;
-    }
-
-    private PointF calculateBulletOffset(List<PrecisionSeries> precisionSeries) {
-        PointF point = new PointF(0, 0);
-        int nBulletHoles = 0;
-
-        for (PrecisionSeries series : precisionSeries) {
-            for (BulletHole bulletHole : series.getBulletHoles()) {
-                PointF currentPoint = bulletHole.toCartesianCoordinates();
-                point.x += currentPoint.x;
-                point.y += currentPoint.y;
-
-                nBulletHoles += 1;
-            }
-        }
-
-        point.x /= nBulletHoles;
-        point.y /= nBulletHoles;
-
-        return point;
-    }
-
 
     @Nullable
     @Override
@@ -237,19 +128,24 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         mAvgSpreadText.setText(getResources().getString(R.string.mean_spread, mAvgSpread));
 
         String formatString;
-        if (mBulletOffset.x < 0 && mBulletOffset.y < 0) {
+        if (mHitMean.x < 0 && mHitMean.y < 0) {
             formatString = getResources().getString(R.string.down_left_offset);
-        } else if (mBulletOffset.x < 0 && mBulletOffset.y > 0) {
+        } else if (mHitMean.x < 0 && mHitMean.y > 0) {
             formatString = getResources().getString(R.string.up_left_offset);
-        } else if (mBulletOffset.x > 0 && mBulletOffset.y > 0) {
+        } else if (mHitMean.x > 0 && mHitMean.y > 0) {
             formatString = getResources().getString(R.string.up_right_offset);
-        } else /* if (mBulletOffset.x > 0 && mBulletOffset.y < 0) */ {
+        } else /* if (mHitMean.x > 0 && mHitMean.y < 0) */ {
             formatString = getResources().getString(R.string.down_right_offset);
         }
 
-        float xOffset = Math.abs(mBulletOffset.x);
-        float yOffset = Math.abs(mBulletOffset.y);
+        float xOffset = Math.abs(mHitMean.x);
+        float yOffset = Math.abs(mHitMean.y);
         mOffsetText.setText(String.format(formatString, xOffset, yOffset));
+
+        float dx = mHitMean.x - mHitStd.x;
+        float dy = mHitMean.y - mHitStd.y;
+        float std = (float)Math.sqrt(dx * dx + dy * dy);
+        mStdSpreadText.setText(getResources().getString(R.string.standard_deviation, std));
     }
 
     @Override
@@ -259,24 +155,6 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
 
     private void onRestoreInstanceState(Bundle bundle) {
 
-    }
-
-    private float getSpread(BulletHole h1, BulletHole h2) {
-        float r1 = h1.getRadius();
-        float r2 = h2.getRadius();
-        float a1 = h1.getAngle();
-        float a2 = h2.getAngle();
-        float d1 = h1.getCaliber().getDiameter();
-        float d2 = h2.getCaliber().getDiameter();
-
-        float x1 = (float)(r1 * Math.cos(a1));
-        float y1 = (float)(r1 * Math.sin(a1));
-        float x2 = (float)(r2 * Math.cos(a2));
-        float y2 = (float)(r2 * Math.sin(a2));
-
-        float tmp = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
-
-        return (float)Math.sqrt(tmp) + (d1 + d2) / 2;
     }
 
     private void display(Fragment fragment) {
