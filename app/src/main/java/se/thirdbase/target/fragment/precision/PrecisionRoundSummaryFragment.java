@@ -45,7 +45,8 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
     private int mScore = 0;
     private double mMaxSpread;
     private double mAvgSpread;
-    private PointF mHitStd;
+    private double mHitStd;
+    //private PointF mHitStd;
     private PointF mHitMean;
     private List<Pair<Float, Float>> mScoreDistribution = new ArrayList<>();
 
@@ -129,23 +130,20 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
 
         String formatString;
         if (mHitMean.x < 0 && mHitMean.y < 0) {
-            formatString = getResources().getString(R.string.down_left_offset);
-        } else if (mHitMean.x < 0 && mHitMean.y > 0) {
             formatString = getResources().getString(R.string.up_left_offset);
+        } else if (mHitMean.x < 0 && mHitMean.y > 0) {
+            formatString = getResources().getString(R.string.down_left_offset);
         } else if (mHitMean.x > 0 && mHitMean.y > 0) {
-            formatString = getResources().getString(R.string.up_right_offset);
-        } else /* if (mHitMean.x > 0 && mHitMean.y < 0) */ {
             formatString = getResources().getString(R.string.down_right_offset);
+        } else /* if (mHitMean.x > 0 && mHitMean.y < 0) */ {
+            formatString = getResources().getString(R.string.up_right_offset);
         }
 
         float xOffset = Math.abs(mHitMean.x);
         float yOffset = Math.abs(mHitMean.y);
-        mOffsetText.setText(String.format(formatString, xOffset, yOffset));
+        mOffsetText.setText(String.format(formatString, yOffset, xOffset));
 
-        float dx = mHitMean.x - mHitStd.x;
-        float dy = mHitMean.y - mHitStd.y;
-        float std = (float)Math.sqrt(dx * dx + dy * dy);
-        mStdSpreadText.setText(getResources().getString(R.string.standard_deviation, std));
+        mStdSpreadText.setText(getResources().getString(R.string.standard_deviation, mHitStd));
     }
 
     @Override

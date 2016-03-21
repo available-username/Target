@@ -1,12 +1,16 @@
 package se.thirdbase.target.util;
 
 import android.graphics.PointF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.precision.PrecisionRound;
 import se.thirdbase.target.model.precision.PrecisionSeries;
@@ -15,7 +19,7 @@ import se.thirdbase.target.model.precision.PrecisionTarget;
 /**
  * Created by alex on 3/15/16.
  */
-public final class PrecisionMath {
+public final class PrecisionMath implements Parcelable {
 
     private double mMaxSpread;
     private double mAvgSpread;
@@ -23,9 +27,14 @@ public final class PrecisionMath {
     List<Pair<Float, Float>> mScoreDistribution = new ArrayList<>();
     private PointF mHitMean = new PointF(0, 0);
     private PointF mHitStd = new PointF();
+    private BulletHole mHitMeanBulletHole;
 
     public PrecisionMath(PrecisionRound precisionRound) {
         this(precisionRound.getPrecisionSeries());
+    }
+
+    public PrecisionMath(PrecisionSeries[] precisionSeries) {
+        this(Arrays.asList(precisionSeries));
     }
 
     public PrecisionMath(List<PrecisionSeries> precisionSeries) {
@@ -33,6 +42,27 @@ public final class PrecisionMath {
         calculateMeansAndScore(precisionSeries);
         calculateStandardDeviation(precisionSeries);
     }
+
+    protected PrecisionMath(Parcel in) {
+        mMaxSpread = in.readDouble();
+        mAvgSpread = in.readDouble();
+        mScore = in.readInt();
+        mHitMean = in.readParcelable(PointF.class.getClassLoader());
+        mHitStd = in.readParcelable(PointF.class.getClassLoader());
+        mHitMeanBulletHole = in.readParcelable(BulletHole.class.getClassLoader());
+    }
+
+    public static final Creator<PrecisionMath> CREATOR = new Creator<PrecisionMath>() {
+        @Override
+        public PrecisionMath createFromParcel(Parcel in) {
+            return new PrecisionMath(in);
+        }
+
+        @Override
+        public PrecisionMath[] newArray(int size) {
+            return new PrecisionMath[size];
+        }
+    };
 
     public double getMaxSpread() {
         return mMaxSpread;
@@ -54,8 +84,12 @@ public final class PrecisionMath {
         return new PointF(mHitMean.x, mHitMean.y);
     }
 
-    public PointF getHitStd() {
-        return new PointF(mHitStd.x, mHitStd.y);
+    public double getHitStd() {
+        //return new PointF(mHitStd.x, mHitStd.y);
+        float dx = mHitStd.x - mHitMean.x;
+        float dy = mHitStd.y - mHitMean.y;
+
+        return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
     }
 
     private void calculateSpreads(List<PrecisionSeries> precisionSeries) {
@@ -103,9 +137,10 @@ public final class PrecisionMath {
         float x2 = (float)(r2 * Math.cos(a2));
         float y2 = (float)(r2 * Math.sin(a2));
 
-        float tmp = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+        float dx = (x1 - x2);
+        float dy = (y1 - y2);
 
-        return (float)Math.sqrt(tmp) + (d1 + d2) / 2;
+        return (float)Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) + (d1 + d2) / 2;
     }
 
 
@@ -113,6 +148,12 @@ public final class PrecisionMath {
         int[] distribution = new int[10];
         int nbrSeries = precisionSeries.size();
         int nbrBullets = 0;
+
+        /* HitMeanBulletHole initialization */
+        if (precisionSeries.size() > 0 && precisionSeries.get(0).getBulletHoles().size() > 0) {
+            BulletCaliber caliber = precisionSeries.get(0).getBulletHoles().get(0).getCaliber();
+            mHitMeanBulletHole = new BulletHole(caliber, 0, 0);
+        }
 
         for (int i = 0; i < nbrSeries; i++) {
             PrecisionSeries series = precisionSeries.get(i);
@@ -133,6 +174,8 @@ public final class PrecisionMath {
                 PointF currentPoint = bulletHole.toCartesianCoordinates();
                 mHitMean.x += currentPoint.x;
                 mHitMean.y += currentPoint.y;
+
+                /* HitMeanBulletHole calculation */
 
                 nbrBullets += 1;
             }
@@ -179,5 +222,20 @@ public final class PrecisionMath {
             mHitStd.x = (float)Math.sqrt(point.x);
             mHitStd.y = (float)Math.sqrt(point.y);
         }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(mMaxSpread);
+        dest.writeDouble(mAvgSpread);
+        dest.writeInt(mScore);
+        dest.writeParcelable(mHitMean, flags);
+        dest.writeParcelable(mHitStd, flags);
+        dest.writeParcelable(mHitMeanBulletHole, flags);
     }
 }

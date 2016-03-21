@@ -1,6 +1,7 @@
 package se.thirdbase.target.fragment.precision;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,7 +16,8 @@ import se.thirdbase.target.R;
 import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.precision.PrecisionRound;
 import se.thirdbase.target.model.precision.PrecisionSeries;
-import se.thirdbase.target.view.PrecisionTargetView;
+import se.thirdbase.target.util.PrecisionMath;
+import se.thirdbase.target.view.PrecisionTargetSummaryView;
 
 /**
  * Created by alexp on 2/25/16.
@@ -44,7 +46,8 @@ public class PrecisionHitDistributionFragment extends Fragment {
     }
 
     private PrecisionSeries[] mPrecisionSeries;
-    private PrecisionTargetView mPrecisionTargetView;
+    private PrecisionMath mPrecisionMath;
+    private PrecisionTargetSummaryView mPrecisionTargetView;
 
     @Override
     public void onAttach(Context context) {
@@ -53,6 +56,7 @@ public class PrecisionHitDistributionFragment extends Fragment {
         Bundle arguments = getArguments();
 
         mPrecisionSeries = (PrecisionSeries[]) arguments.getParcelableArray(BUNDLE_TAG_PRECISION_SERIES);
+        mPrecisionMath = new PrecisionMath(mPrecisionSeries);
     }
 
     @Nullable
@@ -60,10 +64,15 @@ public class PrecisionHitDistributionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.precision_hit_distribution_layout, container, false);
 
-        mPrecisionTargetView = (PrecisionTargetView) view.findViewById(R.id.precision_hit_distribution_target);
+        mPrecisionTargetView = (PrecisionTargetSummaryView) view.findViewById(R.id.precision_hit_distribution_target);
 
         List<BulletHole> bulletHoles = getBulletHoles(mPrecisionSeries);
         mPrecisionTargetView.setBulletHoles(bulletHoles);
+
+        PointF hitMean = mPrecisionMath.getHitMean();
+        double hitStd = mPrecisionMath.getHitStd();
+
+        mPrecisionTargetView.setHitMean(hitMean, hitStd);
 
         return view;
     }

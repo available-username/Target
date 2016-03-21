@@ -14,4 +14,5 @@
     <!-- TargetView colors -->
     <color name="target_view_bullet">#8888FF</color>
     <color name="target_view_bullet_selected">#FF8888</color>
+    <color name="target_view_statistics">#BBFFBB</color>
 </resources>
