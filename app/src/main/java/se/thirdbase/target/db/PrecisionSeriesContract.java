@@ -21,6 +21,7 @@ public final class PrecisionSeriesContract {
         String COLUMN_NAME_WEAPON     = "weapon";
         String COLUMN_NAME_AMMUNITION = "ammunition";
         String COLUMN_NAME_SCORE      = "score";
+        String COLUMN_NAME_NOTES      = "notes";
     }
 
     public static final String SQL_CREATE_SERIES =
@@ -34,6 +35,7 @@ public final class PrecisionSeriesContract {
                             "%s INTEGER," + // WEAPON
                             "%s INTEGER," + // AMMUNITION
                             "%s INTEGER," + // SCORE
+                            "%s TExT,"    + // NOTES
                             "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," + // BULLET_1
                             "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
                             "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
@@ -52,6 +54,7 @@ public final class PrecisionSeriesContract {
                     PrecisionSeriesEntry.COLUMN_NAME_WEAPON,
                     PrecisionSeriesEntry.COLUMN_NAME_AMMUNITION,
                     PrecisionSeriesEntry.COLUMN_NAME_SCORE,
+                    PrecisionSeriesEntry.COLUMN_NAME_NOTES,
                     PrecisionSeriesEntry.COLUMN_NAME_BULLET_1, BulletHoleContract.TABLE_NAME, BulletHoleContract.BulletHoleEntry._ID,
                     PrecisionSeriesEntry.COLUMN_NAME_BULLET_2, BulletHoleContract.TABLE_NAME, BulletHoleContract.BulletHoleEntry._ID,
                     PrecisionSeriesEntry.COLUMN_NAME_BULLET_3, BulletHoleContract.TABLE_NAME, BulletHoleContract.BulletHoleEntry._ID,
