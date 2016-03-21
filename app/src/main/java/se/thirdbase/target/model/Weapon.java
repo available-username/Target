@@ -21,13 +21,19 @@ public class Weapon implements Parcelable {
     private String mManufacturer;
     private String mModel;
     private BulletCaliber mCaliber;
+    private int mRemoved;
     private long mDBHandle = Long.MIN_VALUE;
 
     public Weapon(WeaponType type, String manufacturer, String model, BulletCaliber caliber) {
+        this(type, manufacturer, model, caliber, false);
+    }
+
+    public Weapon(WeaponType type, String manufacturer, String model, BulletCaliber caliber, boolean removed) {
         mWeaponType = type;
         mManufacturer = manufacturer;
         mModel = model;
         mCaliber = caliber;
+        mRemoved = removed ? 1 : 0;
     }
 
     protected Weapon(Parcel in) {
@@ -36,6 +42,7 @@ public class Weapon implements Parcelable {
         mModel = in.readString();
         mCaliber = (BulletCaliber)in.readSerializable();
         mWeaponType = (WeaponType)in.readSerializable();
+        mRemoved = in.readInt();
     }
 
     public static final Creator<Weapon> CREATOR = new Creator<Weapon>() {
@@ -94,6 +101,7 @@ public class Weapon implements Parcelable {
         dest.writeString(mModel);
         dest.writeSerializable(mCaliber);
         dest.writeSerializable(mWeaponType);
+        dest.writeInt(mRemoved);
     }
 
     /*** Database handling **/
@@ -138,7 +146,8 @@ public class Weapon implements Parcelable {
                 WeaponContract.WeaponEntry.COLUMN_NAME_TYPE,
                 WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER,
                 WeaponContract.WeaponEntry.COLUMN_NAME_MODEL,
-                WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER
+                WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER,
+                WeaponContract.WeaponEntry.COLUMN_NAME_REMOVED
         };
 
         Cursor cursor = db.query(WeaponContract.TABLE_NAME,
@@ -174,8 +183,9 @@ public class Weapon implements Parcelable {
         WeaponType type = WeaponType.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_TYPE))];
         String manufacturer = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER));
         String model = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MODEL));
+        int removed = cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_REMOVED));
 
-        Weapon weapon = new Weapon(type, manufacturer, model, caliber);
+        Weapon weapon = new Weapon(type, manufacturer, model, caliber, removed == 1);
         weapon.mDBHandle = id;
 
         return weapon;

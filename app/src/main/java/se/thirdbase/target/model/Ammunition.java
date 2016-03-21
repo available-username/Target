@@ -23,16 +23,23 @@ public class Ammunition implements Parcelable {
     private BulletCaliber mCaliber;
     private double mGrains;
     private int mMuzzleVelocity;
+    private int mRemoved;
     private long mDBHandle = Long.MIN_VALUE;
 
     public Ammunition(AmmunitionType type, String manufacturer, String name, BulletCaliber caliber,
                       double grains, int muzzleVelocity) {
+        this(type, manufacturer, name, caliber, grains, muzzleVelocity, false);
+    }
+
+    public Ammunition(AmmunitionType type, String manufacturer, String name, BulletCaliber caliber,
+                      double grains, int muzzleVelocity, boolean removed) {
         mType = type;
         mManufacturer = manufacturer;
         mName = name;
         mCaliber = caliber;
         mGrains = grains;
         mMuzzleVelocity = muzzleVelocity;
+        mRemoved = removed ? 1 : 0;
     }
 
     protected Ammunition(Parcel in) {
@@ -40,6 +47,7 @@ public class Ammunition implements Parcelable {
         mName = in.readString();
         mGrains = in.readDouble();
         mMuzzleVelocity = in.readInt();
+        mRemoved = in.readInt();
         mCaliber = (BulletCaliber)in.readSerializable();
         mType = (AmmunitionType)in.readSerializable();
     }
@@ -104,6 +112,14 @@ public class Ammunition implements Parcelable {
         mMuzzleVelocity = muzzleVelocity;
     }
 
+    public boolean getRemoved() {
+        return mRemoved == 1? true : false;
+    }
+
+    public void setRemoved(boolean removed) {
+        mRemoved = removed ? 1 : 0;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -115,6 +131,7 @@ public class Ammunition implements Parcelable {
         dest.writeString(mName);
         dest.writeDouble(mGrains);
         dest.writeInt(mMuzzleVelocity);
+        dest.writeInt(mRemoved);
         dest.writeSerializable(mCaliber);
         dest.writeSerializable(mType);
     }
@@ -135,6 +152,7 @@ public class Ammunition implements Parcelable {
             values.put(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MANUFACTURER, mManufacturer);
             values.put(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_NAME, mName);
             values.put(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MUZZLE_VELOCITY, mMuzzleVelocity);
+            values.put(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_REMOVED, mRemoved);
             values.put(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
             mDBHandle = db.insert(AmmunitionContract.TABLE_NAME, null, values);
@@ -164,7 +182,8 @@ public class Ammunition implements Parcelable {
                 AmmunitionContract.AmmunitionEntry.COLUMN_NAME_NAME,
                 AmmunitionContract.AmmunitionEntry.COLUMN_NAME_CALIBER,
                 AmmunitionContract.AmmunitionEntry.COLUMN_NAME_GRAINS,
-                AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MUZZLE_VELOCITY
+                AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MUZZLE_VELOCITY,
+                AmmunitionContract.AmmunitionEntry.COLUMN_NAME_REMOVED
         };
 
         Cursor cursor = db.query(AmmunitionContract.TABLE_NAME,
@@ -203,8 +222,9 @@ public class Ammunition implements Parcelable {
         String name = cursor.getString(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_NAME));
         double grains = cursor.getDouble(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_GRAINS));
         int muzzleVelocity = cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_MUZZLE_VELOCITY));
+        int removed = cursor.getInt(cursor.getColumnIndex(AmmunitionContract.AmmunitionEntry.COLUMN_NAME_REMOVED));
 
-        Ammunition ammunition = new Ammunition(type, manufacturer, name, caliber, grains, muzzleVelocity);
+        Ammunition ammunition = new Ammunition(type, manufacturer, name, caliber, grains, muzzleVelocity, removed == 1);
         ammunition.mDBHandle = id;
 
         return ammunition;

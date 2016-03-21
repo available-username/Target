@@ -19,21 +19,24 @@ public class WeaponContract {
         String COLUMN_NAME_MANUFACTURER = "manufacturer";
         String COLUMN_NAME_MODEL = "model";
         String COLUMN_NAME_CALIBER = "caliber";
+        String COLUMN_NAME_REMOVED = "removed";
     }
 
     public static final String SQL_CREATE_WEAPON =
             String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-                    "%s INTEGER," + //DATE_TIME
-                    "%s INTEGER," + // TYPE
-                    "%s VARCHAR(64)," + // MANUFACTURER
-                    "%s VARCHAR(64)," + // MODEL
-                    "%s INTEGER);", // CALIBER
+                            "%s INTEGER," + //DATE_TIME
+                            "%s INTEGER," + // TYPE
+                            "%s VARCHAR(64)," + // MANUFACTURER
+                            "%s VARCHAR(64)," + // MODEL
+                            "%s INTEGER," +
+                            "%s INTEGER);", // REMOVED
                     TABLE_NAME, WeaponEntry._ID,
                     WeaponEntry.COLUMN_NAME_DATE_TIME,
                     WeaponEntry.COLUMN_NAME_TYPE,
                     WeaponEntry.COLUMN_NAME_MANUFACTURER,
                     WeaponEntry.COLUMN_NAME_MODEL,
-                    WeaponEntry.COLUMN_NAME_CALIBER);
+                    WeaponEntry.COLUMN_NAME_CALIBER,
+                    WeaponEntry.COLUMN_NAME_REMOVED);
 
     public static String SQL_DROP_WEAPON = String.format("DROP TABLE IF EXISTS %s;", TABLE_NAME);
 
