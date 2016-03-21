@@ -70,7 +70,6 @@ public class PrecisionTargetSummaryView extends PrecisionTargetView {
         y1 = cy - dist;
         canvas.drawLine(x0, y0, x1, y1, paint);
 
-        :willNotCacheDrawing()
         radius = (float)Math.sqrt(2 * Math.pow(dist, 2));
         canvas.drawCircle(cx, cy, radius, paint);
     }
