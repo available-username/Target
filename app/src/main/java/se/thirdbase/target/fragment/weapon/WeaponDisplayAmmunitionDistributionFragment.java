@@ -100,7 +100,7 @@ public class WeaponDisplayAmmunitionDistributionFragment extends Fragment {
 
         for (PrecisionSeries series : precisionSeries) {
             Ammunition ammo = series.getAmmunition();
-            String label = String.format("%s %s", ammo.getManufacturer(), ammo.getName());
+            String label = ammo.getMakeAndName();
             int bulletCount = series.getBulletHoles().size();
 
             if (map.containsKey(label)) {

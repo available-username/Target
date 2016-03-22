@@ -16,9 +16,10 @@ public class WeaponContract {
     public interface WeaponEntry extends BaseColumns {
         String COLUMN_NAME_DATE_TIME = "date_time";
         String COLUMN_NAME_TYPE = "type"; //pistol, revolver, rifle...
-        String COLUMN_NAME_MANUFACTURER = "manufacturer";
-        String COLUMN_NAME_MODEL = "model";
+        String COLUMN_NAME_MAKE_AND_MODEL = "make_and_model";
         String COLUMN_NAME_CALIBER = "caliber";
+        String COLUMN_NAME_LAST_CLEANED = "last_cleaned";
+        String COLUMN_NAME_BULLETS_FIRED = "bullets_fired";
         String COLUMN_NAME_REMOVED = "removed";
     }
 
@@ -26,16 +27,18 @@ public class WeaponContract {
             String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                             "%s INTEGER," + //DATE_TIME
                             "%s INTEGER," + // TYPE
-                            "%s VARCHAR(64)," + // MANUFACTURER
-                            "%s VARCHAR(64)," + // MODEL
+                            "%s VARCHAR(128)," + // MAKE_AND_MODEL
                             "%s INTEGER," +
+                            "%s INTEGER," + // LAST_CLEANED
+                            "%s INTEGER," + // BULLETS_FIRED
                             "%s INTEGER);", // REMOVED
                     TABLE_NAME, WeaponEntry._ID,
                     WeaponEntry.COLUMN_NAME_DATE_TIME,
                     WeaponEntry.COLUMN_NAME_TYPE,
-                    WeaponEntry.COLUMN_NAME_MANUFACTURER,
-                    WeaponEntry.COLUMN_NAME_MODEL,
+                    WeaponEntry.COLUMN_NAME_MAKE_AND_MODEL,
                     WeaponEntry.COLUMN_NAME_CALIBER,
+                    WeaponEntry.COLUMN_NAME_LAST_CLEANED,
+                    WeaponEntry.COLUMN_NAME_BULLETS_FIRED,
                     WeaponEntry.COLUMN_NAME_REMOVED);
 
     public static String SQL_DROP_WEAPON = String.format("DROP TABLE IF EXISTS %s;", TABLE_NAME);

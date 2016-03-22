@@ -24,8 +24,7 @@ public class AmmunitionAddFragment extends AmmunitionBaseFragment {
 
     private static final String TAG = AmmunitionAddFragment.class.getSimpleName();
 
-    private EditText mManufacturerText;
-    private EditText mNameText;
+    private EditText mMakeAndNameText;
     private Spinner mCaliberSpinner;
     private Spinner mTypeSpinner;
     private EditText mVelocityText;
@@ -46,8 +45,7 @@ public class AmmunitionAddFragment extends AmmunitionBaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.ammunition_add_layout, container, false);
 
-        mManufacturerText = (EditText)view.findViewById(R.id.ammunition_add_layout_manufacturer);
-        mNameText = (EditText)view.findViewById(R.id.ammunition_add_layout_name);
+        mMakeAndNameText = (EditText)view.findViewById(R.id.ammunition_add_layout_make_and_name);
 
         //
         //// Caliber
@@ -104,17 +102,12 @@ public class AmmunitionAddFragment extends AmmunitionBaseFragment {
     View.OnClickListener mSaveClickedListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            String manufacturer = mManufacturerText.getText().toString();
-            String name = mNameText.getText().toString();
+            String makeAndName = mMakeAndNameText.getText().toString();
             String velocity = mVelocityText.getText().toString();
             String grains = mGrainsText.getText().toString();
 
-            if (manufacturer.length() == 0) {
+            if (makeAndName.length() == 0) {
                 String msg = getContext().getResources().getString(R.string.ammunition_manufacturer_error);
-                Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT);
-                toast.show();
-            } else if (name.length() == 0) {
-                String msg = getContext().getResources().getString(R.string.ammunition_name_error);
                 Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT);
                 toast.show();
             } else if (velocity.length() == 0) {
@@ -135,7 +128,7 @@ public class AmmunitionAddFragment extends AmmunitionBaseFragment {
                 int velocityValue = Integer.parseInt(velocity);
                 double grainsValue = Double.parseDouble(grains);
 
-                Ammunition ammunition = new Ammunition(type, manufacturer, name, caliber, grainsValue, velocityValue);
+                Ammunition ammunition = new Ammunition(type, makeAndName, caliber, grainsValue, velocityValue);
 
                 onAdded(ammunition);
             }

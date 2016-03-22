@@ -57,18 +57,14 @@
     </string-array>
 
     <!-- Add weapon strings -->
-    <string name="weapon_manufacturer">Tillverkare</string>
+    <string name="weapon_make_and_model">Tillverkare och modellbeteckning</string>
     <string name="weapon_manufacturer_error">Tillverkare måste anges</string>
-    <string name="weapon_model">Modellbeteckning</string>
-    <string name="weapon_model_error">Modellbeteckning måste anges</string>
     <string name="weapon_type">Typ</string>
     <string name="weapon_caliber">Kaliber</string>
 
     <!-- Add ammunition strings -->
-    <string name="ammunition_manufacturer">Tillverkare</string>
+    <string name="ammunition_manufacturer">Tillverkare och produktnamn</string>
     <string name="ammunition_manufacturer_error">Tillverkare måste anges</string>
-    <string name="ammunition_name">Produktnamn</string>
-    <string name="ammunition_name_error">Produktnamn måste anges</string>
     <string name="ammunition_type">Typ</string>
     <string name="ammunition_caliber">Kaliber</string>
     <string name="ammunition_velocity">Utgångshastighet (m/s)</string>

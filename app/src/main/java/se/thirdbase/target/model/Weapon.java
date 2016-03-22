@@ -9,7 +9,6 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-import se.thirdbase.target.db.PrecisionSeriesContract;
 import se.thirdbase.target.db.WeaponContract;
 
 /**
@@ -18,30 +17,33 @@ import se.thirdbase.target.db.WeaponContract;
 public class Weapon implements Parcelable {
 
     private WeaponType mWeaponType;
-    private String mManufacturer;
-    private String mModel;
+    private String mMakeAndModel;
     private BulletCaliber mCaliber;
+    private long mLastCleaned;
+    private int mBulletsFired;
     private int mRemoved;
     private long mDBHandle = Long.MIN_VALUE;
 
-    public Weapon(WeaponType type, String manufacturer, String model, BulletCaliber caliber) {
-        this(type, manufacturer, model, caliber, false);
+    public Weapon(WeaponType type, String makeAndModel, BulletCaliber caliber) {
+        this(type, makeAndModel, caliber, 0, 0, false);
     }
 
-    public Weapon(WeaponType type, String manufacturer, String model, BulletCaliber caliber, boolean removed) {
+    public Weapon(WeaponType type, String makeAndModel, BulletCaliber caliber, long lastCleaned, int mBulletsFired, boolean removed) {
         mWeaponType = type;
-        mManufacturer = manufacturer;
-        mModel = model;
+        mMakeAndModel = makeAndModel;
         mCaliber = caliber;
+        mLastCleaned = lastCleaned;
+        mBulletsFired = mBulletsFired;
         mRemoved = removed ? 1 : 0;
     }
 
     protected Weapon(Parcel in) {
         mDBHandle = in.readLong();
-        mManufacturer = in.readString();
-        mModel = in.readString();
+        mMakeAndModel = in.readString();
         mCaliber = (BulletCaliber)in.readSerializable();
         mWeaponType = (WeaponType)in.readSerializable();
+        mLastCleaned = in.readLong();
+        mBulletsFired = in.readInt();
         mRemoved = in.readInt();
     }
 
@@ -65,20 +67,12 @@ public class Weapon implements Parcelable {
         this.mWeaponType = mWeaponType;
     }
 
-    public String getManufacturer() {
-        return mManufacturer;
+    public String getMakeAndModel() {
+        return mMakeAndModel;
     }
 
-    public void setManufacturer(String mManufacturer) {
-        this.mManufacturer = mManufacturer;
-    }
-
-    public String getModel() {
-        return mModel;
-    }
-
-    public void setModel(String mModel) {
-        this.mModel = mModel;
+    public void setMakeAndModel(String makeAndModel) {
+        this.mMakeAndModel = makeAndModel;
     }
 
     public BulletCaliber getCaliber() {
@@ -97,10 +91,11 @@ public class Weapon implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mDBHandle);
-        dest.writeString(mManufacturer);
-        dest.writeString(mModel);
+        dest.writeString(mMakeAndModel);
         dest.writeSerializable(mCaliber);
         dest.writeSerializable(mWeaponType);
+        dest.writeLong(mLastCleaned);
+        dest.writeInt(mBulletsFired);
         dest.writeInt(mRemoved);
     }
 
@@ -114,11 +109,13 @@ public class Weapon implements Parcelable {
         if (mDBHandle == Long.MIN_VALUE) {
             ContentValues values = new ContentValues();
 
-            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER, mCaliber.ordinal());
-            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_TYPE, mWeaponType.ordinal());
-            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER, mManufacturer);
-            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_MODEL, mModel);
             values.put(WeaponContract.WeaponEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
+            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_TYPE, mWeaponType.ordinal());
+            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_MAKE_AND_MODEL, mMakeAndModel);
+            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER, mCaliber.ordinal());
+            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_LAST_CLEANED, mLastCleaned);
+            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_BULLETS_FIRED, mBulletsFired);
+            values.put(WeaponContract.WeaponEntry.COLUMN_NAME_REMOVED, mRemoved);
 
             mDBHandle = db.insert(WeaponContract.TABLE_NAME, null, values);
         }
@@ -144,9 +141,10 @@ public class Weapon implements Parcelable {
                 WeaponContract.WeaponEntry._ID,
                 WeaponContract.WeaponEntry.COLUMN_NAME_DATE_TIME,
                 WeaponContract.WeaponEntry.COLUMN_NAME_TYPE,
-                WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER,
-                WeaponContract.WeaponEntry.COLUMN_NAME_MODEL,
+                WeaponContract.WeaponEntry.COLUMN_NAME_MAKE_AND_MODEL,
                 WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER,
+                WeaponContract.WeaponEntry.COLUMN_NAME_LAST_CLEANED,
+                WeaponContract.WeaponEntry.COLUMN_NAME_BULLETS_FIRED,
                 WeaponContract.WeaponEntry.COLUMN_NAME_REMOVED
         };
 
@@ -181,11 +179,12 @@ public class Weapon implements Parcelable {
         long id = cursor.getLong(cursor.getColumnIndex(WeaponContract.WeaponEntry._ID));
         BulletCaliber caliber = BulletCaliber.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_CALIBER))];
         WeaponType type = WeaponType.values()[cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_TYPE))];
-        String manufacturer = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MANUFACTURER));
-        String model = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MODEL));
+        String makeAndModel = cursor.getString(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_MAKE_AND_MODEL));
+        long lastCleaned = cursor.getLong(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_LAST_CLEANED));
+        int bulletsFired = cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_BULLETS_FIRED));
         int removed = cursor.getInt(cursor.getColumnIndex(WeaponContract.WeaponEntry.COLUMN_NAME_REMOVED));
 
-        Weapon weapon = new Weapon(type, manufacturer, model, caliber, removed == 1);
+        Weapon weapon = new Weapon(type, makeAndModel, caliber, lastCleaned, bulletsFired, removed == 1);
         weapon.mDBHandle = id;
 
         return weapon;

@@ -37,8 +37,7 @@ public class AmmunitionListAdapter extends ArrayAdapter<Ammunition> {
             row = inflater.inflate(mResource, parent, false);
 
             holder = new AmmunitionHolder();
-            holder.manufacturer = (TextView)row.findViewById(R.id.ammunition_list_row_manufacturer);
-            holder.name = (TextView)row.findViewById(R.id.ammunition_list_row_model);
+            holder.makeAndName = (TextView)row.findViewById(R.id.ammunition_list_row_make_and_name);
             holder.caliber = (TextView)row.findViewById(R.id.ammunition_list_row_caliber);
             holder.type = (TextView)row.findViewById(R.id.ammunition_list_row_type);
             holder.velocity = (TextView)row.findViewById(R.id.ammunition_list_row_velocity);
@@ -51,8 +50,7 @@ public class AmmunitionListAdapter extends ArrayAdapter<Ammunition> {
 
         Ammunition ammunition = mData[position];
 
-        holder.manufacturer.setText(ammunition.getManufacturer());
-        holder.name.setText(ammunition.getName());
+        holder.makeAndName.setText(ammunition.getMakeAndName());
         holder.caliber.setText(ammunition.getCaliber().toString());
         holder.type.setText(ammunition.getType().toString());
         String velocity = String.format("%dm/s", ammunition.getMuzzleVelocity());
@@ -64,8 +62,7 @@ public class AmmunitionListAdapter extends ArrayAdapter<Ammunition> {
     }
 
     static class AmmunitionHolder {
-        TextView manufacturer;
-        TextView name;
+        TextView makeAndName;
         TextView caliber;
         TextView type;
         TextView velocity;

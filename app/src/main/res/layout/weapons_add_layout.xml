@@ -21,7 +21,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/TargetFontSmall"
-                android:text="@string/weapon_manufacturer"/>
+                android:text="@string/weapon_make_and_model"/>
 
             <EditText
                 android:layout_width="match_parent"
@@ -29,21 +29,6 @@
                 android:inputType="text"
                 android:id="@+id/weapons_add_layout_manufacturer"
                 tools:text="Sig-Sauer"/>
-
-
-            <!-- Model -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/TargetFontSmall"
-                android:text="@string/weapon_model"/>
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text"
-                android:id="@+id/weapons_add_layout_model"
-                tools:text="P226 LDC"/>
 
             <!-- Caliber -->
             <TextView

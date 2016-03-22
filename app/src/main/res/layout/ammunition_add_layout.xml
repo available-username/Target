@@ -29,23 +29,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:id="@+id/ammunition_add_layout_manufacturer"
+                android:id="@+id/ammunition_add_layout_make_and_name"
                 tools:text="Magtech"/>
-
-
-            <!-- Model -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/TargetFontSmall"
-                android:text="@string/ammunition_name"/>
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text"
-                android:id="@+id/ammunition_add_layout_name"
-                tools:text="Premium"/>
 
             <!-- Caliber -->
             <TextView

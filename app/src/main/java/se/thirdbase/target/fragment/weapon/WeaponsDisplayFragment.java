@@ -62,7 +62,7 @@ public class WeaponsDisplayFragment extends WeaponsBaseFragment {
         }
 
         TextView titleText = (TextView) view.findViewById(R.id.weapon_display_layout_weapon_title);
-        String title = String.format("%s %s", mWeapon.getManufacturer(), mWeapon.getModel());
+        String title = mWeapon.getMakeAndModel();
         titleText.setText(title);
 
         Button principleButton = (Button)view.findViewById(R.id.weapon_display_layout_principle);

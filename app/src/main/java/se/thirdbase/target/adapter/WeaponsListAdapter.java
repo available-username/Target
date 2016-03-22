@@ -2,7 +2,6 @@ package se.thirdbase.target.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import se.thirdbase.target.R;
 import se.thirdbase.target.model.Weapon;
-import se.thirdbase.target.view.TargetView;
 
 /**
  * Created by alexp on 2/29/16.
@@ -39,8 +37,7 @@ public class WeaponsListAdapter extends ArrayAdapter<Weapon> {
             row = inflater.inflate(mResource, parent, false);
 
             holder = new WeaponHolder();
-            holder.manufacturer = (TextView)row.findViewById(R.id.weapon_list_row_manufacturer);
-            holder.model = (TextView)row.findViewById(R.id.weapon_list_row_model);
+            holder.makeAndModel = (TextView)row.findViewById(R.id.weapon_list_row_manufacturer);
             holder.caliber = (TextView)row.findViewById(R.id.weapon_list_row_caliber);
             holder.type = (TextView)row.findViewById(R.id.weapons_list_row_type);
 
@@ -51,8 +48,7 @@ public class WeaponsListAdapter extends ArrayAdapter<Weapon> {
 
         Weapon weapon = mData[position];
 
-        holder.manufacturer.setText(weapon.getManufacturer());
-        holder.model.setText(weapon.getModel());
+        holder.makeAndModel.setText(weapon.getMakeAndModel());
         holder.caliber.setText(weapon.getCaliber().toString());
 
         String[] weaponTypeArray = getContext().getResources().getStringArray(R.array.weapon_type);
@@ -63,8 +59,7 @@ public class WeaponsListAdapter extends ArrayAdapter<Weapon> {
     }
 
     static class WeaponHolder {
-        TextView manufacturer;
-        TextView model;
+        TextView makeAndModel;
         TextView caliber;
         TextView type;
     }

@@ -55,11 +55,11 @@ public class SetupListAdapter extends ArrayAdapter<Setup> {
         holder.principle.setText(principle);
 
         Weapon weapon = setup.getWeapon();
-        String weaponStr = String.format("%s %s", weapon.getManufacturer(), weapon.getModel());
+        String weaponStr = weapon.getMakeAndModel();
         holder.weapon.setText(weaponStr);
 
         Ammunition ammunition = setup.getAmmunition();
-        String ammunitionStr = String.format("%s %s", ammunition.getManufacturer(), ammunition.getName());
+        String ammunitionStr = ammunition.getMakeAndName();
         holder.ammunition.setText(ammunitionStr);
 
         return row;

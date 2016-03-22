@@ -25,8 +25,7 @@ public class WeaponsAddFragment extends WeaponsBaseFragment {
 
     private static final String TAG = WeaponsAddFragment.class.getSimpleName();
 
-    private EditText mManufacturerText;
-    private EditText mModelText;
+    private EditText mMakeAndModelText;
     private Spinner mCaliberSpinner;
     private Spinner mWeaponTypeSpinner;
     private Button mSaveButton;
@@ -45,8 +44,7 @@ public class WeaponsAddFragment extends WeaponsBaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.weapons_add_layout, container, false);
 
-        mManufacturerText = (EditText)view.findViewById(R.id.weapons_add_layout_manufacturer);
-        mModelText = (EditText)view.findViewById(R.id.weapons_add_layout_model);
+        mMakeAndModelText = (EditText)view.findViewById(R.id.weapons_add_layout_manufacturer);
 
         mCaliberSpinner = (Spinner)view.findViewById(R.id.weapons_add_layout_caliber);
 
@@ -86,16 +84,10 @@ public class WeaponsAddFragment extends WeaponsBaseFragment {
     View.OnClickListener mSaveClickedListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            String manufacturer = mManufacturerText.getText().toString();
-            String model = mModelText.getText().toString();
+            String makeAndModel = mMakeAndModelText.getText().toString();
 
-            if (manufacturer.length() == 0) {
+            if (makeAndModel.length() == 0) {
                 String msg = getContext().getResources().getString(R.string.weapon_manufacturer_error);
-                Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.TOP, 0, 0);
-                toast.show();
-            } else if (model.length() == 0) {
-                String msg = getContext().getResources().getString(R.string.weapon_model_error);
                 Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.TOP, 0, 0);
                 toast.show();
@@ -106,7 +98,7 @@ public class WeaponsAddFragment extends WeaponsBaseFragment {
                 BulletCaliber caliber = BulletCaliber.values()[caliberIdx];
                 WeaponType weaponType = WeaponType.values()[weaponTypeIdx];
 
-                Weapon weapon = new Weapon(weaponType, manufacturer, model, caliber);
+                Weapon weapon = new Weapon(weaponType, makeAndModel, caliber);
 
                 onAdded(weapon);
             }
