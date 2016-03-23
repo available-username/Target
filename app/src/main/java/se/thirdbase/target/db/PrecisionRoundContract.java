@@ -21,6 +21,7 @@ public final class PrecisionRoundContract {
         String COLUMN_NAME_SERIES_6 = "series6";
         String COLUMN_NAME_SERIES_7 = "series7";
         String COLUMN_NAME_SCORE = "score";
+        String COLUMN_NAME_COMPETITION = "competition";
         String COLUMN_NAME_NOTES = "notes";
     }
 
@@ -35,14 +36,15 @@ public final class PrecisionRoundContract {
                             "%s INTEGER," +
                             "%s INTEGER," +
                             "%s INTEGER," + // SCORE
+                            "%s INTEGER," + // COMPETITION
                             "%s TEXT," +
-                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," + // SERIES_1
-                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
-                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
-                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
-                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
-                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE," +
-                            "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE);", // SERIES_7
+                            "FOREIGN KEY(%s) REFERENCES %s(%s)," + // SERIES_1
+                            "FOREIGN KEY(%s) REFERENCES %s(%s)," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s)," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s)," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s)," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s)," +
+                            "FOREIGN KEY(%s) REFERENCES %s(%s));", // SERIES_7
                     TABLE_NAME, PrecisionRoundEntry._ID,
                     PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_1,
@@ -53,6 +55,7 @@ public final class PrecisionRoundContract {
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
                     PrecisionRoundEntry.COLUMN_NAME_SCORE,
+                    PrecisionRoundEntry.COLUMN_NAME_COMPETITION,
                     PrecisionRoundEntry.COLUMN_NAME_NOTES,
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_1, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID,
                     PrecisionRoundEntry.COLUMN_NAME_SERIES_2, PrecisionSeriesContract.TABLE_NAME, PrecisionSeriesContract.PrecisionSeriesEntry._ID,

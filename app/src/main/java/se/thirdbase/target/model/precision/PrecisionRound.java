@@ -21,6 +21,7 @@ public class PrecisionRound implements Parcelable {
 
     private List<PrecisionSeries> mPrecisionSeries;
     private int mScore;
+    private int mCompetition;
     private String mNotes;
     private long mTimestamp;
     private long mDBHandle = Long.MIN_VALUE;
@@ -29,20 +30,22 @@ public class PrecisionRound implements Parcelable {
         mPrecisionSeries = new ArrayList<>();
     }
 
-    public PrecisionRound(List<PrecisionSeries> precisionSeries, String notes) {
-        mPrecisionSeries = precisionSeries;
-        mScore = calculateScore(precisionSeries);
-        mNotes = notes;
+    public PrecisionRound(List<PrecisionSeries> precisionSeries, boolean competition, String notes) {
+        this(precisionSeries, competition, notes, 0);
     }
 
-    public PrecisionRound(List<PrecisionSeries> precisionSeries, String notes, long timestamp) {
-        this(precisionSeries, notes);
+    public PrecisionRound(List<PrecisionSeries> precisionSeries, boolean competition, String notes, long timestamp) {
+        mPrecisionSeries = precisionSeries;
+        mScore = calculateScore(precisionSeries);
+        mCompetition = competition ? 1 : 0;
+        mNotes = notes;
         mTimestamp = timestamp;
     }
 
     protected PrecisionRound(Parcel in) {
         mPrecisionSeries = in.createTypedArrayList(PrecisionSeries.CREATOR);
         mScore = in.readInt();
+        mCompetition = in.readInt();
         mNotes = in.readString();
         mTimestamp = in.readLong();
     }
@@ -85,6 +88,14 @@ public class PrecisionRound implements Parcelable {
         return mScore;
     }
 
+    public boolean getCompetition() {
+        return mCompetition > 0;
+    }
+
+    public void setmCompetition(boolean competition) {
+        mCompetition = competition ? 1 : 0;
+    }
+
     public int getNbrSeries() {
         return mPrecisionSeries.size();
     }
@@ -116,6 +127,7 @@ public class PrecisionRound implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mPrecisionSeries);
         dest.writeInt(mScore);
+        dest.writeInt(mCompetition);
         dest.writeString(mNotes);
         dest.writeLong(mTimestamp);
     }
@@ -152,8 +164,7 @@ public class PrecisionRound implements Parcelable {
                     PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_4,
                     PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
                     PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
-                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
-                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
+                    PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_7
             };
 
             int size = mPrecisionSeries.size();
@@ -162,6 +173,7 @@ public class PrecisionRound implements Parcelable {
             }
 
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE, getScore());
+            values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_COMPETITION, getCompetition() ? 1 : 0);
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES, getNotes());
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
@@ -212,8 +224,10 @@ public class PrecisionRound implements Parcelable {
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
-                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME,
-                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_COMPETITION,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES,
+                PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME
         };
 
         Cursor cursor = db.query(PrecisionRoundContract.TABLE_NAME,
@@ -276,11 +290,14 @@ public class PrecisionRound implements Parcelable {
         series = PrecisionSeries.fetch(db, seriesId);
         if (series != null) { precisionSeries.add(series); }
 
-        long timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME));
+        int competition = cursor.getInt(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_COMPETITION));
 
         String notes = cursor.getString(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES));
 
-        PrecisionRound precisionRound = new PrecisionRound(precisionSeries, notes, timestamp);
+        long timestamp = cursor.getLong(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME));
+
+
+        PrecisionRound precisionRound = new PrecisionRound(precisionSeries, competition > 0, notes, timestamp);
 
         precisionRound.mDBHandle = id;
 
