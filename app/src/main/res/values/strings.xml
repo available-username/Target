@@ -2,9 +2,11 @@
     <string name="app_name">Target</string>
 
     <!-- Startup strings -->
-    <string name="new_precision_round">Precision</string>
-    <string name="statistics">Statistik</string>
-    <string name="settings">Inställningar</string>
+    <string name="title_precision">Precision</string>
+    <string name="title_weapons">Vapen</string>
+    <string name="title_ammunition">ammunition</string>
+    <string name="title_statistics">Statistik</string>
+    <string name="title_settings">Inställningar</string>
 
     <string-array name="startup_options">
         <item>Precision</item>

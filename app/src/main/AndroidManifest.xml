@@ -5,21 +5,24 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.MainActivity">
+        <activity android:name=".activity.MainActivity"
+            android:label="Target">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PrecisionActivity"/>
-        <activity android:name=".activity.WeaponsActivity"/>
-        <activity android:name=".activity.AmmunitionActivity"/>
-        <activity android:name=".activity.StatisticsActivity"/>
-
+        <activity android:name=".activity.PrecisionActivity"
+            android:label="@string/title_precision"/>
+        <activity android:name=".activity.WeaponsActivity"
+            android:label="@string/title_weapons"/>
+        <activity android:name=".activity.AmmunitionActivity"
+            android:label="@string/title_ammunition"/>
+        <activity android:name=".activity.StatisticsActivity"
+            android:label="@string/title_statistics"/>
     </application>
 
 </manifest>
