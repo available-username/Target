@@ -6,15 +6,17 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.thirdbase.target.R;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.loadout.LoadOutFragment;
-import se.thirdbase.target.fragment.loadout.LoadOutListener;
 import se.thirdbase.target.fragment.precision.PrecisionHitDistributionFragment;
-import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryListener;
 import se.thirdbase.target.fragment.precision.PrecisionRoundFragment;
 import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryFragment;
 import se.thirdbase.target.fragment.precision.PrecisionScoreDistributionFragment;
+import se.thirdbase.target.fragment.precision.PrecisionSelectionFragment;
 import se.thirdbase.target.fragment.precision.PrecisionTargetFragment;
 import se.thirdbase.target.model.Ammunition;
 import se.thirdbase.target.model.Principle;
@@ -22,13 +24,15 @@ import se.thirdbase.target.model.Setup;
 import se.thirdbase.target.model.Weapon;
 import se.thirdbase.target.model.precision.PrecisionRound;
 import se.thirdbase.target.model.precision.PrecisionSeries;
+import se.thirdbase.target.model.precision.UnboundPrecisionRound;
 
-public class PrecisionActivity extends BaseActivity implements PrecisionStateListener, PrecisionRoundSummaryListener, LoadOutListener {
+public class PrecisionActivity extends BaseActivity implements PrecisionStateListener, PrecisionRoundSummaryFragment.PrecisionRoundSummaryListener, LoadOutFragment.LoadOutListener {
 
     private static final String TAG = PrecisionActivity.class.getSimpleName();
 
     public static final String INTENT_SETUP_ID = "INTENT_SETUP_ID";
 
+    private static final String BACK_STACK_TAG_SELECTION_FRAGMENT = "BACK_STACK_TAG_SELECTION_FRAGMENT";
     private static final String BACK_STACK_TAG_LOAD_OUT_FRAGMENT = "BACK_STACK_TAG_LOAD_OUT_FRAGMENT";
     private static final String BACK_STACK_TAG_PRECISION_ROUND = "BACK_STACK_TAG_PRECISION_ROUND";
     private static final String BACK_STACK_TAG_PRECISION_SERIES = "BACK_STACK_TAG_PRECISION_SERIES";
@@ -36,10 +40,17 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
     private static final String BACK_STACK_TAG_PRECISION_POINT_DISTRIBUTION = "BACK_STACK_TAG_PRECISION_POINT_DISTRIBUTION";
     private static final String BACK_STACK_TAG_PRECISION_HIT_DISTRIBUTION = "BACK_STACK_TAG_PRECISION_HIT_DISTRIBUTION";
 
+    enum Selection {
+        COMPETITION_ROUND,
+        TRAINING_ROUND,
+        UNBOUND_SERIES
+    }
+
     private SQLiteDatabase mSQLiteDatabase;
     private PrecisionRound mPrecisionRound;
     private Weapon mWeapon;
     private Ammunition mAmmunition;
+    private Selection selection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +66,8 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
             long setupId = intent.getLongExtra(INTENT_SETUP_ID, Long.MIN_VALUE);
 
             if (setupId == Long.MIN_VALUE) {
-                onSelectLoadOut();
+                //onSelectLoadOut();
+                onPrecisionSelection();
             } else {
                 Setup setup = Setup.fetch(mSQLiteDatabase, setupId);
 
@@ -66,7 +78,8 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
                 mWeapon = setup.getWeapon();
                 mAmmunition = setup.getAmmunition();
 
-                onPrecisionRoundBegin();
+                //onPrecisionRoundBegin();
+                onPrecisionSelection();
             }
         }
     }
@@ -116,13 +129,64 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         displayFragment(fragment, false, BACK_STACK_TAG_LOAD_OUT_FRAGMENT);
     }
 
+    private void onPrecisionSelection() {
+        Log.d(TAG, "onPrecisionSelection");
+
+        Fragment fragment = PrecisionSelectionFragment.newInstance();
+        displayFragment(fragment, false, BACK_STACK_TAG_SELECTION_FRAGMENT);
+    }
+
     private void onPrecisionRoundBegin() {
         Log.d(TAG, "onPrecisionRoundBegin()");
 
-        mPrecisionRound = new PrecisionRound();
+        switch (selection) {
+            case COMPETITION_ROUND:
+                mPrecisionRound = new PrecisionRound(true);
+                break;
+            case TRAINING_ROUND:
+                mPrecisionRound = new PrecisionRound(false);
+                break;
+            case UNBOUND_SERIES:
+                mPrecisionRound = new UnboundPrecisionRound();
+                break;
+        }
 
         Fragment fragment = PrecisionTargetFragment.newInstance(mWeapon, mAmmunition);
         displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SERIES);
+    }
+
+    @Override
+    public void onPrecisionStartCompetitionRound() {
+        selection = Selection.COMPETITION_ROUND;
+        /*
+        Log.d(TAG, "onPrecisionStartCompetitionRound()");
+
+        mPrecisionRound = new PrecisionRound(true);
+
+        Fragment fragment = PrecisionTargetFragment.newInstance(mWeapon, mAmmunition);
+        displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SERIES);
+        */
+        onSelectLoadOut();
+    }
+
+    @Override
+    public void onPrecisionStartTrainingRound() {
+        selection = Selection.TRAINING_ROUND;
+        /*
+        Log.d(TAG, "onPrecisionStartTrainingRound()");
+
+        mPrecisionRound = new PrecisionRound(false);
+
+        Fragment fragment = PrecisionTargetFragment.newInstance(mWeapon, mAmmunition);
+        displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_SERIES);
+        */
+        onSelectLoadOut();
+    }
+
+    @Override
+    public void onPrecisionStartUnboundRound() {
+        selection = Selection.UNBOUND_SERIES;
+        onSelectLoadOut();
     }
 
     @Override
@@ -162,7 +226,7 @@ public class PrecisionActivity extends BaseActivity implements PrecisionStateLis
         if (nbrSeries == 1) {
             Fragment fragment = PrecisionRoundFragment.newInstance(mPrecisionRound);
             displayFragment(fragment, false, BACK_STACK_TAG_PRECISION_ROUND);
-        } else if (mPrecisionRound.getNbrSeries() == PrecisionRound.MAX_NBR_SERIES) {
+        } else if (mPrecisionRound.getNbrSeries() == mPrecisionRound.getMaxNbrSeries()) {
             onPrecisionRoundComplete(mPrecisionRound);
         } else {
             popBackStack();

@@ -202,4 +202,12 @@ public class LoadOutFragment extends Fragment {
             toggleSaveButton();
         }
     };
+
+    /**
+     * Created by alexp on 3/1/16.
+     */
+    public static interface LoadOutListener {
+
+        void onLoadOut(Weapon weapon, Ammunition ammunition);
+    }
 }

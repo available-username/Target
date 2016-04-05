@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import se.thirdbase.target.R;
 import se.thirdbase.target.fragment.precision.PrecisionHitDistributionFragment;
 import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryFragment;
-import se.thirdbase.target.fragment.precision.PrecisionRoundSummaryListener;
 import se.thirdbase.target.fragment.precision.PrecisionScoreDistributionFragment;
 import se.thirdbase.target.fragment.statistics.StatisticsPrecisionFragment;
 import se.thirdbase.target.fragment.statistics.StatisticsPrecisionProgressFragment;
@@ -15,7 +14,7 @@ import se.thirdbase.target.model.precision.PrecisionRound;
 /**
  * Created by alexp on 2/24/16.
  */
-public class StatisticsActivity extends BaseActivity implements StatisticsStateListener, PrecisionRoundSummaryListener {
+public class StatisticsActivity extends BaseActivity implements StatisticsStateListener, PrecisionRoundSummaryFragment.PrecisionRoundSummaryListener {
 
     private static final String BACK_STACK_TAG_PRECISION_FRAGMENT = "BACK_STACK_TAG_PRECISION_FRAGMENT";
     private static final String BACK_STACK_TAG_PRECISION_PROGRESS_FRAGMENT = "BACK_STACK_TAG_PRECISION_PROGRESS_FRAGMENT";

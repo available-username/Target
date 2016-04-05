@@ -32,6 +32,18 @@
     <string name="save">Spara</string>
     <string name="max_bullets_reached">Kan inte lägga till fler kulor</string>
 
+    <!-- Precision selection strings -->
+    <string-array name="precision_selection">
+        <item>Tävling</item>
+        <item>Träning</item>
+        <item>Fristående serier</item>
+    </string-array>
+    <string-array name="precision_selection_desc">
+        <item>7 serier om 5 skott</item>
+        <item>7 serier om 5 skott</item>
+        <item>Obegränsat antal serier om 5 skott</item>
+    </string-array>
+
     <!-- Precision round summary strings -->
     <string name="point_distribution">Poängdistribution</string>
     <string name="hit_distribution">Träffbild</string>
@@ -81,4 +93,7 @@
     <!-- Weapon display strings -->
     <string name="weapon_display_principle_button">Moment</string>
     <string name="weapon_display_ammunition_button">Ammunition</string>
+
+    <!-- Generic strings -->
+    <string name="generic_finish">Avsluta</string>
 </resources>

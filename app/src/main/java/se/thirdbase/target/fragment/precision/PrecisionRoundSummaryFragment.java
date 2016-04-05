@@ -18,10 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.thirdbase.target.R;
-import se.thirdbase.target.model.BulletHole;
 import se.thirdbase.target.model.precision.PrecisionRound;
-import se.thirdbase.target.model.precision.PrecisionSeries;
-import se.thirdbase.target.model.precision.PrecisionTarget;
 import se.thirdbase.target.util.PrecisionMath;
 
 /**
@@ -160,5 +157,12 @@ public class PrecisionRoundSummaryFragment extends PrecisionBaseFragment {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.precision_round_summary_layout_graph_container, fragment, null);
         transaction.commit();
+    }
+
+    public interface  PrecisionRoundSummaryListener {
+
+        void onPrecisionRoundScoreDistribution(PrecisionRound precisionRound);
+
+        void onPrecisionRoundHitDistribution(PrecisionRound precisionRound);
     }
 }

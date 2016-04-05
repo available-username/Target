@@ -28,11 +28,12 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
     private static final String BUNDLE_TAG_PRECISION_ROUND = "BUNDLE_TAG_PRECISION_ROUND";
 
     private ListView mSeriesList;
+    private Button mFinishButton;
     private Button mAddButton;
     private PrecisionRound mPrecisionRound;
 
-    public static PrecisionRoundFragment newInstance() {
-        return newInstance(new PrecisionRound());
+    public static PrecisionRoundFragment newInstance(boolean competition) {
+        return newInstance(new PrecisionRound(competition));
     }
 
     public static PrecisionRoundFragment newInstance(PrecisionRound precisionRound) {
@@ -63,6 +64,9 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
         mSeriesList = (ListView)view.findViewById(R.id.precision_layout_series_list);
         mSeriesList.setOnItemClickListener(mSeriesClickedListener);
 
+        mFinishButton = (Button) view.findViewById(R.id.precision_layout_end_round);
+        mFinishButton.setOnClickListener(mFinishButtonClicked);
+
         mAddButton = (Button) view.findViewById(R.id.precision_layout_add_series);
         mAddButton.setOnClickListener(mAddButtonClicked);
 
@@ -90,6 +94,13 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
         mPrecisionRound = bundle.getParcelable(BUNDLE_TAG_PRECISION_ROUND);
     }
 
+    private View.OnClickListener mFinishButtonClicked = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            onPrecisionRoundComplete(mPrecisionRound);
+        }
+    };
+
     private View.OnClickListener mAddButtonClicked = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -104,7 +115,6 @@ public class PrecisionRoundFragment extends PrecisionBaseFragment {
             Log.d(TAG, String.format("Position: %d", position));
 
             List<PrecisionSeries> precisionSeries = mPrecisionRound.getPrecisionSeries();
-            //PrecisionSeries series = position == precisionSeries.size() ? null : precisionSeries.get(position);
             PrecisionSeries series = precisionSeries.get(position);
 
             onPrecisionSeriesUpdate(series);

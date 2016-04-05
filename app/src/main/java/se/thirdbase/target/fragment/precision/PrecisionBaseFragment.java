@@ -13,7 +13,7 @@ import se.thirdbase.target.model.precision.PrecisionSeries;
 public class PrecisionBaseFragment extends Fragment {
 
     private PrecisionStateListener mPrecisionStateListener;
-    private PrecisionRoundSummaryListener mPrecisionRoundSummaryListener;
+    private PrecisionRoundSummaryFragment.PrecisionRoundSummaryListener mPrecisionRoundSummaryListener;
 
     @Override
     public void onAttach(Context context) {
@@ -23,8 +23,26 @@ public class PrecisionBaseFragment extends Fragment {
             mPrecisionStateListener = (PrecisionStateListener) context;
         }
 
-        if (context instanceof PrecisionRoundSummaryListener) {
-            mPrecisionRoundSummaryListener = (PrecisionRoundSummaryListener) context;
+        if (context instanceof PrecisionRoundSummaryFragment.PrecisionRoundSummaryListener) {
+            mPrecisionRoundSummaryListener = (PrecisionRoundSummaryFragment.PrecisionRoundSummaryListener) context;
+        }
+    }
+
+    protected void onPrecisionStartCompetitionRound() {
+        if (mPrecisionStateListener != null) {
+            mPrecisionStateListener.onPrecisionStartCompetitionRound();
+        }
+    }
+
+    protected void onPrecisionStartTrainingRound() {
+        if (mPrecisionStateListener != null) {
+            mPrecisionStateListener.onPrecisionStartTrainingRound();
+        }
+    }
+
+    protected void onPrecisionStartUnboundRound() {
+        if (mPrecisionStateListener != null) {
+            mPrecisionStateListener.onPrecisionStartUnboundRound();
         }
     }
 

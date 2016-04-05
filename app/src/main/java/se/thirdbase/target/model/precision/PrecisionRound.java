@@ -17,7 +17,7 @@ import se.thirdbase.target.db.PrecisionRoundContract;
  */
 public class PrecisionRound implements Parcelable {
 
-    public static final int MAX_NBR_SERIES = 7; //real number is 7
+    private static final int MAX_NBR_SERIES = 7;
 
     private List<PrecisionSeries> mPrecisionSeries;
     private int mScore;
@@ -26,8 +26,8 @@ public class PrecisionRound implements Parcelable {
     private long mTimestamp;
     private long mDBHandle = Long.MIN_VALUE;
 
-    public PrecisionRound() {
-        mPrecisionSeries = new ArrayList<>();
+    public PrecisionRound(boolean competition) {
+        this(new ArrayList<PrecisionSeries>(), competition, null);
     }
 
     public PrecisionRound(List<PrecisionSeries> precisionSeries, boolean competition, String notes) {
@@ -94,6 +94,10 @@ public class PrecisionRound implements Parcelable {
 
     public void setmCompetition(boolean competition) {
         mCompetition = competition ? 1 : 0;
+    }
+
+    public int getMaxNbrSeries() {
+        return MAX_NBR_SERIES;
     }
 
     public int getNbrSeries() {
