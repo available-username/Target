@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import se.thirdbase.target.db.PrecisionRoundContract;
+import se.thirdbase.target.db.PrecisionRoundToSeriesContract;
 
 /**
  * Created by alexp on 2/18/16.
@@ -161,6 +162,7 @@ public class PrecisionRound implements Parcelable {
             }
 
             ContentValues values = new ContentValues();
+            /*
             String[] columns = {
                     PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_1,
                     PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_2,
@@ -175,6 +177,8 @@ public class PrecisionRound implements Parcelable {
             for (int i = 0; i < size; i++) {
                 values.put(columns[i], ids.get(i));
             }
+            */
+
 
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE, getScore());
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_COMPETITION, getCompetition() ? 1 : 0);
@@ -182,6 +186,8 @@ public class PrecisionRound implements Parcelable {
             values.put(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_DATE_TIME, System.currentTimeMillis());
 
             mDBHandle = db.insert(PrecisionRoundContract.TABLE_NAME, null, values);
+
+            PrecisionRoundToSeriesMapper.store(db, this);
         } else {
             update(db);
         }
@@ -221,6 +227,7 @@ public class PrecisionRound implements Parcelable {
                                                       String groupBy, String having, String orderBy, String limit) {
         String[] columns = {
                 PrecisionRoundContract.PrecisionRoundEntry._ID,
+                /*
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_1,
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_2,
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_3,
@@ -228,6 +235,7 @@ public class PrecisionRound implements Parcelable {
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_5,
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_6,
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_7,
+                */
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SCORE,
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_COMPETITION,
                 PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_NOTES,
@@ -262,10 +270,13 @@ public class PrecisionRound implements Parcelable {
     }
 
     private static PrecisionRound fromCursor(SQLiteDatabase db, Cursor cursor) {
-        List<PrecisionSeries> precisionSeries = new ArrayList<>();
+        //List<PrecisionSeries> precisionSeries = new ArrayList<>();
 
         long id = cursor.getLong(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry._ID));
 
+        List<PrecisionSeries> precisionSeries = PrecisionRoundToSeriesMapper.fetch(db, id);
+
+        /*
         long seriesId = cursor.getLong(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_1));
         PrecisionSeries series = PrecisionSeries.fetch(db, seriesId);
         if (series != null) { precisionSeries.add(series); }
@@ -293,6 +304,7 @@ public class PrecisionRound implements Parcelable {
         seriesId = cursor.getLong(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_SERIES_7));
         series = PrecisionSeries.fetch(db, seriesId);
         if (series != null) { precisionSeries.add(series); }
+        */
 
         int competition = cursor.getInt(cursor.getColumnIndex(PrecisionRoundContract.PrecisionRoundEntry.COLUMN_NAME_COMPETITION));
 

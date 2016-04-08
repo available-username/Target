@@ -43,6 +43,7 @@ public class TargetDBHelper extends SQLiteOpenHelper {
             db.execSQL(AmmunitionContract.SQL_CREATE_AMMUNITION);
             db.execSQL(PrecisionSeriesContract.SQL_CREATE_SERIES);
             db.execSQL(PrecisionRoundContract.SQL_CREATE_PRECISION);
+            db.execSQL(PrecisionRoundToSeriesContract.SQL_CREATE_ROUND_TO_SERIES);
             db.execSQL(SetupContract.SQL_CREATE_SETUP);
             db.setTransactionSuccessful();
         } finally {

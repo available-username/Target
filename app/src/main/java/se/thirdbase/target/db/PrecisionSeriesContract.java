@@ -63,5 +63,5 @@ public final class PrecisionSeriesContract {
                     PrecisionSeriesEntry.COLUMN_NAME_WEAPON, WeaponContract.TABLE_NAME, WeaponContract.WeaponEntry._ID,
                     PrecisionSeriesEntry.COLUMN_NAME_AMMUNITION, AmmunitionContract.TABLE_NAME, AmmunitionContract.AmmunitionEntry._ID);
 
-    public static final String SQL_DROP_SERIES = String.format("DROP TABLE IF EXISTS %s", PrecisionSeriesContract.TABLE_NAME);
+    public static final String SQL_DROP_SERIES = String.format("DROP TABLE IF EXISTS %s;", PrecisionSeriesContract.TABLE_NAME);
 }

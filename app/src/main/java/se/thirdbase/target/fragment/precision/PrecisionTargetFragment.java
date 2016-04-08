@@ -172,7 +172,7 @@ public class PrecisionTargetFragment extends PrecisionBaseFragment {
 
         onEnterOverview();
 
-        populateWithTestData();
+        //populateWithTestData();
 
         updateTextFields();
 

@@ -11,7 +11,12 @@ import java.util.List;
 import se.thirdbase.target.R;
 import se.thirdbase.target.db.TargetDBHelper;
 import se.thirdbase.target.fragment.StartupFragment;
+import se.thirdbase.target.model.Ammunition;
+import se.thirdbase.target.model.AmmunitionType;
+import se.thirdbase.target.model.BulletCaliber;
 import se.thirdbase.target.model.BulletHole;
+import se.thirdbase.target.model.Weapon;
+import se.thirdbase.target.model.WeaponType;
 import se.thirdbase.target.model.precision.PrecisionRound;
 import se.thirdbase.target.model.precision.PrecisionSeries;
 
@@ -27,6 +32,9 @@ public class MainActivity extends BaseActivity implements StateListener {
 
         if (savedInstanceState == null) {
             onStartup();
+
+            //TODO remove
+            //setDBInitialState();
         }
     }
 
@@ -73,6 +81,22 @@ public class MainActivity extends BaseActivity implements StateListener {
 
         Intent intent = new Intent(this, StatisticsActivity.class);
         startActivity(intent);
+    }
+
+    private void setDBInitialState() {
+        TargetDBHelper helper = TargetDBHelper.getInstance(this);
+        SQLiteDatabase dbReader = helper.getReadableDatabase();
+        SQLiteDatabase dbWriter = helper.getWritableDatabase();
+
+        if (Ammunition.fetchAll(dbReader, null).size() == 0) {
+            Ammunition ammo = new Ammunition(AmmunitionType.ROUND_NOSE, "TopShot Competition", BulletCaliber.CAL_22, 5, 329);
+            ammo.store(dbWriter);
+        }
+
+        if (Weapon.fetchAll(dbReader, null).size() == 0) {
+            Weapon weapon = new Weapon(WeaponType.PISTOL, "Feinwerkbau AW93", BulletCaliber.CAL_22);
+            weapon.store(dbWriter);
+        }
     }
 
     private void dumpDB() {
